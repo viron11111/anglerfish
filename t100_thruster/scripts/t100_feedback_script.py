@@ -12,7 +12,6 @@ import time
 import math
 import rospy
 from std_msgs.msg import Float32
-from std_msgs.msg import Int16
 from std_msgs.msg import Header
 from std_msgs.msg import String
 from anglerfish.msg import t100_thruster_feedback
@@ -59,31 +58,42 @@ def RPM(pulse, _rpmTimer):
 	return _rpm, _rpmTimer
 
 def thrust(force):
-	if force >= 2.36:
-		force = 2.36
+
+	if force.data >= 2.36:
+		rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
+		force.data = 2.36
 		
-	elif force <= -1.82:
-		force = -1.82
+	elif force.data <= -1.82:
+		rospy.logwarn("Max reverse thrust = -1.82 kgf.  Input, %0.2f kgf changed to -1.82 kgf", force.data)
+		force.data = -1.82
 	
-	if force < 0:
-		output = (force/-1.82)*-32767
-	elif force > 0:
-		output = (force/2.36)*32767
+	if force.data < 0.0:
+		output = (force.data/-1.82)*-32767
+	elif force.data > 0.0:
+		output = (force.data/2.36)*32767
 	else:
-		output = 0
+		output = 0.0
 
-	print output
+	output = int(output)
 
+        bus.write_byte_data(0x29, 0x00, output>>8)
+        bus.write_byte_data(0x29, 0x01, output)
 
+def stop_motor():
+        bus.write_byte_data(0x29, 0x00, 0)
+        bus.write_byte_data(0x29, 0x01, 0)	
 
 class read_registers():
 
 	def __init__(self):
 		#ROS params for definging node for each thruster
-		T100_ADDR = rospy.get_param('~register')
-		T100_name = rospy.get_param('~name')
+		T100_ADDR = 0x29#rospy.get_param('~register')
+		T100_name = "thruster1"#rospy.get_param('~name')
 
 		#T100 registers used for RPM, voltage, temp, current (2 bytes each)
+		T100_THROTTLE_1	     = 0x00
+		T100_THROTTLE_2      = 0x01
+
 		T100_PULSE_COUNT_1   = 0x02
 		T100_PULSE_COUNT_2   = 0x03
 		T100_VOLTAGE_1       = 0x04
@@ -95,7 +105,11 @@ class read_registers():
 		#T100 register for detecting if T100 is alive (bool)
 		T100_ALIVE           = 0x0A
 
-		rospy.Subscriber("thrust", Int16, thrust)
+		bus.write_byte_data(T100_ADDR, T100_THROTTLE_1, 0)
+		bus.write_byte_data(T100_ADDR, T100_THROTTLE_2, 0)
+		time.sleep(.05)
+
+		rospy.Subscriber("thrust", Float32, thrust)
 		self.ROV_pub = rospy.Publisher(T100_name, t100_thruster_feedback, queue_size=1)
 
 		t100 = t100_thruster_feedback()
@@ -162,6 +176,7 @@ class read_registers():
 
 			self.ROV_pub.publish(t100)
 			rate.sleep()
+	rospy.on_shutdown(stop_motor)
 
 def main(args):
 	rospy.init_node('t100_feedback_sensors', anonymous=True)

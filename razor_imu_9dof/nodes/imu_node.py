@@ -252,7 +252,7 @@ while not rospy.is_shutdown():
     q = quaternion_from_euler(roll,pitch,yaw)
     imuMsg.orientation.x = q[0]
     imuMsg.orientation.y = q[1]
-    imuMsg.orientation.z = q[2]
+    imuMsg.orientation.z = q[2]*2.0
     imuMsg.orientation.w = q[3]
     imuMsg.header.stamp= rospy.Time.now()
     imuMsg.header.frame_id = 'base_imu_link'
