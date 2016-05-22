@@ -12,6 +12,7 @@ import time
 import math
 import rospy
 from std_msgs.msg import Float32
+from std_msgs.msg import Int16
 from std_msgs.msg import Header
 from std_msgs.msg import String
 from anglerfish.msg import t100_thruster_feedback
@@ -57,6 +58,24 @@ def RPM(pulse, _rpmTimer):
 	_rpmTimer = time.clock()
 	return _rpm, _rpmTimer
 
+def thrust(force):
+	if force >= 2.36:
+		force = 2.36
+		
+	elif force <= -1.82:
+		force = -1.82
+	
+	if force < 0:
+		output = (force/-1.82)*-32767
+	elif force > 0:
+		output = (force/2.36)*32767
+	else:
+		output = 0
+
+	print output
+
+
+
 class read_registers():
 
 	def __init__(self):
@@ -76,6 +95,7 @@ class read_registers():
 		#T100 register for detecting if T100 is alive (bool)
 		T100_ALIVE           = 0x0A
 
+		rospy.Subscriber("thrust", Int16, thrust)
 		self.ROV_pub = rospy.Publisher(T100_name, t100_thruster_feedback, queue_size=1)
 
 		t100 = t100_thruster_feedback()
