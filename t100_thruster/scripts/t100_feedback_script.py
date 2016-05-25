@@ -131,7 +131,7 @@ class read_registers():
 		time.sleep(.05)
 
 		self.ROV_pub = rospy.Publisher(self.T100_NAME, t100_thruster_feedback, queue_size=1)
-		rospy.Subscriber(self.T100_NAME, Float32, thrust)
+		rospy.Subscriber(self.T100_NAME, Float32, self.thrust)
 
 		t100 = t100_thruster_feedback()
 
