@@ -24,7 +24,8 @@ class Interface(object):
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.imu_pub = rospy.Publisher('/imu', Imu, queue_size=1)
         #self.last_msg = Nonesens
-        self.skipped_msgs = 0
+        self.gyroData = 0
+        self.angle = 0
 
     def sync(self):
         char = None
@@ -61,7 +62,7 @@ class Interface(object):
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
         ).astype(np.float32) / (2 ** 14)
-        print gyro
+        #print gyro
 
         self.last_msg = gyro
 
@@ -82,6 +83,26 @@ class Interface(object):
             b'\x00' + msg[start + 6:start + 9][::-1],
             dtype='<i'
         ).astype(np.float32) / (2 ** 22)
+
+        #for x in range(4,0,-1):
+        #    self.gyroHolder[x] = self.gyroHolder[x-1]
+            
+        #print self.gyroHolder
+        #self.gyroHolder[0] = gyro[0]
+        #print self.gyroHolder
+
+        #self.gyroData = sum(self.gyroHolder)/5
+        self.gyroData = self.gyroData + gyro[0]
+        #print self.gyroData
+
+        angle = 0.98(angle+self.gyroData)
+
+        #self.gyroData = self.gyroData + gyro[0]
+        #print self.gyroData
+        #angle = 0.98(angle + gyroData)
+
+        #angle = 0.98*(angle + gyro[0]*dt) + 0.02*linear_acceleration[0]
+
 
 #header=sub8_ros_tools.make_header(),
 
