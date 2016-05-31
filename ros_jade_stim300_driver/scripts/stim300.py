@@ -11,6 +11,8 @@ import binascii
 import struct
 import encodings
 import math
+import tf
+#from scipy import integrate
 #import sub8_ros_tools
 
 
@@ -25,11 +27,20 @@ class Interface(object):
         self.serial = serial.Serial('/dev/ttyUSB0', baudrate=self._baudrate)
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.imu_pub = rospy.Publisher('/imu', Imu, queue_size=1)
-        self.stim_pub = rospy.Publisher('stim', Float32, queue_size=1)
+        self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
+        self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
+        self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
         #self.last_msg = Nonesens
-        self.gyroData = 0
-        self.angle = 0
+        self.gyroDatax = 0
+        self.gyroDatay = 0
+        self.gyroDataz = 0
+        self.anglex = 0
+        self.angley = 0
+        self.anglez = 0
         self.roll = 0
+        self.pitch = 0
+        self.yaw = 0
+        #self.orientation_quaternion = []
 
     def sync(self):
         char = None
@@ -99,14 +110,39 @@ class Interface(object):
         #self.gyroData = self.gyroData + 
         #print self.gyroData
 
-        self.gyroData = (self.gyroData+gyro[0]/500) #for 500 Hz rate
+        #gyroData_quaternion = tf.transformations.quaternion_from_euler(math.radians((gyro[0]/500)/128), 
+        #    math.radians((gyro[1]/500)/128), math.radians((gyro[2]/500)/128))
+        #gyroData_quaternion = tf.transformations.quaternion_from_euler((gyro[0]/500)/128, gyro[1]/500, gyro[2]/500)
 
-        self.gyroData = self.gyroData/128  #128 was discovered through trial and error
+        self.gyroDatax = (self.gyroDatax + (gyro[0]/500))/128 #self.gyroDatax + gyroData_quaternion[0]
+        self.gyroDatay = (self.gyroDatay + (gyro[1]/500))/128 #self.gyroDatay + gyroData_quaternion[1]
+        self.gyroDataz = (self.gyroDataz + (gyro[2]/500))/128 #self.gyroDataz + gyroData_quaternion[2]
 
         self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
+        #print self.roll
 
-        self.angle = 0.98*(self.angle + math.radians(self.gyroData)) + 0.02 * self.roll
+        self.anglex = .98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
 
+
+        self.pitch = -math.atan2(linear_acceleration[0],linear_acceleration[2])
+
+        self.angley = .98*(self.angley + math.radians(self.gyroDatay)) + 0.02 * self.pitch
+
+        self.anglez = (self.anglez + math.radians(self.gyroDataz))
+
+        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)#[self.anglex, self.angley, self.anglez, 1] #gyroData_quaternion[3]]
+
+        #rpy_quaternion = tf.transformations.quaternion_from_euler(math.atan2(linear_acceleration[1],linear_acceleration[2]), 
+        #    -math.atan2(linear_acceleration[0],linear_acceleration[2]), math.atan2(linear_acceleration[0],linear_acceleration[1]))
+
+        #self.orientation_quaternion = .98*(self.orientation_quaternion + gyroData_quaternion)+.02(rpy_quaternion)
+
+        #print quaternion
+        #type(pose) = geometry_msgs.msg.Pose
+        #pose.orientation.x = quaternion[0]
+        #pose.orientation.y = quaternion[1]
+        #pose.orientation.z = quaternion[2]
+        #pose.orientation.w = quaternion[3]
         #print self.angle
 
 
@@ -123,16 +159,21 @@ class Interface(object):
 
         imu_msg = Imu(            
             header= Header(
+                frame_id = 'base_link',
                 stamp=rospy.get_rostime()
             ),
             angular_velocity=Vector3(*gyro),
-            linear_acceleration=Vector3(*linear_acceleration)
-            #orientation=Quaternion(inclination)
+            linear_acceleration=Vector3(*linear_acceleration),
+            orientation=Quaternion(*orientation_quaternion)
         )
-        self.imu_pub.publish(imu_msg)
-        self.stim_pub.publish(self.angle)
 
-        #print msg.encode("hex")
+        self.imu_pub.publish(imu_msg)
+        self.roll_pub.publish(self.pitch)
+        self.pitch_pub.publish(self.angley)
+        self.yaw_pub.publish(self.gyroDatay)
+        
+        br = tf.TransformBroadcaster()
+        br.sendTransform((0, 0, 0), orientation_quaternion, rospy.Time.now(), "stim_imu", "world")
 
     def run(self):
         l = self.sync()
@@ -140,6 +181,41 @@ class Interface(object):
         if l != 38:
             return
         self.read_datagram()
+
+
+    def holder(self):
+        self.gyroDatax = self.gyroDatax+(gyro[0]/500.0) #for 500 Hz rate
+
+        self.gyroDatax = self.gyroDatax/128.0  #128 was discovered through trial and error
+
+
+        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
+
+        self.anglex = 0.98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
+
+
+        self.gyroDatay = self.gyroDatay+(gyro[1]/500) #for 500 Hz 
+
+        self.gyroDatay = (self.gyroDatay/128)  #128 was discovered through trial and error
+        #print self.gyroDatay
+        self.gyroDatay = -self.gyroDatay
+
+        self.pitch = -math.atan2(linear_acceleration[0],linear_acceleration[2])
+
+        self.angley = 0.9*(self.angley + math.radians(self.gyroDatay)) + 0.1 * self.pitch
+
+
+        self.gyroDataz = self.gyroDataz+(gyro[2]/500) #for 500 Hz rate
+
+        self.gyroDataz = self.gyroDataz/128  #128 was discovered through trial and error
+        #self.gyroDataz = self.gyroDataz
+
+        self.yaw = math.atan2(linear_acceleration[0],linear_acceleration[1])
+
+        self.anglez = 1.0*(self.anglez + math.radians(self.gyroDataz)) #+ 0.01 * self.yaw
+
+        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)
+
 
 
 if __name__ == '__main__':
