@@ -6,9 +6,11 @@ import rospy
 from geometry_msgs.msg import Quaternion, Vector3
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Header
+from std_msgs.msg import Float32
 import binascii
 import struct
 import encodings
+import math
 #import sub8_ros_tools
 
 
@@ -23,9 +25,11 @@ class Interface(object):
         self.serial = serial.Serial('/dev/ttyUSB0', baudrate=self._baudrate)
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.imu_pub = rospy.Publisher('/imu', Imu, queue_size=1)
+        self.stim_pub = rospy.Publisher('stim', Float32, queue_size=1)
         #self.last_msg = Nonesens
         self.gyroData = 0
         self.angle = 0
+        self.roll = 0
 
     def sync(self):
         char = None
@@ -92,10 +96,21 @@ class Interface(object):
         #print self.gyroHolder
 
         #self.gyroData = sum(self.gyroHolder)/5
-        self.gyroData = self.gyroData + gyro[0]
+        #self.gyroData = self.gyroData + 
         #print self.gyroData
 
-        angle = 0.98(angle+self.gyroData)
+        self.gyroData = (self.gyroData+gyro[0]/500) #for 500 Hz rate
+
+        self.gyroData = self.gyroData/128  #128 was discovered through trial and error
+
+        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
+
+        self.angle = 0.98*(self.angle + math.radians(self.gyroData)) + 0.02 * self.roll
+
+        #print self.angle
+
+
+        #print math.radians(self.angle)
 
         #self.gyroData = self.gyroData + gyro[0]
         #print self.gyroData
@@ -115,6 +130,7 @@ class Interface(object):
             #orientation=Quaternion(inclination)
         )
         self.imu_pub.publish(imu_msg)
+        self.stim_pub.publish(self.angle)
 
         #print msg.encode("hex")
 
