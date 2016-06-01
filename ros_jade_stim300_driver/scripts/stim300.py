@@ -62,6 +62,12 @@ class Interface(object):
 
         return k
 
+    def twos_comp(self):
+        """compute the 2's compliment of int value val"""
+        if (self.data & (1 << (24 - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+            self.data = self.data - (1 << 24)        # compute negative value
+        return self.data                         # return positive value as is
+
     def read_datagram(self):
         msg = self.serial.read(
             self._datagram_lengths[self.datagram_identifier]
@@ -70,25 +76,31 @@ class Interface(object):
 
         start = 0
         
+        #print self.msg.encode("hex")
+        #print self.msg[start + 0:start + 3][::-1].encode("hex")
+
         # gyr
+
         gyro = np.fromstring(
             b'\x00' + self.msg[start + 0:start + 3][::-1] +
             b'\x00' + self.msg[start + 3:start + 6][::-1] +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 14)
-        #print gyro
-
-        self.last_msg = gyro
+        ).astype(np.float32) / (2 ** 21)/128
 
         start += 10
+
         # acc
+
         linear_acceleration = np.fromstring(
-            b'\x00' + self.msg[start + 0:start + 3][::-1] +
-            b'\x00' + self.msg[start + 3:start + 6][::-1] +
+            b'\x00' + self.msg[start + 0:start + 3][::-1]  +
+            b'\x00' + self.msg[start + 3:start + 6][::-1]  +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 19)
+        ).astype(np.float32) / (2 ** 19)/255
+
+        #print linear_acceleration
+
         start += 10
 
         # inc
@@ -114,15 +126,16 @@ class Interface(object):
         #    math.radians((gyro[1]/500)/128), math.radians((gyro[2]/500)/128))
         #gyroData_quaternion = tf.transformations.quaternion_from_euler((gyro[0]/500)/128, gyro[1]/500, gyro[2]/500)
 
-        self.gyroDatax = (self.gyroDatax + (gyro[0]/500))/128 #self.gyroDatax + gyroData_quaternion[0]
-        self.gyroDatay = (self.gyroDatay + (gyro[1]/500))/128 #self.gyroDatay + gyroData_quaternion[1]
-        self.gyroDataz = (self.gyroDataz + (gyro[2]/500))/128 #self.gyroDataz + gyroData_quaternion[2]
+        self.gyroDatax = (self.gyroDatax + (gyro[0]/1000)) #self.gyroDatax + gyroData_quaternion[0]
+        self.gyroDatay = (self.gyroDatay + (gyro[1]/1000)) #self.gyroDatay + gyroData_quaternion[1]
+        self.gyroDataz = (self.gyroDataz + (gyro[2]/1000)) #self.gyroDataz + gyroData_quaternion[2]
 
         self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
         #print self.roll
 
         self.anglex = .98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
 
+        self.gyroDatay = -self.gyroDatay
 
         self.pitch = -math.atan2(linear_acceleration[0],linear_acceleration[2])
 
