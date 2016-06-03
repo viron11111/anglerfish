@@ -3,7 +3,8 @@
 import serial
 import numpy as np
 import rospy
-from geometry_msgs.msg import Quaternion, Vector3
+from geometry_msgs.msg import Quaternion, Vector3, PoseStamped
+from geometry_msgs.msg import TwistWithCovariance
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Header
 from std_msgs.msg import Float32
@@ -12,6 +13,7 @@ import struct
 import encodings
 import math
 import tf
+
 #from scipy import integrate
 #import sub8_ros_tools
 
@@ -30,6 +32,7 @@ class Interface(object):
         self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
         self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
         self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
+        self.pose_pub = rospy.Publisher("/static_point", PoseStamped, queue_size = 0)
         #self.last_msg = Nonesens
         self.gyroDatax = 0
         self.gyroDatay = 0
@@ -86,7 +89,7 @@ class Interface(object):
             b'\x00' + self.msg[start + 3:start + 6][::-1] +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 21)/128
+        ).astype(np.float32) / (2 ** 14)#/128
 
         start += 10
 
@@ -97,7 +100,7 @@ class Interface(object):
             b'\x00' + self.msg[start + 3:start + 6][::-1]  +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 19)/255
+        ).astype(np.float32) / (2 ** 19)
 
         #print linear_acceleration
 
@@ -126,24 +129,6 @@ class Interface(object):
         #    math.radians((gyro[1]/500)/128), math.radians((gyro[2]/500)/128))
         #gyroData_quaternion = tf.transformations.quaternion_from_euler((gyro[0]/500)/128, gyro[1]/500, gyro[2]/500)
 
-        self.gyroDatax = (self.gyroDatax + (gyro[0]/1000)) #self.gyroDatax + gyroData_quaternion[0]
-        self.gyroDatay = (self.gyroDatay + (gyro[1]/1000)) #self.gyroDatay + gyroData_quaternion[1]
-        self.gyroDataz = (self.gyroDataz + (gyro[2]/1000)) #self.gyroDataz + gyroData_quaternion[2]
-
-        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
-        #print self.roll
-
-        self.anglex = .98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
-
-        self.gyroDatay = -self.gyroDatay
-
-        self.pitch = -math.atan2(linear_acceleration[0],linear_acceleration[2])
-
-        self.angley = .98*(self.angley + math.radians(self.gyroDatay)) + 0.02 * self.pitch
-
-        self.anglez = (self.anglez + math.radians(self.gyroDataz))
-
-        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)#[self.anglex, self.angley, self.anglez, 1] #gyroData_quaternion[3]]
 
         #rpy_quaternion = tf.transformations.quaternion_from_euler(math.atan2(linear_acceleration[1],linear_acceleration[2]), 
         #    -math.atan2(linear_acceleration[0],linear_acceleration[2]), math.atan2(linear_acceleration[0],linear_acceleration[1]))
@@ -157,18 +142,38 @@ class Interface(object):
         #pose.orientation.z = quaternion[2]
         #pose.orientation.w = quaternion[3]
         #print self.angle
+        self.gyroDatax = self.gyroDatax+(gyro[0]/500.0) #for 500 Hz rate
+
+        self.gyroDatax = (self.gyroDatax/128.0)  #128 was discovered through trial and error
 
 
-        #print math.radians(self.angle)
+        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
 
-        #self.gyroData = self.gyroData + gyro[0]
-        #print self.gyroData
-        #angle = 0.98(angle + gyroData)
-
-        #angle = 0.98*(angle + gyro[0]*dt) + 0.02*linear_acceleration[0]
+        self.anglex = .96*(self.anglex + math.radians(self.gyroDatax)) + 0.04 * self.roll
 
 
-#header=sub8_ros_tools.make_header(),
+        self.gyroDatay = self.gyroDatay+(gyro[1]/500) #for 500 Hz 
+
+        self.gyroDatay = (self.gyroDatay/128)  #128 was discovered through trial and error
+        #print self.gyroDatay
+
+        self.pitch = math.atan2(linear_acceleration[0],linear_acceleration[2])
+
+        self.angley = .96*(self.angley + math.radians(self.gyroDatay)) + 0.04 * self.pitch
+
+
+        self.gyroDataz = self.gyroDataz+(gyro[2]/500) #for 500 Hz rate
+
+        self.gyroDataz = self.gyroDataz/128  #128 was discovered through trial and error
+        #self.gyroDataz = self.gyroDataz
+
+        self.yaw = math.atan2(linear_acceleration[0],linear_acceleration[1])
+
+        self.anglez = 1.0*(self.anglez + math.radians(self.gyroDataz)) #+ 0.01 * self.yaw
+
+        #print self.anglex
+
+        orientation_quaternion = tf.transformations.quaternion_from_euler(-self.anglex, self.angley, self.anglez)
 
         imu_msg = Imu(            
             header= Header(
@@ -180,10 +185,18 @@ class Interface(object):
             orientation=Quaternion(*orientation_quaternion)
         )
 
+        to_send = PoseStamped()
+        to_send.header.frame_id = "/enu"
+
+        to_send.pose.position.x = 0
+        to_send.pose.position.y = 0
+        to_send.pose.orientation.x, to_send.pose.orientation.y, to_send.pose.orientation.z, to_send.pose.orientation.w  = [0,0,0,0]
+
         self.imu_pub.publish(imu_msg)
-        self.roll_pub.publish(self.pitch)
-        self.pitch_pub.publish(self.angley)
-        self.yaw_pub.publish(self.gyroDatay)
+        self.roll_pub.publish(self.roll)
+        self.pitch_pub.publish(self.pitch)
+        self.yaw_pub.publish(self.yaw)
+        self.pose_pub.publish(to_send)
         
         br = tf.TransformBroadcaster()
         br.sendTransform((0, 0, 0), orientation_quaternion, rospy.Time.now(), "stim_imu", "world")
@@ -196,38 +209,8 @@ class Interface(object):
         self.read_datagram()
 
 
-    def holder(self):
-        self.gyroDatax = self.gyroDatax+(gyro[0]/500.0) #for 500 Hz rate
+    #def holder(self):
 
-        self.gyroDatax = self.gyroDatax/128.0  #128 was discovered through trial and error
-
-
-        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
-
-        self.anglex = 0.98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
-
-
-        self.gyroDatay = self.gyroDatay+(gyro[1]/500) #for 500 Hz 
-
-        self.gyroDatay = (self.gyroDatay/128)  #128 was discovered through trial and error
-        #print self.gyroDatay
-        self.gyroDatay = -self.gyroDatay
-
-        self.pitch = -math.atan2(linear_acceleration[0],linear_acceleration[2])
-
-        self.angley = 0.9*(self.angley + math.radians(self.gyroDatay)) + 0.1 * self.pitch
-
-
-        self.gyroDataz = self.gyroDataz+(gyro[2]/500) #for 500 Hz rate
-
-        self.gyroDataz = self.gyroDataz/128  #128 was discovered through trial and error
-        #self.gyroDataz = self.gyroDataz
-
-        self.yaw = math.atan2(linear_acceleration[0],linear_acceleration[1])
-
-        self.anglez = 1.0*(self.anglez + math.radians(self.gyroDataz)) #+ 0.01 * self.yaw
-
-        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)
 
 
 
@@ -236,3 +219,25 @@ if __name__ == '__main__':
     i = Interface()
     while(True):
         i.run()
+
+'''
+        self.gyroDatax = (self.gyroDatax + (gyro[0]/500)) #self.gyroDatax + gyroData_quaternion[0]
+        self.gyroDatay = (self.gyroDatay + (gyro[1]/500)) #self.gyroDatay + gyroData_quaternion[1]
+        self.gyroDataz = (self.gyroDataz + (gyro[2]/500)) #self.gyroDataz + gyroData_quaternion[2]
+
+
+        self.gyroDatax = -self.gyroDatax
+        self.roll = -math.atan2(linear_acceleration[1],linear_acceleration[2])
+        #print self.roll
+
+        self.anglex = .98*(self.anglex + math.radians(self.gyroDatax)) + 0.02 * self.roll
+
+        self.pitch = math.atan2(linear_acceleration[0],linear_acceleration[2])
+
+        self.angley = .95*(self.angley + math.radians(self.gyroDatay)) + 0.05 * self.pitch
+
+        self.anglez = .5*(self.anglez + math.radians(self.gyroDataz))
+
+        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)#[self.anglex, self.angley, self.anglez, 1] #gyroData_quaternion[3]]
+
+'''
