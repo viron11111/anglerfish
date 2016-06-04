@@ -81,7 +81,11 @@ class read_registers():
 		self.rpmTimer = time.clock()
 
 
+<<<<<<< HEAD
 	def thrust(self, force):
+=======
+	def thrust(self):
+>>>>>>> 9af99e43003846d9e9ce14780fddf942ca40e184
 
 		if force.data >= 2.36:
 			rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
@@ -100,8 +104,11 @@ class read_registers():
 
 		output = int(output)
 
+<<<<<<< HEAD
                 bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, 0)
                 bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, 0)
+=======
+>>>>>>> 9af99e43003846d9e9ce14780fddf942ca40e184
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, output>>8)
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, output)
 
@@ -113,7 +120,10 @@ class read_registers():
 		#ROS params for definging node for each thruster
 		self.T100_ADDR = rospy.get_param('~register')
 		self.T100_NAME = rospy.get_param('~name')
+<<<<<<< HEAD
 		self.T100_OUTPUT = rospy.get_param('~force')
+=======
+>>>>>>> 9af99e43003846d9e9ce14780fddf942ca40e184
 
 		#T100 registers used for RPM, voltage, temp, current (2 bytes each)
 		self.T100_THROTTLE_1	  = 0x00
@@ -134,7 +144,11 @@ class read_registers():
 		time.sleep(.05)
 
 		self.ROV_pub = rospy.Publisher(self.T100_NAME, t100_thruster_feedback, queue_size=1)
+<<<<<<< HEAD
 		rospy.Subscriber(self.T100_OUTPUT, Float32, self.thrust)
+=======
+		rospy.Subscriber(self.T100_NAME, Float32, self.thrust)
+>>>>>>> 9af99e43003846d9e9ce14780fddf942ca40e184
 
 		t100 = t100_thruster_feedback()
 
@@ -167,7 +181,11 @@ class read_registers():
 				t100.temperature = self.thruster_temp
 				t100.voltage = self.actual_voltage
 				t100.current = self.actual_current 
+<<<<<<< HEAD
 				t100.rpm = self.actual_rpm
+=======
+				t100.rpm = self.actual_RPM
+>>>>>>> 9af99e43003846d9e9ce14780fddf942ca40e184
 				t100.alive = "CONNECTED"
 
 			else:
