@@ -32,9 +32,9 @@ class measure_headings():
 	    self.bus.write_byte_data(self.HMC5883L_ADDR, adr, value)
 
         def get_reading(self): 
-            self.x_out = self.read_word_2c(3) * self.scale
-            self.y_out = self.read_word_2c(7) * self.scale
-            self.z_out = self.read_word_2c(5) * self.scale
+            self.x_out = (self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
+            self.y_out = (self.read_word_2c(7) * self.scale)/10000
+            self.z_out = (self.read_word_2c(5) * self.scale)/10000
             #print x_out
 
 	def __init__(self):
@@ -48,15 +48,23 @@ class measure_headings():
 	    self.write_byte(0x01, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 	    self.write_byte(0x02, 0b00000000) # Continuous sampling
 
-            self.scale = 0.92
+        self.scale = 0.92
 
-            rate = rospy.Rate(15) #for 15 Hz readings
+        rate = rospy.Rate(15) #for 15 Hz readings
 
-            while not rospy.is_shutdown():
-                self.get_reading()
-		
-                print self.x_out
-                rate.sleep()
+        while not rospy.is_shutdown():
+            self.get_reading()
+
+            mag = MagneticField(
+            	header = Header(
+					stamp = rospy.get_rostime(),
+					frame_id = 'magnetometer'
+				),
+				magnetic_field = Vector3(self.x_out, self.y_out, self.z_out)
+			)
+			
+            self.mag_pub.publish(mag)
+            rate.sleep()
 
 def main(args):
 	rospy.init_node('hmc5883l_magnetometer', anonymous=False)
