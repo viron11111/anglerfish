@@ -8,6 +8,9 @@
   <node pkg="hmc5883l" type="hmc5883l_script.py" name="HMC5883L" respawn="true">
   </node>
 
+  <node pkg="light_control" type="lights.py" name="LIGHTS" respawn="true">
+  </node>
+
   <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster1" respawn="true">
 	<rosparam param="register">41</rosparam>
 	<rosparam param="name">"thruster1"</rosparam>
