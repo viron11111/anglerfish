@@ -29,9 +29,9 @@ class Interface(object):
         self.serial = serial.Serial('/dev/ttyUSB1', baudrate=self._baudrate)
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.pub = rospy.Publisher('imu/data_raw', Imu, queue_size=1)
-        #self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
-        #self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
-        #self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
+        self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
+        self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
+        self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
         #self.pose_pub = rospy.Publisher("/static_point", PoseStamped, queue_size = 0)
         #self.last_msg = Nonesens
         self.gyroDatax = 0
@@ -89,7 +89,7 @@ class Interface(object):
             b'\x00' + self.msg[start + 3:start + 6][::-1] +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 14)/129
+        ).astype(np.float32) / (2 ** 14)/500#/4150#8300
 
         gyro[0] = math.radians(gyro[0])
         gyro[1] = math.radians(gyro[1])
@@ -99,13 +99,15 @@ class Interface(object):
 
         # acc
 
-        linear_acceleration = np.fromstring(
+        linear_acceleration = (np.fromstring(
             b'\x00' + self.msg[start + 0:start + 3][::-1]  +
             b'\x00' + self.msg[start + 3:start + 6][::-1]  +
             b'\x00' + self.msg[start + 6:start + 9][::-1],
             dtype='<i'
-        ).astype(np.float32) / (2 ** 19)/255
+        ).astype(np.float32) / (2 ** 19)/255)*9.81
 
+	#linear_acceleration[1] = -linear_acceleration[1]
+	
         #print linear_acceleration
 
         start += 10
@@ -145,37 +147,37 @@ class Interface(object):
         #pose.orientation.y = quaternion[1]
         #pose.orientation.z = quaternion[2]
         #pose.orientation.w = quaternion[3]
-        '''self.gyroDatax = self.gyroDatax+(gyro[0]/500.0) #for 500 Hz rate
+        self.gyroDatax = self.gyroDatax+(gyro[0])
 
-        self.gyroDatax = (self.gyroDatax/129.0)  #129 was discovered through trial and error
+        #self.gyroDatax = (self.gyroDatax/129.0)  #129 was discovered through trial and error
 
 
-        #self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
+        self.roll = math.atan2(linear_acceleration[1],linear_acceleration[2])
 
-        self.anglex = (self.anglex + math.radians(self.gyroDatax)) #+ 0.04 * self.roll
+        #self.anglex = (self.anglex + math.radians(self.gyroDatax)) #+ 0.04 * self.roll
 
-        print self.anglex
+        #print self.anglex
 
-        self.gyroDatay = self.gyroDatay+(gyro[1]/500) #for 500 Hz 
+        #self.gyroDatay = self.gyroDatay+(gyro[1]/500) #for 500 Hz 
 
-        self.gyroDatay = (self.gyroDatay/129)  #129 was discovered through trial and error
+        #self.gyroDatay = (self.gyroDatay/129)  #129 was discovered through trial and error
         #print self.gyroDatay
 
-        #self.pitch = math.atan2(linear_acceleration[0],linear_acceleration[2])
+        self.pitch = math.atan2(linear_acceleration[0],linear_acceleration[2])
 
-        self.angley = (self.angley + math.radians(self.gyroDatay)) #+ 0.04 * self.pitch
+        #self.angley = (self.angley + math.radians(self.gyroDatay)) #+ 0.04 * self.pitch
 
 
-        self.gyroDataz = self.gyroDataz+(gyro[2]/500) #for 500 Hz rate
+        #self.gyroDataz = self.gyroDataz+(gyro[2]/500) #for 500 Hz rate
 
-        self.gyroDataz = self.gyroDataz/129  #129 was discovered through trial and error
+        #self.gyroDataz = self.gyroDataz/129  #129 was discovered through trial and error
         #self.gyroDataz = self.gyroDataz
 
-        #self.yaw = math.atan2(linear_acceleration[0],linear_acceleration[1])
+        self.yaw = math.atan2(linear_acceleration[0],linear_acceleration[1])
 
-        self.anglez = (self.anglez + math.radians(self.gyroDataz)) #+ 0.01 * self.yaw
+        #self.anglez = (self.anglez + math.radians(self.gyroDataz)) #+ 0.01 * self.yaw
 
-        orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)'''
+        #orientation_quaternion = tf.transformations.quaternion_from_euler(self.anglex, self.angley, self.anglez)'''
 
 
         #angular_velocity.x = 
@@ -198,9 +200,9 @@ class Interface(object):
         to_send.pose.orientation.x, to_send.pose.orientation.y, to_send.pose.orientation.z, to_send.pose.orientation.w  = [0,0,0,0]'''
 
         self.pub.publish(imu_msg)
-        #self.roll_pub.publish(self.anglex)
-        #self.pitch_pub.publish(self.angley)
-        #self.yaw_pub.publish(self.anglez)
+        self.roll_pub.publish(self.gyroDatax)
+        self.pitch_pub.publish(self.pitch)
+        self.yaw_pub.publish(self.yaw)
         #self.pose_pub.publish(to_send)
         
         #br = tf.TransformBroadcaster()
@@ -225,8 +227,7 @@ if __name__ == '__main__':
     while(True):
         i.run()
 
-'''
-        self.gyroDatax = (self.gyroDatax + (gyro[0]/500)) #self.gyroDatax + gyroData_quaternion[0]
+'''        self.gyroDatax = (self.gyroDatax + (gyro[0]/500)) #self.gyroDatax + gyroData_quaternion[0]
         self.gyroDatay = (self.gyroDatay + (gyro[1]/500)) #self.gyroDatay + gyroData_quaternion[1]
         self.gyroDataz = (self.gyroDataz + (gyro[2]/500)) #self.gyroDataz + gyroData_quaternion[2]
 

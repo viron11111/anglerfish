@@ -42,15 +42,19 @@ class measure_headings():
 
 	    self.HMC5883L_ADDR       = 0x1E  #HMC5883L address
 
-	    self.mag_pub = rospy.Publisher("magnetic_headings", MagneticField, queue_size=1)
+	    self.mag_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
 
-	    self.write_byte(0x00, 0b01110000) # Set to 8 samples @ 15Hz
+	    self.write_byte(0x00, 0b01111000) # Set to 8 samples @ 75Hz
 	    self.write_byte(0x01, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 	    self.write_byte(0x02, 0b00000000) # Continuous sampling
 
             self.scale = 0.92
 
-            rate = rospy.Rate(15) #for 15 Hz readings
+            self.x_offset = 47
+            self.y_offset = -67
+            self.z_offset = -73
+
+            rate = rospy.Rate(75) #Hz
 
             while not rospy.is_shutdown():
                 self.get_reading()
@@ -62,9 +66,9 @@ class measure_headings():
                         frame_id = 'magnetometer'
                     ),
                     magnetic_field = Vector3(self.x_out, self.y_out, self.z_out),
-                    magnetic_field_covariance = [0,0,0,
-                        0,0,0,
-                        0,0,0]
+                    magnetic_field_covariance = [ 22.3180189, 0.58065964, 0.28238449,
+                        0, 22.3021513, -0.04371008,
+                        0, 0, 24.94456386]
                 )
 
                 #print mag.header	
