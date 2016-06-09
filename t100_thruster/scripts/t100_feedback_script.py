@@ -107,9 +107,9 @@ class read_registers():
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, output>>8)
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, output)
 
-	def stop_motor(self):
-	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, 0)
-	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, 0)	
+	def stop_motor():
+	        bus.write_byte_data(rospy.get_param('~register'), 0x00, 0)
+	        bus.write_byte_data(rospy.get_param('~register'), 0x01, 0)	
 
 	def __init__(self):
 		#ROS params for definging node for each thruster
