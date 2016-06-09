@@ -1,0 +1,28 @@
+<launch>
+
+  #### Nodelet manager ######################################################
+
+  <node pkg="nodelet" type="nodelet" name="imu_manager" 
+    args="manager" output="screen" />
+
+  #### IMU Driver ###########################################################
+
+
+  #### IMU Orientation Filter ###############################################
+
+  <node pkg="nodelet" type="nodelet" name="ImuFilterNodelet" 
+    args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
+    output="screen">
+
+    <param name="use_magnetic_field_msg" value="true"/>
+    <param name="mag_bias_x" value="0.0031989"/>
+    <param name="mag_bias_y" value="-0.006781"/>
+    <param name="mag_bias_z" value="-0.00041159"/>
+    <param name="zeta" value="4.8481366753355e-6"/>
+    <param name="use_magnetic_field_msg" value="true"/>
+    <param name="gain" value=".4"/>
+
+
+  </node>
+
+</launch>

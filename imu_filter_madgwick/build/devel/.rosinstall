@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/andy/catkin_ws/src/anglerfish/imu_filter_madgwick/build/devel/setup.sh
