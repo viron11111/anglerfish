@@ -9,34 +9,58 @@ from std_msgs.msg import Float32
 from std_msgs.msg import Header
 from anglerfish.msg import bmp180_msg
 
+# BMP085 default address.
+BMP180_I2CADDR           = 0x77
 
+# Operating Modes
+BMP085_ULTRALOWPOWER     = 0
+BMP085_STANDARD          = 1
+BMP085_HIGHRES           = 2
+BMP085_ULTRAHIGHRES      = 3
 
-class measure_internal_pressure:
+# BMP085 Registers
+BMP085_CAL_AC1           = 0xAA  # R   Calibration data (16 bits)
+BMP085_CAL_AC2           = 0xAC  # R   Calibration data (16 bits)
+BMP085_CAL_AC3           = 0xAE  # R   Calibration data (16 bits)
+BMP085_CAL_AC4           = 0xB0  # R   Calibration data (16 bits)
+BMP085_CAL_AC5           = 0xB2  # R   Calibration data (16 bits)
+BMP085_CAL_AC6           = 0xB4  # R   Calibration data (16 bits)
+BMP085_CAL_B1            = 0xB6  # R   Calibration data (16 bits)
+BMP085_CAL_B2            = 0xB8  # R   Calibration data (16 bits)
+BMP085_CAL_MB            = 0xBA  # R   Calibration data (16 bits)
+BMP085_CAL_MC            = 0xBC  # R   Calibration data (16 bits)
+BMP085_CAL_MD            = 0xBE  # R   Calibration data (16 bits)
+BMP085_CONTROL           = 0xF4
+BMP085_TEMPDATA          = 0xF6
+BMP085_PRESSUREDATA      = 0xF6
 
-	def __init__(self):
-		
+# Commands
+BMP085_READTEMPCMD       = 0x2E
+BMP085_READPRESSURECMD   = 0x34
 
+class measure_internal_pressure(object):
+    def __init__(self):
+        self.bmp_pub = rospy.Publisher("BMP180_pressure_sensor", bmp180_msg, queue_size=1)
+        self.bus = smbus.SMBus(1)
+        #self._load_calibration()
 
+        print bus.read_i2c_block_data(BMP180_I2CADDR,BMP085_CAL_AC1,2)
 
-class BMP085(object):
-    def __init__(self, mode=BMP085_STANDARD, address=BMP085_I2CADDR, i2c=None, **kwargs):
-	self.bmp_pub = rospy.Publisher("BMP180_pressure_sensor", bmp180_msg, queue_size=1)
+        rate = rospy.Rate(10) #Hz
 
+        bmp = bmp180_msg()
 
-
-
-        self._logger = logging.getLogger('Adafruit_BMP.BMP085')
-        # Check that mode is valid.
-        if mode not in [BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, BMP085_ULTRAHIGHRES]:
-            raise ValueError('Unexpected mode value {0}.  Set mode to one of BMP085_ULTRALOWPOWER, BMP085_STANDARD, BMP085_HIGHRES, or BMP085_ULTRAHIGHRES'.format(mode))
-        self._mode = mode
-        # Create I2C device.
-        if i2c is None:
-            import Adafruit_GPIO.I2C as I2C
-            i2c = I2C
-        self._device = i2c.get_i2c_device(address, **kwargs)
-        # Load calibration values.
-        self._load_calibration()
+        while not rospy.is_shutdown():
+            
+            self.get_reading()    
+            
+            bmp180.header = Header(
+                stamp = rospy.get_rostime(),
+                frame_id = 'BMP180'
+            )
+            
+            self.bmp_pub.publish(bmp180)
+            rate.sleep()
 
     def _load_calibration(self):
         self.cal_AC1 = self._device.readS16BE(BMP085_CAL_AC1)   # INT16
@@ -50,32 +74,6 @@ class BMP085(object):
         self.cal_MB = self._device.readS16BE(BMP085_CAL_MB)     # INT16
         self.cal_MC = self._device.readS16BE(BMP085_CAL_MC)     # INT16
         self.cal_MD = self._device.readS16BE(BMP085_CAL_MD)     # INT16
-        self._logger.debug('AC1 = {0:6d}'.format(self.cal_AC1))
-        self._logger.debug('AC2 = {0:6d}'.format(self.cal_AC2))
-        self._logger.debug('AC3 = {0:6d}'.format(self.cal_AC3))
-        self._logger.debug('AC4 = {0:6d}'.format(self.cal_AC4))
-        self._logger.debug('AC5 = {0:6d}'.format(self.cal_AC5))
-        self._logger.debug('AC6 = {0:6d}'.format(self.cal_AC6))
-        self._logger.debug('B1 = {0:6d}'.format(self.cal_B1))
-        self._logger.debug('B2 = {0:6d}'.format(self.cal_B2))
-        self._logger.debug('MB = {0:6d}'.format(self.cal_MB))
-        self._logger.debug('MC = {0:6d}'.format(self.cal_MC))
-        self._logger.debug('MD = {0:6d}'.format(self.cal_MD))
-
-    def _load_datasheet_calibration(self):
-        # Set calibration from values in the datasheet example.  Useful for debugging the
-        # temp and pressure calculation accuracy.
-        self.cal_AC1 = 408
-        self.cal_AC2 = -72
-        self.cal_AC3 = -14383
-        self.cal_AC4 = 32741
-        self.cal_AC5 = 32757
-        self.cal_AC6 = 23153
-        self.cal_B1 = 6190
-        self.cal_B2 = 4
-        self.cal_MB = -32767
-        self.cal_MC = -8711
-        self.cal_MD = 2868
 
     def read_raw_temp(self):
         """Reads the raw (uncompensated) temperature from the sensor."""
