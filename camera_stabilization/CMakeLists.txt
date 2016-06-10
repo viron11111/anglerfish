@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(orientation_estimater)
+project(camera_stabilization)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
   rospy
-  sensor_msgs
   std_msgs
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -46,10 +43,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   rpy_msg.msg
- )
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -66,10 +64,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -101,10 +99,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  #INCLUDE_DIRS include
-  LIBRARIES orientation_estimater
-  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs message_runtime
-  #DEPENDS system_lib
+#  INCLUDE_DIRS include
+#  LIBRARIES camera_stabilization
+#  CATKIN_DEPENDS rospy std_msgs
+#  DEPENDS system_lib
 )
 
 ###########
@@ -119,24 +117,24 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(orientation_estimater
-#   src/${PROJECT_NAME}/orientation_estimater.cpp
+# add_library(camera_stabilization
+#   src/${PROJECT_NAME}/camera_stabilization.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(orientation_estimater ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(camera_stabilization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(orientation_estimater_node src/orientation_estimater_node.cpp)
+# add_executable(camera_stabilization_node src/camera_stabilization_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(orientation_estimater_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(camera_stabilization_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(orientation_estimater_node
+# target_link_libraries(camera_stabilization_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -155,7 +153,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS orientation_estimater orientation_estimater_node
+# install(TARGETS camera_stabilization camera_stabilization_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -180,7 +178,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_orientation_estimater.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_camera_stabilization.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
