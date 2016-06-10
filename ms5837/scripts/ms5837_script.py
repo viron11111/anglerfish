@@ -138,7 +138,7 @@ class measure_depth:
 				stamp = rospy.get_rostime()
 			)
 
-			rov.depth = depth_af
+			rov.depth = -depth_af
 			rov.temperature = temperature_af
 			rov.ex_pressure = pressure_af
 	

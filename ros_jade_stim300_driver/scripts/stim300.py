@@ -29,9 +29,9 @@ class Interface(object):
         self.serial = serial.Serial('/dev/ttyUSB1', baudrate=self._baudrate)
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.pub = rospy.Publisher('imu/data_raw', Imu, queue_size=1)
-        self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
-        self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
-        self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
+        #self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)
+        #self.pitch_pub = rospy.Publisher('pitch', Float32, queue_size=1)
+        #self.yaw_pub = rospy.Publisher('yaw', Float32, queue_size=1)
         #self.pose_pub = rospy.Publisher("/static_point", PoseStamped, queue_size = 0)
         #self.last_msg = Nonesens
         self.gyroDatax = 0
@@ -200,9 +200,9 @@ class Interface(object):
         to_send.pose.orientation.x, to_send.pose.orientation.y, to_send.pose.orientation.z, to_send.pose.orientation.w  = [0,0,0,0]'''
 
         self.pub.publish(imu_msg)
-        self.roll_pub.publish(self.gyroDatax)
-        self.pitch_pub.publish(self.pitch)
-        self.yaw_pub.publish(self.yaw)
+        #self.roll_pub.publish(self.gyroDatax)
+        #self.pitch_pub.publish(self.pitch)
+        #self.yaw_pub.publish(self.yaw)
         #self.pose_pub.publish(to_send)
         
         #br = tf.TransformBroadcaster()
@@ -218,7 +218,11 @@ class Interface(object):
 
     #def holder(self):
 
+    def close_port():
+	ser = serial.Serial('/dev/ttyUSB1')
+	ser.close()
 
+    rospy.on_shutdown(close_port)
 
 
 if __name__ == '__main__':

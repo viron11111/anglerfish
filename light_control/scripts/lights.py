@@ -29,8 +29,8 @@ class start_lights():
 	def __init__(self):
 		rospy.Subscriber('Green_led', Bool, self.green)
 		rospy.Subscriber('White_led', Bool, self.white)
-		self.green_pub = rospy.Publisher("green_light", String, queue_size=1)
-		self.white_pub = rospy.Publisher("white_light", String, queue_size=1)
+		#self.green_pub = rospy.Publisher("green_light", String, queue_size=1)
+		#self.white_pub = rospy.Publisher("white_light", String, queue_size=1)
 
 		self.pig = pigpio.pi()
 		self.pig.set_mode(12, pigpio.OUTPUT)

@@ -66,9 +66,9 @@ class measure_headings():
                         frame_id = 'magnetometer'
                     ),
                     magnetic_field = Vector3(self.x_out, self.y_out, self.z_out),
-                    magnetic_field_covariance = [ 22.3180189, 0.58065964, 0.28238449,
-                        0, 22.3021513, -0.04371008,
-                        0, 0, 24.94456386]
+                    magnetic_field_covariance = [ 2.19918421e+01, 6.13875066e-01, 3.68221974e-01,
+                        0, 2.17394286e+01, -5.56954205e-03, 
+                        0, 0, 2.41408444e+01]
                 )
 
                 #print mag.header	
