@@ -7,7 +7,7 @@ import math
 import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
-from anglerfish.msg import bmp180_msg
+from bmp180.msg import bmp180_msg
 
 # BMP085 default address.
 BMP180_I2CADDR           = 0x77
@@ -39,12 +39,45 @@ BMP085_READTEMPCMD       = 0x2E
 BMP085_READPRESSURECMD   = 0x34
 
 class measure_internal_pressure(object):
+
+    # Global variables
+    address = 0x77
+    mode = 1 # TODO: Add a way to change the mode
+
+    # BMP180 registers
+    CONTROL_REG = 0xF4
+    DATA_REG = 0xF6
+
+    # Calibration data registers
+    CAL_AC1_REG = 0xAA
+    CAL_AC2_REG = 0xAC
+    CAL_AC3_REG = 0xAE
+    CAL_AC4_REG = 0xB0
+    CAL_AC5_REG = 0xB2
+    CAL_AC6_REG = 0xB4
+    CAL_B1_REG = 0xB6
+    CAL_B2_REG = 0xB8
+    CAL_MB_REG = 0xBA
+    CAL_MC_REG = 0xBC
+    CAL_MD_REG = 0xBE
+
+    # Calibration data variables
+    calAC1 = 0
+    calAC2 = 0
+    calAC3 = 0
+    calAC4 = 0
+    calAC5 = 0
+    calAC6 = 0
+    calB1 = 0
+    calB2 = 0
+    calMB = 0
+    calMC = 0
+    calMD = 0
+
     def __init__(self):
         self.bmp_pub = rospy.Publisher("BMP180_pressure_sensor", bmp180_msg, queue_size=1)
         self.bus = smbus.SMBus(1)
-        #self._load_calibration()
-
-        print bus.read_i2c_block_data(BMP180_I2CADDR,BMP085_CAL_AC1,2)
+        self.read_calibration_data()
 
         rate = rospy.Rate(10) #Hz
 
@@ -52,28 +85,49 @@ class measure_internal_pressure(object):
 
         while not rospy.is_shutdown():
             
-            self.get_reading()    
+            #self.get_reading()    
             
-            bmp180.header = Header(
+            bmp.header = Header(
                 stamp = rospy.get_rostime(),
                 frame_id = 'BMP180'
             )
             
-            self.bmp_pub.publish(bmp180)
+            self.bmp_pub.publish(bmp)
             rate.sleep()
 
-    def _load_calibration(self):
-        self.cal_AC1 = self._device.readS16BE(BMP085_CAL_AC1)   # INT16
-        self.cal_AC2 = self._device.readS16BE(BMP085_CAL_AC2)   # INT16
-        self.cal_AC3 = self._device.readS16BE(BMP085_CAL_AC3)   # INT16
-        self.cal_AC4 = self._device.readU16BE(BMP085_CAL_AC4)   # UINT16
-        self.cal_AC5 = self._device.readU16BE(BMP085_CAL_AC5)   # UINT16
-        self.cal_AC6 = self._device.readU16BE(BMP085_CAL_AC6)   # UINT16
-        self.cal_B1 = self._device.readS16BE(BMP085_CAL_B1)     # INT16
-        self.cal_B2 = self._device.readS16BE(BMP085_CAL_B2)     # INT16
-        self.cal_MB = self._device.readS16BE(BMP085_CAL_MB)     # INT16
-        self.cal_MC = self._device.readS16BE(BMP085_CAL_MC)     # INT16
-        self.cal_MD = self._device.readS16BE(BMP085_CAL_MD)     # INT16
+    def read_signed_16_bit(self, register):
+        """Reads a 16-bit signed value and returns it.
+        register -- the register to read from.
+        Returns the read value.
+        """
+        high = self.bus.read_byte_data(self.address, register)
+        low = self.bus.read_byte_data(self.address, register + 1)
+
+        if high > 127:
+            high -= 256
+        
+        return (high << 8) + low
+
+    # Reads a 16-bit unsigned value from the given register and returns it
+    def read_unsigned_16_bit(self, register):
+        high = self.bus.read_byte_data(self.address, register)
+        low = self.bus.read_byte_data(self.address, register + 1)
+
+        return (high << 8) + low
+
+    def read_calibration_data(self):
+        """Reads and stores the raw calibration data."""
+        self.calAC1 = self.read_signed_16_bit(self.CAL_AC1_REG)
+        self.calAC2 = self.read_signed_16_bit(self.CAL_AC2_REG)
+        self.calAC3 = self.read_signed_16_bit(self.CAL_AC3_REG)
+        self.calAC4 = self.read_unsigned_16_bit(self.CAL_AC4_REG)
+        self.calAC5 = self.read_unsigned_16_bit(self.CAL_AC5_REG)
+        self.calAC6 = self.read_unsigned_16_bit(self.CAL_AC6_REG)
+        self.calB1 = self.read_signed_16_bit(self.CAL_B1_REG)
+        self.calB2 = self.read_signed_16_bit(self.CAL_B2_REG)
+        self.calMB = self.read_signed_16_bit(self.CAL_MB_REG)
+        self.calMC = self.read_signed_16_bit(self.CAL_MC_REG)
+        self.calMD = self.read_signed_16_bit(self.CAL_MD_REG)
 
     def read_raw_temp(self):
         """Reads the raw (uncompensated) temperature from the sensor."""
