@@ -38,8 +38,13 @@ class read_registers():
 		BCOEFFICIENT = 3900
 		# the value of the 'other' resistor
 		SERIESRESISTOR = 3300 
-
+		
+		if temp_reg == 0:
+			rospy.logwarn("temp_reg zero error: %d %s" % (temp_reg, self.T100_NAME))
+			temp_reg = 30000
+			#rospy.logwarn(self.T100_NAME)
 		resistance = SERIESRESISTOR/(65535/float(temp_reg)-1)
+		#rospy.logwarn(resistance)
 		steinhart = resistance / THERMISTORNOMINAL  # (R/Ro)
 		steinhart = math.log(steinhart)                 # ln(R/Ro)
 		steinhart /= BCOEFFICIENT                  # 1/B * ln(R/Ro)
@@ -107,6 +112,18 @@ class read_registers():
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, output>>8)
 	        bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, output)
 
+		if (force.data > 0.000 and self.actual_rpm == 0.0) or (force.data < 0.000 and self.actual_rpm == 0.0):
+			self.spin_warn_trigger = time.time()*1000
+			self.trigger = 1
+
+                if self.actual_rpm > 0.0:
+                        self.spin_warn_time = time.time()*1000
+			self.trigger = 0
+
+		if (self.spin_warn_time - self.spin_warn_trigger) > 500 and force.data != 0.000 and self.trigger==1:
+			rospy.logerr("NO SPIN: %s" % self.T100_NAME)
+			
+
 	def stop_motor():
 	        bus.write_byte_data(rospy.get_param('~register'), 0x00, 0)
 	        bus.write_byte_data(rospy.get_param('~register'), 0x01, 0)	
@@ -116,6 +133,10 @@ class read_registers():
 		self.T100_ADDR = rospy.get_param('~register')
 		self.T100_NAME = rospy.get_param('~name')
 		self.T100_OUTPUT = rospy.get_param('~force')
+
+		self.spin_warn_time = time.time()*1000	
+		self.spin_warn_trigger = time.time()*1000	
+		self.trigger = 0
 
 		#T100 registers used for RPM, voltage, temp, current (2 bytes each)
 		self.T100_THROTTLE_1	  = 0x00

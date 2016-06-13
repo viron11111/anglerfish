@@ -25,11 +25,11 @@ def setServoPulse(channel, pulse):
 
 def moving(pos):
     if pos.data < 140:
+	rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
 	pos.data = 140
     elif pos.data > 710:
+	rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
 	pos.data = 710
-    else:
-	rospy.logwarn("Servo min/max values exceeded.  Acceptable range: 140-710")
 
     pwm.setPWM(0, 0, pos.data)
     print pos    
