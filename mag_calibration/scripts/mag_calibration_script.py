@@ -40,7 +40,7 @@ class calibrate_measurements():
 	def __init__(self):
 
 	    #self.mag_pub = rospy.Publisher("/imu/mag_uncal", MagneticField, queue_size=1)
-	    self.dynamic_pub = rospy.Publisher("/imu/mag_corr", MagneticField, queue_size=1)
+	    self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
 	    rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 
 	    self.max_x = 0.0
