@@ -19,8 +19,8 @@ class calibrate_imu:
         self.mag_offset = zeros(3)
         self.sampling = False
 
-        mag_topic = rospy.get_param('~mag_topic', '/imu/mag')
-        imu_topic = rospy.get_param('~imu_topic', '/imu/data')
+        mag_topic = rospy.get_param('~mag_topic', '/imu/mag_raw')
+        imu_topic = rospy.get_param('~imu_topic', '/imu/data_raw')
         self.publish_calibrated = rospy.get_param("~publish_calibrated", False)
         self.max_samples = rospy.get_param("~max_samples", 5000)
         self.__location__ = rospy.get_param("~calibrations_dir", "/data/mag_calibration")
