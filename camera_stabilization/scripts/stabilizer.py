@@ -15,7 +15,7 @@ class stability(object):
 
 	def stabilize(self, data):
 
-		output = int(-data.pitch*215 + 400)
+		output = int(-data.pitch*215 + 345)
 		#rospy.logwarn(output)
 		if output <= 140:
 			output = 140

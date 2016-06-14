@@ -36,30 +36,16 @@ class calibrate_mag():
 		self.y_bias = ((self.max_y + self.min_y)/2.0) #not to be used again until new location
 		self.z_bias = ((self.max_z + self.min_z)/2.0)
 
-		#f = (self.max_x + self.max_y + self.max_z)/3.0
-		#print f
-		f = .050232
-
-		#print '************'
-		#print self.max_x
-		#print self.max_y
-		#print self.max_z
-		
 		self.x_out_hard = self.x_out - 0.011868
 		self.y_out_hard = self.y_out - (-0.017066)
 		self.z_out_hard = self.z_out - 0.002116
 
-		self.x_simple_cal = self.x_out_hard * (f/0.070288)
-		self.y_simple_cal = self.y_out_hard * (f/0.034224)
-		self.z_simple_cal = self.z_out_hard * (f/0.046092)
-
 		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
 
-		soft_matrix = np.matrix('22.18458769, 0.68136508, 0.39133311; 0.0, 22.4054685, -0.2618374; 0.0, 0.0,  24.14833212')
+		soft_matrix = np.matrix('2.19918421e+01
 
-		self.calibrated_values = soft_matrix * self.hard_vals
+		self.calibrated_values = 
 
-		#print self.calibrated_values[0]
 		
 
 
@@ -67,11 +53,11 @@ class calibrate_mag():
 		self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 
-		self.max_x = 0.0001
+		self.max_x = 0.0
 		self.min_x = 0.0
-		self.max_y = 0.0001
+		self.max_y = 0.0
 		self.min_y = 0.0
-		self.max_z = 0.0001
+		self.max_z = 0.0
 		self.min_z = 0.0
 
 		self.x_out = 0.0
@@ -86,11 +72,7 @@ class calibrate_mag():
 		self.y_out_hard = 0.0
 		self.z_out_hard = 0.0
 
-		self.x_simple_cal = .04
-		self.y_simple_cal = .04
-		self.z_simple_cal = .04
-
-		self.calibrated_values = (0.0, 0.0, 0.0)
+		self.calibrated_values = Vector3(0.0, 0.0, 0.0)
 
 		rate = rospy.Rate(75)
 
@@ -99,8 +81,7 @@ class calibrate_mag():
 		    mag = MagneticField(header = 
                         Header(stamp = rospy.get_rostime(),
 	                frame_id = 'magnetometer_corrected'),
-	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal)
-	                #magnetic_field = Vector3(self.calibrated_values[0],self.calibrated_values[1],self.calibrated_values[2])
+	                magnetic_field = Vector3(self.x_out_hard, self.y_out_hard, self.z_out_hard)
 	                )
 	            self.dynamic_pub.publish(mag)
 	            rate.sleep()
