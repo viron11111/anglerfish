@@ -34,22 +34,22 @@ class start_test():
 
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
-			self.thruster1_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster1_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster2_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster3_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster4_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster5_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
-			self.thruster6_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster6_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		else:
 			self.thrust1_pub.publish(0.0)
 			self.thrust2_pub.publish(0.0)
@@ -77,22 +77,22 @@ class start_test():
 
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
-			self.thruster1_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster1_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster2_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster3_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster4_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster5_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
-			self.thruster6_file.writerow([self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average,output])
+			self.thruster6_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
 		else:
 			self.thrust1_pub.publish(0.0)
 			self.thrust2_pub.publish(0.0)
@@ -147,25 +147,25 @@ class start_test():
 
 	def create_files(self):
 		date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
-		file_name1 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster1.csv"#,date_time)
-		file_name2 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster2.csv"#,date_time)
-		file_name3 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster3.csv"#,date_time)
-		file_name4 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster4.csv"#,date_time)
-		file_name5 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster5.csv"#,date_time)
-		file_name6 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster6.csv"#,date_time)
+		file_name1 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster1_%s.csv" % date_time
+		file_name2 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster2_%s.csv" % date_time
+		file_name3 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster3_%s.csv" % date_time
+		file_name4 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster4_%s.csv" % date_time
+		file_name5 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster5_%s.csv" % date_time
+		file_name6 = "/home/andy/catkin_ws/src/anglerfish/t100_thruster/data/thruster6_%s.csv" % date_time
 		
 		self.thruster1_file = csv.writer(open(file_name1,'w'))
-		self.thruster1_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])
+		self.thruster1_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])
 		self.thruster2_file = csv.writer(open(file_name2,'w'))
-		self.thruster2_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])		
+		self.thruster2_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])		
 		self.thruster3_file = csv.writer(open(file_name3,'w'))
-		self.thruster3_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])
+		self.thruster3_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])
 		self.thruster4_file = csv.writer(open(file_name4,'w'))
-		self.thruster4_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])
+		self.thruster4_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])
 		self.thruster5_file = csv.writer(open(file_name5,'w'))
-		self.thruster5_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])
+		self.thruster5_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])
 		self.thruster6_file = csv.writer(open(file_name6,'w'))
-		self.thruster6_file.writerow(["x_mag","y_mag","z_mag","force (kg)"])
+		self.thruster6_file.writerow(["force (kg)","x_mag","y_mag","z_mag"])
 
 	def __init__(self):
 		self.thrust1_pub = rospy.Publisher('/thruster1_force', Float32, queue_size=1)
@@ -179,12 +179,12 @@ class start_test():
 
 		self.counter = 0
 		self.thruster = 1
-		self.resolution = 100.0
-		self.forward_thrust_force = .25 #2.36 kg forward
-		self.reverse_thrust_force = -.25 #1.82 kg reverse
+		self.resolution = 1000.0
+		self.forward_thrust_force = 1 #2.36 kg forward
+		self.reverse_thrust_force = -1#1.82 kg reverse
 		self.direction = 'forward'
 
-		self.window_size = 100
+		self.window_size = 200
 		self.sliderx = [0] * self.window_size
 		self.slidery = [0] * self.window_size
 		self.sliderz = [0] * self.window_size
