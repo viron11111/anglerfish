@@ -1,4 +1,7 @@
 <launch>
+  <node pkg="mag_calibration" type="mag_calibration_script.py" name="mag_cal" respawn="true">
+  </node>
+
   <node pkg="camera_stabilization" type="stabilizer.py" name="stabilizer" respawn="true">
   </node>
 
