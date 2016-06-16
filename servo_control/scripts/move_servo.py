@@ -29,7 +29,7 @@ class servo_control():
   def center():
     pwm = PWM(0x40)
     pwm.setPWMFreq(60)
-    pwm.setPWM(0, 0, 365)
+    pwm.setPWM(0, 0, 345)
 
   def __init__(self):
     rospy.Subscriber("servo_position", Int16, self.moving)
@@ -38,7 +38,7 @@ class servo_control():
 
   rospy.on_shutdown(center)
 
-def main(args):
+def main(): #args
   rospy.init_node('move_servo', anonymous=False)
 
   servo_control()
@@ -50,4 +50,4 @@ def main(args):
     pass
 
 if __name__ == '__main__':
-  main(sys.argv)
+    main()#sys.argv
