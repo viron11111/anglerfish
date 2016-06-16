@@ -68,7 +68,7 @@ class start_test():
 			self.thrust4_pub.publish(0.0)
 			self.thrust5_pub.publish(0.0)
 			self.thrust6_pub.publish(0.0)
-			time.sleep(1)
+			time.sleep(2)
 
 	def reverse(self):
 		output = (float(self.counter)/self.resolution) * self.reverse_thrust_force
@@ -111,7 +111,7 @@ class start_test():
 			self.thrust4_pub.publish(0.0)
 			self.thrust5_pub.publish(0.0)
 			self.thrust6_pub.publish(0.0)
-			time.sleep(1)			
+			time.sleep(2)			
 
 	def stop_thrusters():
 		thrust1_pub = rospy.Publisher('/thruster1_force', Float32, queue_size=1)
@@ -180,8 +180,8 @@ class start_test():
 		self.counter = 0
 		self.thruster = 1
 		self.resolution = 1000.0
-		self.forward_thrust_force = 1 #2.36 kg forward
-		self.reverse_thrust_force = -1#1.82 kg reverse
+		self.forward_thrust_force = .5 #2.36 kg forward
+		self.reverse_thrust_force = -.5#1.82 kg reverse
 		self.direction = 'forward'
 
 		self.window_size = 200
@@ -205,7 +205,7 @@ class start_test():
 		self.create_files()
 		self.arm_thrusters()		
 
-		self.rate = rospy.Rate(100)
+		self.rate = rospy.Rate(50)
 
 		while not rospy.is_shutdown():
 			if self.counter == 0:
