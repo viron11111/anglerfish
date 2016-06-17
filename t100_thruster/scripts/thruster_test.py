@@ -179,9 +179,9 @@ class start_test():
 
 		self.counter = 0
 		self.thruster = 1
-		self.resolution = 1000.0
-		self.forward_thrust_force = .5 #2.36 kg forward
-		self.reverse_thrust_force = -.5#1.82 kg reverse
+		self.resolution = 500.0
+		self.forward_thrust_force = .25 #2.36 kg forward
+		self.reverse_thrust_force = -.25#1.82 kg reverse
 		self.direction = 'forward'
 
 		self.window_size = 200
@@ -205,7 +205,7 @@ class start_test():
 		self.create_files()
 		self.arm_thrusters()		
 
-		self.rate = rospy.Rate(50)
+		self.rate = rospy.Rate(25)
 
 		while not rospy.is_shutdown():
 			if self.counter == 0:
