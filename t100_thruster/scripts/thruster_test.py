@@ -180,8 +180,8 @@ class start_test():
 		self.counter = 0
 		self.thruster = 1
 		self.resolution = 500.0
-		self.forward_thrust_force = .25 #2.36 kg forward
-		self.reverse_thrust_force = -.25#1.82 kg reverse
+		self.forward_thrust_force = 2.36 #2.36 kg forward
+		self.reverse_thrust_force = -1.82#1.82 kg reverse
 		self.direction = 'forward'
 
 		self.window_size = 200
