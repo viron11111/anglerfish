@@ -4,4 +4,4 @@ float32 voltage
 float32 temperature
 float32 current
 string  alive
-
+int16   signal
