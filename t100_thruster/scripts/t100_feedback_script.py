@@ -14,7 +14,7 @@ import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
 from std_msgs.msg import String
-from anglerfish.msg import t100_thruster_feedback
+from t100_thruster.msg import t100_thruster_feedback
 
 bus = smbus.SMBus(1)
 
@@ -157,6 +157,8 @@ class read_registers():
 		bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, 0)
 		bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, 0)
 		time.sleep(.05)
+
+		self.signal = 0
 
 		self.ROV_pub = rospy.Publisher(self.T100_NAME, t100_thruster_feedback, queue_size=1)
 		rospy.Subscriber(self.T100_OUTPUT, Float32, self.thrust)

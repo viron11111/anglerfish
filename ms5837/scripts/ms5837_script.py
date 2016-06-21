@@ -11,7 +11,7 @@ import math
 import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
-from anglerfish.msg import ms5837
+from ms5837.msg import ms5837
 
 bus = smbus.SMBus(1)
 
