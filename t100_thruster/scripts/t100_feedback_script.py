@@ -87,11 +87,11 @@ class read_registers():
 
 
 	def thrust(self, force):
-		if force.data >= 2.36:
+		if force.data > 2.36:
 			rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
 			force.data = 2.36
 			
-		elif force.data <= -1.82:
+		elif force.data < -1.82:
 			rospy.logwarn("Max reverse thrust = -1.82 kgf.  Input, %0.2f kgf changed to -1.82 kgf", force.data)
 			force.data = -1.82
 		
@@ -105,6 +105,8 @@ class read_registers():
 			output = 0.0
 
 		output = int(output)
+
+		self.signal = output
 
                 #bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_1, 0)
                 #bus.write_byte_data(self.T100_ADDR, self.T100_THROTTLE_2, 0)
@@ -187,6 +189,7 @@ class read_registers():
 					frame_id = str(self.T100_ADDR)
 				)
 				
+				t100.signal = self.signal
 				t100.temperature = self.thruster_temp
 				t100.voltage = self.actual_voltage
 				t100.current = self.actual_current 
