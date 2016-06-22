@@ -75,7 +75,22 @@ class start_test():
 			self.thrust4_pub.publish(0.0)
 			self.thrust5_pub.publish(0.0)
 			self.thrust6_pub.publish(0.0)
-			time.sleep(4)
+
+			time_diff = 0
+			start_time = time.time()*1000
+			while self.stability == False:
+				time_diff = time.time()*1000 - start_time
+				if time_diff > 10000:
+					self.initial_roll = self.new_roll
+					self.initial_pitch = self.new_pitch
+					self.initial_yaw = self.new_yaw
+					break
+				#print time_diff
+				self.stable_rate.sleep()
+			end_time = time.time()*1000
+			time_diff = end_time - start_time
+
+			rospy.loginfo(time_diff)
 
 	def reverse(self):
 		output = (float(self.counter)/self.resolution) * self.reverse_thrust_force
@@ -124,7 +139,21 @@ class start_test():
 			self.thrust4_pub.publish(0.0)
 			self.thrust5_pub.publish(0.0)
 			self.thrust6_pub.publish(0.0)
-			time.sleep(4)			
+
+			time_diff = 0
+			start_time = time.time()*1000
+			while self.stability == False:
+				time_diff = time.time()*1000 - start_time
+				if time_diff > 10000:
+					self.initial_roll = self.new_roll
+					self.initial_pitch = self.new_pitch
+					self.initial_yaw = self.new_yaw
+					break
+				self.stable_rate.sleep()
+			end_time = time.time()*1000
+			time_diff = end_time - start_time
+
+			rospy.loginfo(time_diff)		
 
 	def stop_thrusters():
 		thrust1_pub = rospy.Publisher('/thruster1_force', Float32, queue_size=1)
@@ -159,15 +188,30 @@ class start_test():
 		self.mag_avg_z = sum(self.sliderz)/self.window_size
 
 	def save_rpy_values(self, data):
+
 		if self.init_rpy == 0:
 			self.initial_roll = data.roll
 			self.initial_pitch = data.pitch
 			self.initial_yaw = data.yaw
+			#print self.initial_roll
 			self.init_rpy = 1
 
+		self.new_roll = data.roll
+		self.new_pitch = data.pitch
+		self.new_yaw = data.yaw
+
+		if abs(self.initial_roll - self.new_roll) < self.sensitivity and abs(self.initial_pitch - self.new_pitch) < self.sensitivity and abs(self.initial_yaw - self.new_yaw) < self.sensitivity:
+			self.stability = True
+		else:
+			self.stability = False
+
+		self.old_roll = self.new_roll
+		self.old_pitch = self.new_pitch
+		self.old_yaw = self.new_yaw
+
+
+
 		self.roll_diff = self.initial_roll - data.roll
-		#rospy.loginfo("initial_roll: " % self.initial_roll)
-		#rospy.loginfo("data.roll: " % data.roll)
 		self.pitch_diff = self.initial_pitch - data.pitch
 		self.yaw_diff = self.initial_yaw - data.yaw
 
@@ -224,23 +268,38 @@ class start_test():
 		rospy.Subscriber('/imu/mag', MagneticField, self.save_mag_values)
 		rospy.Subscriber('/rpy_msg', rpy_msg, self.save_rpy_values)
 
-		self.counter = 0
-		self.thruster = 1
-		self.resolution = 500.0
-		self.forward_thrust_force = 2.36 #2.36 kg forward
-		self.reverse_thrust_force = -1.82 #1.82 kg reverse
-		self.direction = 'forward'
-		self.init_rpy = 0
-		self.roll_diff = 0.0
-		self.pitch_diff = 0.0
-		self.yaw_diff = 0.0
-
 		self.window_size = 200
 		self.sliderx = [0] * self.window_size
 		self.slidery = [0] * self.window_size
 		self.sliderz = [0] * self.window_size
 
-		self.mag_rate = rospy.Rate(15)
+		self.counter = 0
+		self.thruster = 1
+		self.resolution = 200.0
+		self.forward_thrust_force = 2.36 #2.36 kg forward
+		self.reverse_thrust_force = -1.82 #1.82 kg reverse
+		self.direction = 'forward'
+		self.init_rpy = 1
+		self.roll_diff = 0.0
+		self.pitch_diff = 0.0
+		self.yaw_diff = 0.0
+
+		self.new_roll = 0.0
+		self.new_pitch = 0.0
+		self.new_yaw = 0.0
+		self.old_roll = 0.0
+		self.old_pitch = 0.0
+		self.old_yaw = 0.0
+		self.initial_roll = 0.0
+		self.initial_pitch = 0.0
+		self.initial_yaw = 0.0
+		self.stable = False
+		self.stable_rate = rospy.Rate(20)
+		self.sensitivity = 0.05
+
+
+
+		self.mag_rate = rospy.Rate(25) #15
 
 		rospy.loginfo("******************** Thruster vs Mag calibration ********************")
 		rospy.loginfo("Starting mag averaging, hold sub very still...")
@@ -252,6 +311,10 @@ class start_test():
 		self.z_average = self.mag_avg_z
 
 		rospy.loginfo("Mag averaging complete")
+
+		while self.new_roll == 0.0:
+			self.stable_rate.sleep()
+		self.init_rpy = 0
 
 		self.create_files()
 		self.arm_thrusters()		
@@ -268,7 +331,6 @@ class start_test():
 				self.reverse()
 
 			if self.thruster == 7 and self.direction == 'forward':
-				self.init_rpy = 0
 				self.thruster = 1
 				self.direction = 'reverse'
 			elif self.thruster == 7 and self.direction == 'reverse':
