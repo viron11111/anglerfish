@@ -88,11 +88,11 @@ class read_registers():
 
 	def thrust(self, force):
 		if force.data > 2.36:
-			rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
+			#rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
 			force.data = 2.36
 			
 		elif force.data < -1.82:
-			rospy.logwarn("Max reverse thrust = -1.82 kgf.  Input, %0.2f kgf changed to -1.82 kgf", force.data)
+			#rospy.logwarn("Max reverse thrust = -1.82 kgf.  Input, %0.2f kgf changed to -1.82 kgf", force.data)
 			force.data = -1.82
 		
 		if force.data < 0.0000:
