@@ -16,7 +16,7 @@ class calibrate_mag():
 
 	def thruster_1_cal(self, data):
 		x = data.data
-		self.thruster1_x_offset = 0.0073x4 - 0.0034x3 - 0.0275x2 + 0.0027x + 5E-05
+		self.thruster1_x_offset = 0.0073*math.pow(x,4) - 0.0034*math.pow(x,3) - 0.0275*math.pow(x,2) + 0.0027*x + 0.00005
 		self.thruster1_y_offset = 0.0356*math.pow(x,6) - 0.0015*math.pow(x,5) - 0.0572*math.pow(x,4) + 0.0033*math.pow(x,3) + 0.0386*math.pow(x,2) - 0.0016*x - 0.0005
 		self.thruster1_z_offset = -0.0015*math.pw(x,2) - 0.0005*x - 0.0002
 
@@ -127,6 +127,13 @@ class calibrate_mag():
 		self.thruster6_y_offset = 0.0
 		self.thruster6_z_offset = 0.0
 
+                self.max_x = 0.0001
+                self.min_x = 0.0
+                self.max_y = 0.0001
+                self.min_y = 0.0
+                self.max_z = 0.0001
+                self.min_z = 0.0
+
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 		rospy.Subscriber('/thruster1_force', t100_thruster_feedback, self.thruster_1_cal)
 		rospy.Subscriber('/thruster2_force', t100_thruster_feedback, self.thruster_2_cal)
@@ -134,13 +141,6 @@ class calibrate_mag():
 		rospy.Subscriber('/thruster4_force', t100_thruster_feedback, self.thruster_4_cal)
 		rospy.Subscriber('/thruster5_force', t100_thruster_feedback, self.thruster_5_cal)
 		rospy.Subscriber('/thruster6_force', t100_thruster_feedback, self.thruster_6_cal)
-
-		self.max_x = 0.0001
-		self.min_x = 0.0
-		self.max_y = 0.0001
-		self.min_y = 0.0
-		self.max_z = 0.0001
-		self.min_z = 0.0
 
 		self.x_out = 0.0
 		self.y_out = 0.0
