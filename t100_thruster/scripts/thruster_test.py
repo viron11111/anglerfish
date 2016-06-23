@@ -10,7 +10,8 @@ import csv
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
 from std_msgs.msg import String
-from anglerfish.msg import t100_thruster_feedback
+from t100_thruster.msg import t100_thruster_feedback
+#from anglerfish.msg import t100_thruster_feedback
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
 from orientation_estimater.msg import rpy_msg

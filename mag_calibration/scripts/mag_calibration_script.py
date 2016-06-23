@@ -9,8 +9,46 @@ from std_msgs.msg import Float64
 from std_msgs.msg import Header
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
+from t100_thruster.msg import t100_thruster_feedback
+#from anglerfish.msg import t100_thruster_feedback
 
 class calibrate_mag():
+
+	def thruster_1_cal(self, data):
+		x = data.data
+		self.thruster1_x_offset = 0.0073x4 - 0.0034x3 - 0.0275x2 + 0.0027x + 5E-05
+		self.thruster1_y_offset = 0.0356*math.pow(x,6) - 0.0015*math.pow(x,5) - 0.0572*math.pow(x,4) + 0.0033*math.pow(x,3) + 0.0386*math.pow(x,2) - 0.0016*x - 0.0005
+		self.thruster1_z_offset = -0.0015*math.pw(x,2) - 0.0005*x - 0.0002
+
+	def thruster_2_cal(self, data):
+		x = data.data
+		self.thruster2_x_offset = 0.0073*math.pow(x,4) - 0.0034*math.pow(x,3) - 0.0275*math.pow(x,2) + 0.0027*x + 0.00005
+		self.thruster2_y_offset = 0.0083*math.pow(x,4) - 0.004*math.pow(x,3) - 0.0315*math.pow(x,2) + 0.0032*x - 0.0001
+		self.thruster2_z_offset = -0.0049*math.pow(x,2) - 0.0004*x - 0.0008
+
+	def thruster_3_cal(self, data):
+		x = data.data
+		self.thruster3_x_offset = 0.005*math.pow(x,4) - 0.0035*math.pow(x,3) - 0.0169*math.pow(x,2) + 0.0032*x - 0.0009
+		self.thruster3_y_offset = 0.0019*math.pow(x,2) + 0.0025*x + 0.0013
+		self.thruster3_z_offset = -0.0086*math.pow(x,4) + 0.0011*math.pow(x,3) + 0.0182*math.pow(x,2) - 0.0009*x + 0.0006
+
+	def thruster_4_cal(self, data):
+		x = data.data
+		self.thruster4_x_offset = -0.0073*math.pow(x,4) + 0.0036*math.pow(x,3) + 0.0269*math.pow(x,2) - 0.0036*x + 0.0004
+		self.thruster4_y_offset = 0.0019*math.pow(x,2) + 0.0007*x - 0.0004
+		self.thruster4_z_offset = -0.0053*math.pow(x,2) + 0.0003*x + 0.000008
+
+	def thruster_5_cal(self, data):
+		x = data.data
+		self.thruster5_x_offset = -0.0056*math.pow(x,4) + 0.0022*math.pow(x,3) + 0.0177*math.pow(x,2) - 0.0022*x + 0.0002
+		self.thruster5_y_offset = -0.0005*math.pow(x,2) + 0.003*x + 0.0009
+		self.thruster5_z_offset = 0.0056*math.pow(x,4) - 0.002*math.pow(x,3) - 0.0176*math.pow(x,2) + 0.002*x - 0.0004
+
+	def thruster_6_cal(self, data):
+		x = data.data
+		self.thruster6_x_offset = -0.0146*math.pow(x,2) - 0.0003*x - 0.0004
+		self.thruster6_y_offset = -0.0053*math.pow(x,4) + 0.0023*math.pow(x,3) + 0.0186*math.pow(x,2) - 0.0023*x + 0.00009
+		self.thruster6_z_offset = -0.006*math.pow(x,2) + 0.0005*x - 0.0009
 
 	def min_max(self, data):
 		self.x_out = data.magnetic_field.x
@@ -44,14 +82,18 @@ class calibrate_mag():
 		#print self.max_x
 		#print self.max_y
 		#print self.max_z
+
+		x_thruster_offset = self.thruster1_x_offset + self.thruster2_x_offset + self.thruster3_x_offset + self.thruster4_x_offset + self.thruster5_x_offset + self.thruster6_x_offset
+		y_thruster_offset = self.thruster1_y_offset + self.thruster2_y_offset + self.thruster3_y_offset + self.thruster4_y_offset + self.thruster5_y_offset + self.thruster6_y_offset
+		z_thruster_offset = self.thruster1_z_offset + self.thruster2_z_offset + self.thruster3_z_offset + self.thruster4_z_offset + self.thruster5_z_offset + self.thruster6_z_offset
 		
 		self.x_out_hard = self.x_out - 0.011868
 		self.y_out_hard = self.y_out - (-0.017066)
 		self.z_out_hard = self.z_out - 0.002116
 
-		self.x_simple_cal = self.x_out_hard * (f/0.070288)
-		self.y_simple_cal = self.y_out_hard * (f/0.034224)
-		self.z_simple_cal = self.z_out_hard * (f/0.046092)
+		self.x_simple_cal = self.x_out_hard * (f/0.070288) - x_thruster_offset
+		self.y_simple_cal = self.y_out_hard * (f/0.034224) - y_thruster_offset
+		self.z_simple_cal = self.z_out_hard * (f/0.046092) - z_thruster_offset
 
 		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
 
@@ -65,7 +107,33 @@ class calibrate_mag():
 
 	def __init__(self):
 		self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
+
+		self.thruster1_x_offset = 0.0
+		self.thruster1_y_offset = 0.0
+		self.thruster1_z_offset = 0.0
+		self.thruster2_x_offset = 0.0
+		self.thruster2_y_offset = 0.0
+		self.thruster2_z_offset = 0.0
+		self.thruster3_x_offset = 0.0
+		self.thruster3_y_offset = 0.0
+		self.thruster3_z_offset = 0.0
+		self.thruster4_x_offset = 0.0
+		self.thruster4_y_offset = 0.0
+		self.thruster4_z_offset = 0.0
+		self.thruster5_x_offset = 0.0
+		self.thruster5_y_offset = 0.0
+		self.thruster5_z_offset = 0.0
+		self.thruster6_x_offset = 0.0
+		self.thruster6_y_offset = 0.0
+		self.thruster6_z_offset = 0.0
+
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
+		rospy.Subscriber('/thruster1_force', t100_thruster_feedback, self.thruster_1_cal)
+		rospy.Subscriber('/thruster2_force', t100_thruster_feedback, self.thruster_2_cal)
+		rospy.Subscriber('/thruster3_force', t100_thruster_feedback, self.thruster_3_cal)
+		rospy.Subscriber('/thruster4_force', t100_thruster_feedback, self.thruster_4_cal)
+		rospy.Subscriber('/thruster5_force', t100_thruster_feedback, self.thruster_5_cal)
+		rospy.Subscriber('/thruster6_force', t100_thruster_feedback, self.thruster_6_cal)
 
 		self.max_x = 0.0001
 		self.min_x = 0.0
