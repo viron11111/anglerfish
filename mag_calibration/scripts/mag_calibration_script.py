@@ -5,11 +5,12 @@ import sys
 import math
 import rospy
 import numpy as np
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Float32
 from std_msgs.msg import Header
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
 from t100_thruster.msg import t100_thruster_feedback
+#from mag_calibration.msg import mag_values
 #from anglerfish.msg import t100_thruster_feedback
 
 class calibrate_mag():
@@ -18,7 +19,7 @@ class calibrate_mag():
 		x = data.data
 		self.thruster1_x_offset = 0.0073*math.pow(x,4) - 0.0034*math.pow(x,3) - 0.0275*math.pow(x,2) + 0.0027*x + 0.00005
 		self.thruster1_y_offset = 0.0356*math.pow(x,6) - 0.0015*math.pow(x,5) - 0.0572*math.pow(x,4) + 0.0033*math.pow(x,3) + 0.0386*math.pow(x,2) - 0.0016*x - 0.0005
-		self.thruster1_z_offset = -0.0015*math.pw(x,2) - 0.0005*x - 0.0002
+		self.thruster1_z_offset = -0.0015*math.pow(x,2) - 0.0005*x - 0.0002
 
 	def thruster_2_cal(self, data):
 		x = data.data
@@ -90,10 +91,12 @@ class calibrate_mag():
 		self.x_out_hard = self.x_out - 0.011868
 		self.y_out_hard = self.y_out - (-0.017066)
 		self.z_out_hard = self.z_out - 0.002116
-
+		
 		self.x_simple_cal = self.x_out_hard * (f/0.070288) - x_thruster_offset
 		self.y_simple_cal = self.y_out_hard * (f/0.034224) - y_thruster_offset
 		self.z_simple_cal = self.z_out_hard * (f/0.046092) - z_thruster_offset
+
+		rospy.logwarn("comp: %f, orig: %f, diff: %f" % (self.x_simple_cal, self.x_out_hard, self.x_simple_cal - 0.009331))
 
 		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
 
@@ -135,13 +138,13 @@ class calibrate_mag():
                 self.min_z = 0.0
 
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
-		rospy.Subscriber('/thruster1_force', t100_thruster_feedback, self.thruster_1_cal)
-		rospy.Subscriber('/thruster2_force', t100_thruster_feedback, self.thruster_2_cal)
-		rospy.Subscriber('/thruster3_force', t100_thruster_feedback, self.thruster_3_cal)
-		rospy.Subscriber('/thruster4_force', t100_thruster_feedback, self.thruster_4_cal)
-		rospy.Subscriber('/thruster5_force', t100_thruster_feedback, self.thruster_5_cal)
-		rospy.Subscriber('/thruster6_force', t100_thruster_feedback, self.thruster_6_cal)
-
+		rospy.Subscriber('/thruster1_force', Float32, self.thruster_1_cal)
+		rospy.Subscriber('/thruster2_force', Float32, self.thruster_2_cal)
+		rospy.Subscriber('/thruster3_force', Float32, self.thruster_3_cal)
+		rospy.Subscriber('/thruster4_force', Float32, self.thruster_4_cal)
+		rospy.Subscriber('/thruster5_force', Float32, self.thruster_5_cal)
+		rospy.Subscriber('/thruster6_force', Float32, self.thruster_6_cal)
+		
 		self.x_out = 0.0
 		self.y_out = 0.0
 		self.z_out = 0.0
