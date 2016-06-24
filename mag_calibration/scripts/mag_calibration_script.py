@@ -10,6 +10,7 @@ from std_msgs.msg import Header
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
 from t100_thruster.msg import t100_thruster_feedback
+from mag_calibration.msg import mag_values
 #from mag_calibration.msg import mag_values
 #from anglerfish.msg import t100_thruster_feedback
 
@@ -96,7 +97,7 @@ class calibrate_mag():
 		self.y_simple_cal = self.y_out_hard * (f/0.034224) - y_thruster_offset
 		self.z_simple_cal = self.z_out_hard * (f/0.046092) - z_thruster_offset
 
-		rospy.logwarn("comp: %f, orig: %f, diff: %f" % (self.x_simple_cal, self.x_out_hard, self.x_simple_cal - 0.009331))
+		#rospy.logwarn("comp: %f, orig: %f, diff: %f" % (self.x_simple_cal, self.x_out_hard, self.x_simple_cal - 0.009331))
 
 		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
 
@@ -110,6 +111,9 @@ class calibrate_mag():
 
 	def __init__(self):
 		self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
+		self.mag_vals_pub = rospy.Publisher("/comp_mag_values", mag_values, queue_size=1)
+
+		magval = mag_values()
 
 		self.thruster1_x_offset = 0.0
 		self.thruster1_y_offset = 0.0
@@ -167,14 +171,25 @@ class calibrate_mag():
 
 		while not rospy.is_shutdown():
 
+
+			magval.header = Header(
+				stamp = rospy.get_rostime(),
+	            frame_id = 'magnetometer_comp_values'
+	            )
+			magval.mag_pre_comp_x = self.x_out_hard
+			magval.mag_pre_comp_y = self.y_out_hard
+			magval.mag_pre_comp_z = self.z_out_hard
+
 		    mag = MagneticField(header = 
                         Header(stamp = rospy.get_rostime(),
 	                frame_id = 'magnetometer_corrected'),
 	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal)
 	                #magnetic_field = Vector3(self.calibrated_values[0],self.calibrated_values[1],self.calibrated_values[2])
 	                )
-	            self.dynamic_pub.publish(mag)
-	            rate.sleep()
+
+		    self.mag_vals_pub(magval)
+	        self.dynamic_pub.publish(mag)
+	        rate.sleep()
 
 def main(args):
 	rospy.init_node('mag_calibrator', anonymous=False)

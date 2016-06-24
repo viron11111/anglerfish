@@ -15,6 +15,13 @@ from t100_thruster.msg import t100_thruster_feedback
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
 from orientation_estimater.msg import rpy_msg
+from hmc5883l.msg import mag_raw
+from mag_calibration.msg import mag_values
+
+#RPY_raw: HMC5883L script
+#RPY_compensated: mag_cal_script
+#Tesla_raw: mag_cal_script
+#Tesla_compensated: 
 
 
 class start_test():
@@ -190,6 +197,23 @@ class start_test():
 		self.mag_avg_y = sum(self.slidery)/self.window_size
 		self.mag_avg_z = sum(self.sliderz)/self.window_size
 
+	def save_raw_mag_values(self,data):
+		self.x_no_comp = data.mag_pre_comp_x
+		self.y_no_comp = data.mag_pre_comp_y
+		self.z_no_comp = data.mag_pre_comp_z		
+
+		for i in range(self.window_size-1, -1, -1):
+			self.no_comp_sliderx[i] = self.no_comp_sliderx[i-1]
+			self.no_comp_slidery[i] = self.no_comp_slidery[i-1]
+			self.no_comp_sliderz[i] = self.no_comp_sliderz[i-1]
+		self.no_comp_sliderx[0] = self.no_comp_x_compensated
+		self.no_comp_slidery[0] = self.no_comp_y_compensated
+		self.no_comp_sliderz[0] = self.no_comp_z_compensated
+
+		self.no_comp_mag_avg_x = sum(self.no_comp_sliderx)/self.window_size
+		self.no_comp_mag_avg_y = sum(self.no_comp_slidery)/self.window_size
+		self.no_comp_mag_avg_z = sum(self.no_comp_sliderz)/self.window_size
+
 	def save_rpy_values(self, data):
 
 		if self.init_rpy == 0:
@@ -217,6 +241,7 @@ class start_test():
 		self.roll_diff = self.initial_roll - data.roll
 		self.pitch_diff = self.initial_pitch - data.pitch
 		self.yaw_diff = self.initial_yaw - data.yaw
+
 
 	def create_files(self):
 		date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
@@ -271,7 +296,8 @@ class start_test():
 		self.thrust6_pub = rospy.Publisher('/thruster6_force', Float32, queue_size=1)
 
 		rospy.Subscriber('/imu/mag', MagneticField, self.save_mag_values)
-		rospy.Subscriber('/rpy_msg', rpy_msg, self.save_rpy_values)
+		rospy.Subscriber('/mag_raw_rpy', mag_raw, self.save_rpy_values)
+		rospy.Subscriber("/comp_mag_values", mag_values, self.save_raw_mag_values)
 
 		self.window_size = 200
 		self.sliderx = [0] * self.window_size
@@ -279,10 +305,10 @@ class start_test():
 		self.sliderz = [0] * self.window_size
 
 		self.counter = 0
-		self.thruster = 3
+		self.thruster = 1
 		self.resolution = 200.0
-		self.forward_thrust_force = 1.0 #2.36 kg forward
-		self.reverse_thrust_force = -1.0 #1.82 kg reverse
+		self.forward_thrust_force = .15 #2.36 kg forward
+		self.reverse_thrust_force = -.15 #1.82 kg reverse
 		self.direction = 'forward'
 		self.init_rpy = 1
 		self.roll_diff = 0.0
@@ -336,7 +362,7 @@ class start_test():
 				self.reverse()
 
 			if self.thruster == 7 and self.direction == 'forward':
-				self.thruster = 3
+				self.thruster = 1
 				self.direction = 'reverse'
 			elif self.thruster == 7 and self.direction == 'reverse':
 				self.direction = 'stop'
