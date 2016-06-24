@@ -21,13 +21,15 @@ class start_test():
 
 	def arm_thrusters(self):
 		rospy.loginfo("Arming thrusters...")
-		self.thrust1_pub.publish(0.0)
-		self.thrust2_pub.publish(0.0)
-		self.thrust3_pub.publish(0.0)
-		self.thrust4_pub.publish(0.0)
-		self.thrust5_pub.publish(0.0)
-		self.thrust6_pub.publish(0.0)
-		time.sleep(1)
+		for i in range (0,10):
+			self.thrust1_pub.publish(0.0)
+			self.thrust2_pub.publish(0.0)
+			self.thrust3_pub.publish(0.0)
+			self.thrust4_pub.publish(0.0)
+			self.thrust5_pub.publish(0.0)
+			self.thrust6_pub.publish(0.0)
+			self.rate.sleep()
+
 
 	def forward(self):
 		output = (float(self.counter)/self.resolution) * self.forward_thrust_force
@@ -37,27 +39,27 @@ class start_test():
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
 			self.thruster1_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster7_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster7_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
 			self.thruster2_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster8_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster8_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
 			self.thruster3_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster9_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster9_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
 			self.thruster4_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster10_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster10_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
 			self.thruster5_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster11_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster11_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
 			self.thruster6_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster12_file.writerow([output/2.36,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster12_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		else:
 			self.thrust1_pub.publish(0.0)
 			self.thrust2_pub.publish(0.0)
@@ -101,27 +103,27 @@ class start_test():
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
 			self.thruster1_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster7_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster7_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
 			self.thruster2_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster8_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster8_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
 			self.thruster3_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster9_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster9_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
 			self.thruster4_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster10_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster10_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
 			self.thruster5_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster11_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster11_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
 			self.thruster6_file.writerow([output,self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
-			self.thruster12_file.writerow([output/1.82,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster12_file.writerow([output,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		else:
 			self.thrust1_pub.publish(0.0)
 			self.thrust2_pub.publish(0.0)
@@ -259,6 +261,8 @@ class start_test():
 		self.thruster12_file.writerow(["Duty Cycle (%)","Roll","Pitch","Yaw"])
 
 	def __init__(self):
+		self.rate = rospy.Rate(25)
+
 		self.thrust1_pub = rospy.Publisher('/thruster1_force', Float32, queue_size=1)
 		self.thrust2_pub = rospy.Publisher('/thruster2_force', Float32, queue_size=1)
 		self.thrust3_pub = rospy.Publisher('/thruster3_force', Float32, queue_size=1)
@@ -275,7 +279,7 @@ class start_test():
 		self.sliderz = [0] * self.window_size
 
 		self.counter = 0
-		self.thruster = 1
+		self.thruster = 3
 		self.resolution = 200.0
 		self.forward_thrust_force = 1.0 #2.36 kg forward
 		self.reverse_thrust_force = -1.0 #1.82 kg reverse
@@ -311,7 +315,7 @@ class start_test():
 		self.y_average = self.mag_avg_y
 		self.z_average = self.mag_avg_z
 
-		rospy.loginfo("Mag averaging complete")
+		rospy.loginfo("Mag averaging complete: %f" % self.x_average)
 
 		while self.new_roll == 0.0:
 			self.stable_rate.sleep()
@@ -320,7 +324,7 @@ class start_test():
 		self.create_files()
 		self.arm_thrusters()		
 
-		self.rate = rospy.Rate(25)
+
 
 		while not rospy.is_shutdown():
 			if self.counter == 0:
@@ -332,7 +336,7 @@ class start_test():
 				self.reverse()
 
 			if self.thruster == 7 and self.direction == 'forward':
-				self.thruster = 1
+				self.thruster = 3
 				self.direction = 'reverse'
 			elif self.thruster == 7 and self.direction == 'reverse':
 				self.direction = 'stop'
