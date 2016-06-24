@@ -170,26 +170,24 @@ class calibrate_mag():
 		rate = rospy.Rate(75)
 
 		while not rospy.is_shutdown():
-
-
 			magval.header = Header(
 				stamp = rospy.get_rostime(),
-	            frame_id = 'magnetometer_comp_values'
-	            )
+			        frame_id = 'magnetometer_comp_values'
+	    	        )
 			magval.mag_pre_comp_x = self.x_out_hard
 			magval.mag_pre_comp_y = self.y_out_hard
 			magval.mag_pre_comp_z = self.z_out_hard
 
-		    mag = MagneticField(header = 
-                        Header(stamp = rospy.get_rostime(),
-	                frame_id = 'magnetometer_corrected'),
-	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal)
-	                #magnetic_field = Vector3(self.calibrated_values[0],self.calibrated_values[1],self.calibrated_values[2])
-	                )
+			mag = MagneticField(header = 
+                        	Header(stamp = rospy.get_rostime(),
+		                frame_id = 'magnetometer_corrected'),
+		                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal)
+	        	        #magnetic_field = Vector3(self.calibrated_values[0],self.calibrated_values[1],self.calibrated_values[2])
+	               	 )
 
-		    self.mag_vals_pub(magval)
-	        self.dynamic_pub.publish(mag)
-	        rate.sleep()
+			self.mag_vals_pub.publish(magval)
+		        self.dynamic_pub.publish(mag)
+		        rate.sleep()
 
 def main(args):
 	rospy.init_node('mag_calibrator', anonymous=False)
