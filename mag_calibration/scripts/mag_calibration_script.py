@@ -98,16 +98,16 @@ class calibrate_mag():
 		self.z_simple_cal = self.z_out_hard * (f/0.046092) - z_thruster_offset
 
 		self.roll  = math.atan2(self.y_out, self.z_out) 
-	    if (self.roll < 0):
-	        self.roll += 2 * math.pi
+	        if (self.roll < 0):
+	    	  self.roll += 2 * math.pi
 
-            self.pitch  = math.atan2(self.x_out, self.z_out) 
-	    if (self.pitch < 0):
-		self.pitch += 2 * math.pi
+                self.pitch  = math.atan2(self.x_out, self.z_out) 
+	    	if (self.pitch < 0):
+		  self.pitch += 2 * math.pi
 
-            self.yaw  = math.atan2(self.y_out, self.x_out) 
-	    if (self.yaw < 0):
-		self.yaw += 2 * math.pi
+            	self.yaw  = math.atan2(self.y_out, self.x_out) 
+	    	if (self.yaw < 0):
+		  self.yaw += 2 * math.pi
 
 
 		#rospy.logwarn("comp: %f, orig: %f, diff: %f" % (self.x_simple_cal, self.x_out_hard, self.x_simple_cal - 0.009331))
@@ -147,12 +147,12 @@ class calibrate_mag():
 		self.thruster6_y_offset = 0.0
 		self.thruster6_z_offset = 0.0
 
-        self.max_x = 0.0001
-        self.min_x = 0.0
-        self.max_y = 0.0001
-        self.min_y = 0.0
-        self.max_z = 0.0001
-        self.min_z = 0.0
+	        self.max_x = 0.0001
+	        self.min_x = 0.0
+	        self.max_y = 0.0001
+	        self.min_y = 0.0
+	        self.max_z = 0.0001
+	        self.min_z = 0.0
 
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 		rospy.Subscriber('/thruster1_force', Float32, self.thruster_1_cal)
@@ -180,11 +180,15 @@ class calibrate_mag():
 
 		self.calibrated_values = (0.0, 0.0, 0.0)
 
+		self.roll = 0.0
+		self.pitch = 0.0
+		self.yaw = 0.0
+
 		rate = rospy.Rate(75)
 
 		while not rospy.is_shutdown():
 			magval.header = Header(
-				stamp = rospy.get_rostime(),
+			    stamp = rospy.get_rostime(),
 			    frame_id = 'magnetometer_comp_values')
 	    	        
 			magval.mag_pre_comp_x = self.x_out_hard
@@ -196,13 +200,13 @@ class calibrate_mag():
 
 
 			mag = MagneticField(header = 
-                Header(stamp = rospy.get_rostime(),
-                frame_id = 'magnetometer_corrected'),
-                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal))
+          	        Header(stamp = rospy.get_rostime(),
+                	frame_id = 'magnetometer_corrected'),
+	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal))
 
 			self.mag_vals_pub.publish(magval)
-	        self.dynamic_pub.publish(mag)
-	        rate.sleep()
+		        self.dynamic_pub.publish(mag)
+	       	        rate.sleep()
 
 def main(args):
 	rospy.init_node('mag_calibrator', anonymous=False)
