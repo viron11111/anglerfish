@@ -33,11 +33,11 @@ class measure_headings():
 	    self.bus.write_byte_data(self.HMC5883L_ADDR, adr, value)
 
 	def get_reading(self): 
-            self.x_out = (self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
-            self.y_out = (self.read_word_2c(7) * self.scale)/10000
-            self.z_out = (self.read_word_2c(5) * self.scale)/10000
+        self.x_out = (self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
+        self.y_out = (self.read_word_2c(7) * self.scale)/10000
+        self.z_out = (self.read_word_2c(5) * self.scale)/10000
 
-            self.roll  = math.atan2(self.y_out, self.z_out) 
+        self.roll  = math.atan2(self.y_out, self.z_out) 
 	    if (self.roll < 0):
 	        self.roll += 2 * math.pi
 
@@ -48,7 +48,6 @@ class measure_headings():
             self.yaw  = math.atan2(self.y_out, self.x_out) 
 	    if (self.yaw < 0):
 		self.yaw += 2 * math.pi
-
 
         #print self.x_out
 
