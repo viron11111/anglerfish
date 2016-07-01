@@ -40,32 +40,41 @@ class start_test():
 
 	def forward(self):
 		output = (float(self.counter)/self.resolution) * self.forward_thrust_force
+		
+		if output == 0:
+			self.initial_x_no_comp = self.x_no_comp#-self.x_average
+			self.initial_y_no_comp = self.y_no_comp#-self.y_average
+			self.initial_z_no_comp = self.z_no_comp#-self.z_average
+			self.initial_x_comp    = self.x_compensated#-self.x_average
+			self.initial_y_comp    = self.y_compensated#-self.y_average
+			self.initial_z_comp    = self.z_compensated#-self.z_average
+
 
 		self.counter += 1
 
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
-			self.thruster1_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster1_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster7_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
-			self.thruster6_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster6_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster12_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		else:
 			self.thrust1_pub.publish(0.0)
@@ -105,31 +114,39 @@ class start_test():
 	def reverse(self):
 		output = (float(self.counter)/self.resolution) * self.reverse_thrust_force
 
+		if output == 0:
+			self.initial_x_no_comp = self.x_no_comp#-self.x_average
+			self.initial_y_no_comp = self.y_no_comp#-self.y_average
+			self.initial_z_no_comp = self.z_no_comp#-self.z_average
+			self.initial_x_comp    = self.x_compensated#-self.x_average
+			self.initial_y_comp    = self.y_compensated#-self.y_average
+			self.initial_z_comp    = self.z_compensated#-self.z_average
+
 		self.counter += 1
 
 		if self.thruster == 1:
 			self.thrust1_pub.publish(output)
-			self.thruster1_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster1_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster7_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
-			self.thruster6_file.writerow([output,self.x_no_comp-self.x_average, self.y_no_comp-self.y_average, self.z_no_comp-self.z_average, self.x_compensated-self.x_average,self.y_compensated-self.y_average,self.z_compensated-self.z_average])
+			self.thruster6_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster12_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		else:
 			self.thrust1_pub.publish(0.0)
@@ -324,11 +341,18 @@ class start_test():
 		self.no_comp_slidery = [0] * self.window_size
 		self.no_comp_sliderz = [0] * self.window_size
 
+		self.initial_x_no_comp = 0
+		self.initial_y_no_comp = 0
+		self.initial_z_no_comp = 0
+		self.initial_x_comp    = 0
+		self.initial_y_comp    = 0
+		self.initial_z_comp    = 0
+
 		self.counter = 0
 		self.thruster = 1
 		self.resolution = 200.0
-		self.forward_thrust_force = .25 #2.36 kg forward
-		self.reverse_thrust_force = -.25 #1.82 kg reverse
+		self.forward_thrust_force = 1 #2.36 kg forward
+		self.reverse_thrust_force = -1 #1.82 kg reverse
 		self.direction = 'forward'
 		self.init_rpy = 1
 		self.init_rpy2 = 1
@@ -389,6 +413,8 @@ class start_test():
 			if self.thruster == 7 and self.direction == 'forward':
 				self.thruster = 1
 				self.direction = 'reverse'
+				self.init_rpy = 0  ######
+				self.init_rpy2 = 0  ######
 			elif self.thruster == 7 and self.direction == 'reverse':
 				self.direction = 'stop'
 				rospy.loginfo("Thruster testing complete")
