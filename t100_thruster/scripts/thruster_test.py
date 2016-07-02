@@ -58,19 +58,19 @@ class start_test():
 			self.thruster7_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])# self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
@@ -130,19 +130,19 @@ class start_test():
 			self.thruster7_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
-			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
-			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
-			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
+			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
 			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
@@ -295,26 +295,26 @@ class start_test():
 		self.thruster1_file = csv.writer(open(file_name1,'w'))
 		self.thruster1_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])
 		self.thruster2_file = csv.writer(open(file_name2,'w'))
-		self.thruster2_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])		
+		self.thruster2_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw"])#, "x_mag_corr","y_mag_corr","z_mag_corr"])		
 		self.thruster3_file = csv.writer(open(file_name3,'w'))
-		self.thruster3_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])
+		self.thruster3_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw"])#, "x_mag_corr","y_mag_corr","z_mag_corr"])
 		self.thruster4_file = csv.writer(open(file_name4,'w'))
-		self.thruster4_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])
+		self.thruster4_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw"])#, "x_mag_corr","y_mag_corr","z_mag_corr"])
 		self.thruster5_file = csv.writer(open(file_name5,'w'))
-		self.thruster5_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])
+		self.thruster5_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw"])#, "x_mag_corr","y_mag_corr","z_mag_corr"])
 		self.thruster6_file = csv.writer(open(file_name6,'w'))
 		self.thruster6_file.writerow(["duty cycle","x_mag_raw","y_mag_raw","z_mag_raw", "x_mag_corr","y_mag_corr","z_mag_corr"])
 
 		self.thruster7_file = csv.writer(open(file_name7,'w'))
 		self.thruster7_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
 		self.thruster8_file = csv.writer(open(file_name8,'w'))
-		self.thruster8_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
+		self.thruster8_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw"])#, "roll_corr","pitch_corr","yaw_corr"])
 		self.thruster9_file = csv.writer(open(file_name9,'w'))
-		self.thruster9_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
+		self.thruster9_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw"])#, "roll_corr","pitch_corr","yaw_corr"])
 		self.thruster10_file = csv.writer(open(file_name10,'w'))
-		self.thruster10_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
+		self.thruster10_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw"])#, "roll_corr","pitch_corr","yaw_corr"])
 		self.thruster11_file = csv.writer(open(file_name11,'w'))
-		self.thruster11_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
+		self.thruster11_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw"])#, "roll_corr","pitch_corr","yaw_corr"])
 		self.thruster12_file = csv.writer(open(file_name12,'w'))
 		self.thruster12_file.writerow(["duty cycle","roll_raw","pitch_raw","yaw_raw", "roll_corr","pitch_corr","yaw_corr"])
 
@@ -351,8 +351,8 @@ class start_test():
 		self.counter = 0
 		self.thruster = 1
 		self.resolution = 200.0
-		self.forward_thrust_force = 1 #2.36 kg forward
-		self.reverse_thrust_force = -1 #1.82 kg reverse
+		self.forward_thrust_force = .25 #2.36 kg forward
+		self.reverse_thrust_force = -.25 #1.82 kg reverse
 		self.direction = 'forward'
 		self.init_rpy = 1
 		self.init_rpy2 = 1
