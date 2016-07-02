@@ -93,9 +93,9 @@ class calibrate_mag():
 		self.y_out_hard = self.y_out - (-0.017066)
 		self.z_out_hard = self.z_out - 0.002116
 		
-		self.x_simple_cal = self.x_out_hard * (f/0.070288) - x_thruster_offset
-		self.y_simple_cal = self.y_out_hard * (f/0.034224) - y_thruster_offset
-		self.z_simple_cal = self.z_out_hard * (f/0.046092) - z_thruster_offset
+		self.x_simple_cal = self.x_out_hard * (f/0.070288)# - x_thruster_offset
+		self.y_simple_cal = self.y_out_hard * (f/0.034224)# - y_thruster_offset
+		self.z_simple_cal = self.z_out_hard * (f/0.046092)# - z_thruster_offset
 
 		self.roll  = math.atan2(self.y_out, self.z_out) 
 	        if (self.roll < 0):
