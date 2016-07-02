@@ -73,29 +73,30 @@ class calibrate_mag():
 			self.min_z = self.z_out
 
 		self.x_bias = ((self.max_x + self.min_x)/2.0) #for calculating bias
-		self.y_bias = ((self.max_y + self.min_y)/2.0) #not to be used again until new location
+		self.y_bias = ((self.max_y + self.min_y)/2.0) #not to be used again until new location or new magnetometer
 		self.z_bias = ((self.max_z + self.min_z)/2.0)
 
 		#f = (self.max_x + self.max_y + self.max_z)/3.0
-		#print f
-		f = .050232
+		#print "f: %f" % f
+		#f = .050232
+		f = .050723
 
-		#print '************'
-		#print self.max_x
-		#print self.max_y
-		#print self.max_z
+		print '************'
+		print self.x_bias
+		print self.y_bias
+		print self.z_bias
 
 		x_thruster_offset = self.thruster1_x_offset + self.thruster2_x_offset + self.thruster3_x_offset + self.thruster4_x_offset + self.thruster5_x_offset + self.thruster6_x_offset
 		y_thruster_offset = self.thruster1_y_offset + self.thruster2_y_offset + self.thruster3_y_offset + self.thruster4_y_offset + self.thruster5_y_offset + self.thruster6_y_offset
 		z_thruster_offset = self.thruster1_z_offset + self.thruster2_z_offset + self.thruster3_z_offset + self.thruster4_z_offset + self.thruster5_z_offset + self.thruster6_z_offset
 		
-		self.x_out_hard = self.x_out - 0.011868
-		self.y_out_hard = self.y_out - (-0.017066)
-		self.z_out_hard = self.z_out - 0.002116
+		self.x_out_hard = self.x_out - 0.011638
+		self.y_out_hard = self.y_out - (-0.008602)
+		self.z_out_hard = self.z_out - 0.002898
 		
 		self.x_simple_cal = self.x_out_hard * (f/0.070288)# - x_thruster_offset
-		self.y_simple_cal = self.y_out_hard * (f/0.034224)# - y_thruster_offset
-		self.z_simple_cal = self.z_out_hard * (f/0.046092)# - z_thruster_offset
+		self.y_simple_cal = self.y_out_hard * (f/0.035696)# - y_thruster_offset
+		self.z_simple_cal = self.z_out_hard * (f/0.046184)# - z_thruster_offset
 
 		self.roll  = math.atan2(self.y_out, self.z_out) 
 	        if (self.roll < 0):
