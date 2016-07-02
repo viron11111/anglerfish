@@ -33,9 +33,9 @@ class measure_headings():
 	    self.bus.write_byte_data(self.HMC5883L_ADDR, adr, value)
 
 	def get_reading(self): 
-	        self.x_out = (self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
-	        self.y_out = (self.read_word_2c(7) * self.scale)/10000
-	        self.z_out = (self.read_word_2c(5) * self.scale)/10000
+	        self.x_out = ((self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
+	        self.y_out = ((self.read_word_2c(7) * self.scale)/10000
+	        self.z_out = ((self.read_word_2c(5) * self.scale)/10000
 
 	        self.roll  = math.atan2(self.y_out, self.z_out) 
 	        if (self.roll < 0):
@@ -59,7 +59,7 @@ class measure_headings():
 	    self.mag_pub = rospy.Publisher("/imu/mag_raw", MagneticField, queue_size=1)
 	    self.rpy_pub = rospy.Publisher("/mag_raw_rpy", mag_raw, queue_size=1)
 
-	    self.write_byte(0x00, 0b01111000) # Set to 8 samples @ 75Hz
+	    self.write_byte(0x00, 0b01011000) # Set to 4 samples @ 75Hz
 	    self.write_byte(0x01, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 	    self.write_byte(0x02, 0b00000000) # Continuous sampling
 
