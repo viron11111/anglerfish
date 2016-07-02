@@ -59,19 +59,19 @@ class start_test():
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
 			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
 			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
 			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])# self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
 			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
 			self.thruster6_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
@@ -131,19 +131,19 @@ class start_test():
 		elif self.thruster == 2:
 			self.thrust2_pub.publish(output)
 			self.thruster2_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster8_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
 			self.thruster3_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster9_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
 			self.thruster4_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster10_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 5:
 			self.thrust5_pub.publish(output)
 			self.thruster5_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp])#, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
-			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw,self.roll_diff,self.pitch_diff,self.yaw_diff])
+			self.thruster11_file.writerow([output,self.roll_diff_raw,self.pitch_diff_raw,self.yaw_diff_raw])#,self.roll_diff,self.pitch_diff,self.yaw_diff])
 		elif self.thruster == 6:
 			self.thrust6_pub.publish(output)
 			self.thruster6_file.writerow([output,self.x_no_comp-self.initial_x_no_comp, self.y_no_comp-self.initial_y_no_comp, self.z_no_comp-self.initial_z_no_comp, self.x_compensated-self.initial_x_comp,self.y_compensated-self.initial_y_comp,self.z_compensated-self.initial_z_comp])
@@ -351,8 +351,8 @@ class start_test():
 		self.counter = 0
 		self.thruster = 1
 		self.resolution = 200.0
-		self.forward_thrust_force = .25 #2.36 kg forward
-		self.reverse_thrust_force = -.25 #1.82 kg reverse
+		self.forward_thrust_force = 1 #2.36 kg forward
+		self.reverse_thrust_force = -1 #1.82 kg reverse
 		self.direction = 'forward'
 		self.init_rpy = 1
 		self.init_rpy2 = 1
