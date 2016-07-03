@@ -36,21 +36,21 @@ class calibrate_mag():
 
 	def thruster_4_cal(self, data):
 		x = data.data
-		self.thruster4_x_offset = -0.0073*math.pow(x,4) + 0.0036*math.pow(x,3) + 0.0269*math.pow(x,2) - 0.0036*x + 0.0004
-		self.thruster4_y_offset = 0.0019*math.pow(x,2) + 0.0007*x - 0.0004
-		self.thruster4_z_offset = -0.0053*math.pow(x,2) + 0.0003*x + 0.000008
+		self.thruster4_x_offset = 0.025143*math.pow(x,2) - 0.0006295*x + 0.000418
+		self.thruster4_y_offset = 0.0007326*math.pow(x,2) + 0.0003393*x + 0.00006071
+		self.thruster4_z_offset = -0.008161*math.pow(x,2) - 0.00006552*x - 0.00001022
 
 	def thruster_5_cal(self, data):
 		x = data.data
-		self.thruster5_x_offset = -0.0056*math.pow(x,4) + 0.0022*math.pow(x,3) + 0.0177*math.pow(x,2) - 0.0022*x + 0.0002
-		self.thruster5_y_offset = -0.0005*math.pow(x,2) + 0.003*x + 0.0009
-		self.thruster5_z_offset = 0.0056*math.pow(x,4) - 0.002*math.pow(x,3) - 0.0176*math.pow(x,2) + 0.002*x - 0.0004
+		self.thruster5_x_offset = 0.019102*math.pow(x,2) - 0.0005832*x + 0.0004361
+		self.thruster5_y_offset = -0.0052331*math.pow(x,2) - 0.0001203*x - 0.0001762
+		self.thruster5_z_offset = -0.01049994*math.pow(x,2) + 0.000020388*x - 0.0001353
 
 	def thruster_6_cal(self, data):
 		x = data.data
-		self.thruster6_x_offset = -0.0146*math.pow(x,2) - 0.0003*x - 0.0004
-		self.thruster6_y_offset = -0.0053*math.pow(x,4) + 0.0023*math.pow(x,3) + 0.0186*math.pow(x,2) - 0.0023*x + 0.00009
-		self.thruster6_z_offset = -0.006*math.pow(x,2) + 0.0005*x - 0.0009
+		self.thruster6_x_offset = -0.021234*math.pow(x,2) - 0.0000272*x - 0.00101
+		self.thruster6_y_offset = 0.0006144*math.pow(x,2) - 0.0006081*x + 0.000146
+		self.thruster6_z_offset = -0.006943*math.pow(x,2) + 0.0002278*x + 0.000185
 
 	def min_max(self, data):
 		self.x_out = data.magnetic_field.x
