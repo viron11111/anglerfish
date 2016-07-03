@@ -30,9 +30,9 @@ class calibrate_mag():
 
 	def thruster_3_cal(self, data):
 		x = data.data
-		self.thruster3_x_offset = 0.005*math.pow(x,4) - 0.0035*math.pow(x,3) - 0.0169*math.pow(x,2) + 0.0032*x - 0.0009
-		self.thruster3_y_offset = 0.0019*math.pow(x,2) + 0.0025*x + 0.0013
-		self.thruster3_z_offset = -0.0086*math.pow(x,4) + 0.0011*math.pow(x,3) + 0.0182*math.pow(x,2) - 0.0009*x + 0.0006
+		self.thruster3_x_offset = - 0.00040896*math.pow(x,3) - 0.0145272*math.pow(x,2) + 0.00044587*x - 0.0003694
+		self.thruster3_y_offset = -0.003212*math.pow(x,2) - 0.000323*x - 0.000214
+		self.thruster3_z_offset = 0.00570201*math.pow(x,2) + 0.0002538*x - 0.0000405
 
 	def thruster_4_cal(self, data):
 		x = data.data
@@ -98,15 +98,15 @@ class calibrate_mag():
 		self.y_simple_cal = self.y_out_hard * (f/0.035696) - y_thruster_offset
 		self.z_simple_cal = self.z_out_hard * (f/0.046184) - z_thruster_offset
 
-		self.roll  = math.atan2(self.y_out, self.z_out) 
+		self.roll  = math.atan2(self.y_simple_cal, self.z_simple_cal) 
 	        if (self.roll < 0):
 	    	  self.roll += 2 * math.pi
 
-                self.pitch  = math.atan2(self.x_out, self.z_out) 
+                self.pitch  = math.atan2(self.x_simple_cal, self.z_simple_cal) 
 	    	if (self.pitch < 0):
 		  self.pitch += 2 * math.pi
 
-            	self.yaw  = math.atan2(self.y_out, self.x_out) 
+            	self.yaw  = math.atan2(self.y_simple_cal, self.x_simple_cal) 
 	    	if (self.yaw < 0):
 		  self.yaw += 2 * math.pi
 
