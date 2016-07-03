@@ -18,15 +18,15 @@ class calibrate_mag():
 
 	def thruster_1_cal(self, data):
 		x = data.data
-		self.thruster1_x_offset = - 0.001330408*math.pow(x,3) + 0.02441*math.pow(x,2) - 0.0003102*x + 0.0009500
-		self.thruster1_y_offset = 0.0356*math.pow(x,6) - 0.0015*math.pow(x,5) - 0.0572*math.pow(x,4) + 0.0033*math.pow(x,3) + 0.0386*math.pow(x,2) - 0.0016*x - 0.0005
-		self.thruster1_z_offset = -0.0015*math.pow(x,2) - 0.0005*x - 0.0002
+		self.thruster1_x_offset = 0.0010587773*math.pow(x,3) + 0.0240*math.pow(x,2) - 0.0016211*x + 0.0006078633
+		self.thruster1_y_offset = -0.0002168*math.pow(x,3) + 0.005372*math.pow(x,2) + 0.00022265*x + 0.0002505573
+		self.thruster1_z_offset = -0.000693*math.pow(x,2) + 0.0003195*x - 0.0003237
 
 	def thruster_2_cal(self, data):
 		x = data.data
-		self.thruster2_x_offset = 0.0073*math.pow(x,4) - 0.0034*math.pow(x,3) - 0.0275*math.pow(x,2) + 0.0027*x + 0.00005
-		self.thruster2_y_offset = 0.0083*math.pow(x,4) - 0.004*math.pow(x,3) - 0.0315*math.pow(x,2) + 0.0032*x - 0.0001
-		self.thruster2_z_offset = -0.0049*math.pow(x,2) - 0.0004*x - 0.0008
+		self.thruster2_x_offset = - 0.000685*math.pow(x,3) - 0.023506*math.pow(x,2) + 0.0008196*x - 0.0006908
+		self.thruster2_y_offset = - 0.0002858*math.pow(x,2) + 0.00002892*x - 0.0001789
+		self.thruster2_z_offset = 0.0002015*math.pow(x,2) + 0.000357*x - 0.00000623
 
 	def thruster_3_cal(self, data):
 		x = data.data
