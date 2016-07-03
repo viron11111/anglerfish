@@ -130,7 +130,7 @@ class start_test():
 			self.thruster8_file.writerow([output,self.roll_raw-self.initial_roll_raw, self.pitch_raw-self.initial_pitch_raw,self.yaw_raw-self.initial_yaw_raw,self.roll_comp-self.initial_roll_comp,self.pitch_comp-self.initial_pitch_comp,self.yaw_comp-self.initial_yaw_comp])
 		elif self.thruster == 3:
 			self.thrust3_pub.publish(output)
-			self.thruster3_file.writerow([output,self.x_raw-self.initial_x_no_comp, self.y_raw-self.initial_y_no_comp, self.z_raw-self.initial_z_no_comp], self.x_comp-self.initial_x_comp,self.y_comp-self.initial_y_comp,self.z_comp-self.initial_z_comp])
+			self.thruster3_file.writerow([output,self.x_raw-self.initial_x_no_comp, self.y_raw-self.initial_y_no_comp, self.z_raw-self.initial_z_no_comp, self.x_comp-self.initial_x_comp,self.y_comp-self.initial_y_comp,self.z_comp-self.initial_z_comp])
 			self.thruster9_file.writerow([output,self.roll_raw-self.initial_roll_raw, self.pitch_raw-self.initial_pitch_raw,self.yaw_raw-self.initial_yaw_raw,self.roll_comp-self.initial_roll_comp,self.pitch_comp-self.initial_pitch_comp,self.yaw_comp-self.initial_yaw_comp])
 		elif self.thruster == 4:
 			self.thrust4_pub.publish(output)
