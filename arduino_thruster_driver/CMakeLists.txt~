@@ -6,6 +6,7 @@ project(arduino_thruster_driver)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  rosserial
   std_msgs
 )
 
