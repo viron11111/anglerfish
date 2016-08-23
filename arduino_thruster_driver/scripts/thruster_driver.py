@@ -4,29 +4,41 @@ import rospy
 import sys
 #from arduino_thruster_driver.msg import ThrusterCmd
 from std_msgs.msg import Int16, String, Float32
+from sub8_msgs.msg import Thrust, ThrusterCmd
 
 class ThrusterDriver:
-    def name_func(self, name):
+    def thrust_cb(self, msg):
+        '''Callback for recieving thrust commands
+        These messages contain a list of instructions, one for each thruster
+        '''
+        for thrust_cmd in list(msg.thruster_commands):
+            self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
-        if name.data == 'TOP':
+    def command_thruster(self, name, force):
+
+        if name == 'TOP':
+            self.thrust = force * (32767.0) #- 836
             self.thrstr1.publish(self.thrust)
-        elif name.data == 'FL':
+        elif name == 'FL':
+            self.thrust = force * (32767.0)
             self.thrstr2.publish(self.thrust)
-        elif name.data == 'BL':
+        elif name == 'BL':
+            self.thrust = force * (32767.0) #+ 404
             self.thrstr3.publish(self.thrust)
-        elif name.data == 'FR':
+        elif name == 'FR':
+            self.thrust = force * (32767.0) #+ 386
             self.thrstr4.publish(self.thrust)
-        elif name.data == 'BR':
+        elif name == 'BR':
+            self.thrust = force * (32767.0)
             self.thrstr5.publish(self.thrust)
-        elif name.data == 'BTM':
+        elif name == 'BTM':
+            self.thrust = force * (32767.0)
             self.thrstr6.publish(self.thrust)                                    
 
-    def thrust_func(self, force):
-        self.thrust = force.data * (32767)
-
     def __init__(self):
-        rospy.Subscriber('name', String, self.name_func, queue_size = 1)
-        rospy.Subscriber('thrust', Float32, self.thrust_func, queue_size = 1)
+        #rospy.Subscriber('name', String, self.name_func, queue_size = 1)
+        #rospy.Subscriber('thrust', Float32, self.thrust_func, queue_size = 1)
+        self.thrust_sub = rospy.Subscriber('thrusters/thrust', Thrust, self.thrust_cb, queue_size=1)
 
         self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         self.thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)

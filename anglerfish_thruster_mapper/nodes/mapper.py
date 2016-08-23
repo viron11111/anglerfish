@@ -47,8 +47,9 @@ class ThrusterMapper(object):
         self.thruster_name_map = []
         self.dropped_thrusters = []
         self.B = self.generate_B(self.thruster_layout)
-        self.min_thrusts = [-1.82, -1.82, -1.82, -1.82, -1.82, -1.82] #blueRobotics T100
-        self.max_thrusts = [2.36, 2.36, 2.36, 2.36, 2.36, 2.36]
+        #self.min_thrusts, self.max_thrusts = self.get_ranges()
+        self.min_thrusts = np.array([-1.82, -1.82, -1.82, -1.82, -1.82, -1.82]) #blueRobotics T100
+        self.max_thrusts = np.array([2.36, 2.36, 2.36, 2.36, 2.36, 2.36])
 
         self.update_layout_server = rospy.Service('update_thruster_layout', UpdateThrusterLayout, self.update_layout)
         # Expose B matrix through a srv
