@@ -4,4 +4,6 @@
 
   <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
 
+  <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>
+
 </launch>
