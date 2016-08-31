@@ -12,11 +12,13 @@ import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
 from ms5837.msg import ms5837
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Point
 
 bus = smbus.SMBus(1)
 
 MS5837_ADDR              = 0x76  #MS5837 address
-MS5837_RESET             = 0x1E  
+MS5837_RESET             = 0x1E
 MS5837_ADC_READ          = 0x00	 #begin temp/pressure read
 MS5837_PROM_READ         = 0xA0  #calibration values
 MS5837_CONVERT_D1_8192   = 0x4A	 #first half of high resolution read
@@ -125,11 +127,17 @@ class measure_depth:
 
 	def __init__(self):
 		self.ROV_pub = rospy.Publisher('ms5837_pressure_sensor', ms5837, queue_size=1)
+		self.odom_pub = rospy.Publisher('depth', Odometry, queue_size = 1)
 
+		pres = Odometry()
 		rov = ms5837()
 
 		rate = rospy.Rate(20)	
 		initialize_sensor()
+
+		self.frame_id = '/odom'
+		self.child_frame_id = '/base_footprint'
+		
 		while not rospy.is_shutdown():
 			depth_af,temperature_af, pressure_af = read()
 		
@@ -141,7 +149,14 @@ class measure_depth:
 			rov.depth = -depth_af
 			rov.temperature = temperature_af
 			rov.ex_pressure = pressure_af
-	
+			
+			pres.header.stamp = rospy.Time.now()
+		        pres.header.frame_id = self.frame_id # i.e. '/odom'
+		        pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
+
+			pres.pose.pose.position.z = rov.depth
+
+			self.odom_pub.publish(pres)
 			self.ROV_pub.publish(rov)
 			rate.sleep()
 

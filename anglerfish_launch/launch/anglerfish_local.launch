@@ -18,36 +18,7 @@
   <node pkg="light_control" type="lights.py" name="LIGHTS" respawn="true">
   </node>
 
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster1" respawn="true">
-	<rosparam param="register">41</rosparam>
-	<rosparam param="name">"thruster1"</rosparam>
-	<rosparam param="force">"thruster1_force"</rosparam>
-  </node>
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster2" respawn="true">
-        <rosparam param="register">42</rosparam>
-	<rosparam param="name">"thruster2"</rosparam>
-	<rosparam param="force">"thruster2_force"</rosparam>
-  </node>
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster3" respawn="true">
-        <rosparam param="register">43</rosparam>
-        <rosparam param="name">"thruster3"</rosparam>
-	<rosparam param="force">"thruster3_force"</rosparam>
-  </node>
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster4" respawn="true">
-        <rosparam param="register">44</rosparam>
-        <rosparam param="name">"thruster4"</rosparam>
-	<rosparam param="force">"thruster4_force"</rosparam>
-  </node>
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster5" respawn="true">
-        <rosparam param="register">45</rosparam>
-        <rosparam param="name">"thruster5"</rosparam>
-	<rosparam param="force">"thruster5_force"</rosparam>
-  </node>
-  <node pkg="t100_thruster" type="t100_feedback_script.py" name="thruster6" respawn="true">
-        <rosparam param="register">46</rosparam>
-        <rosparam param="name">"thruster6"</rosparam>
-	<rosparam param="force">"thruster6_force"</rosparam>
-  </node>
+  <include file="$(find arduino_thruster_driver)/launch/thrusters.launch"/>
 
   <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
 
