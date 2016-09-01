@@ -23,7 +23,7 @@ class control_sub():
 		self.w_des = np.array([0, 0, 0])
 
 		self.w_err = self.w_des - self.w
-		self.q_err = ori.error(self.q, self.q_des)
+		self.q_err = ori.error(self.q, self.q_des).dot(self.q.reshape(-1))
 
 		#kdW = np.diag(ori.qapply_matrix(q, np.diag(kd)))
 
