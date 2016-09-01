@@ -27,4 +27,16 @@
   <node pkg="servo_control" type="move_servo.py" name="camera_servo" respawn="true">
   </node>
 
+  <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
+  </node>
+
+  <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
+
+  <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>
+
+  <include file="$(find navigation)/launch/ekf.launch"/>
+
+  <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
+  </node>
+
 </launch>
