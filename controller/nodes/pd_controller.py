@@ -13,7 +13,7 @@ from nav_msgs.msg import Odometry
 class control_sub():
 
 	def PD(self, data):
-		kp = np.array([1, 15, 15])  # proportional gain (body frame roll, pitch, yaw)
+		kp = np.array([.8, .8, .8])  # proportional gain (body frame roll, pitch, yaw)
 		kd = np.array([1, 1, 1])  # derivative gain (body frame rolling, pitching, yawing)
 
 		self.q = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
@@ -27,7 +27,7 @@ class control_sub():
 
 		#kdW = np.diag(ori.qapply_matrix(q, np.diag(kd)))
 
-		torque_amnt = (kd * self.w_err)
+		torque_amnt = (kd * self.w_err) + (kp * self.q_err)
 		#print torque
 
 		wrench = WrenchStamped()
