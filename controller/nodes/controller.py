@@ -22,22 +22,12 @@ class control_sub():
 		self.q_des = np.array([1.0, 0.0, 0.0, 0.0])
 		self.w_des = np.array([0, 0, 0])
 
-		self.qW = trns.quaternion_matrix(self.q)
-
-		#rospy.logwarn(self.qW)
-
-		self.qW = self.qW[:3,:3]
-
-		rospy.logwarn(self.qW)
-
 		self.w_err = self.w_des - self.w
-
-		self.q_err = ori.error(self.q, self.q_des)
-		#self.q_err = np.dot(ori.error(self.q, self.q_des),(self.qW.reshape(-1)))
+		self.q_err = ori.error(self.q, self.q_des).dot(self.q.reshape(-1))
 
 		#kdW = np.diag(ori.qapply_matrix(q, np.diag(kd)))
 
-		torque_amnt = (kd * self.w_err) #+ (kp * self.q_err)
+		torque_amnt = (kd * self.w_err) + (kp * self.q_err)
 		#print torque
 
 		wrench = WrenchStamped()
