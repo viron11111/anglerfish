@@ -17,24 +17,32 @@ class ThrusterDriver:
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
     def command_thruster(self, name, force):
-        if name == 'TOP':
-            self.thrust = force * (32767.0) #- 836
-            self.thrstr1.publish(self.thrust)
-        elif name == 'FL':
-            self.thrust = force * (32767.0)
-            self.thrstr2.publish(self.thrust)
-        elif name == 'BL':
-            self.thrust = force * (32767.0) #+ 404
-            self.thrstr3.publish(self.thrust)
-        elif name == 'FR':
-            self.thrust = force * (32767.0) #+ 386
-            self.thrstr4.publish(self.thrust)
-        elif name == 'BR':
-            self.thrust = force * (32767.0)
-            self.thrstr5.publish(self.thrust)
-        elif name == 'BTM':
-            self.thrust = force * (32767.0)
-            self.thrstr6.publish(self.thrust)                                    
+        if self.kill = 'True':
+            if name == 'TOP':
+                self.thrust = force * (32767.0) #- 836
+                self.thrstr1.publish(self.thrust)
+            elif name == 'FL':
+                self.thrust = force * (32767.0)
+                self.thrstr2.publish(self.thrust)
+            elif name == 'BL':
+                self.thrust = force * (32767.0) #+ 404
+                self.thrstr3.publish(self.thrust)
+            elif name == 'FR':
+                self.thrust = force * (32767.0) #+ 386
+                self.thrstr4.publish(self.thrust)
+            elif name == 'BR':
+                self.thrust = force * (32767.0)
+                self.thrstr5.publish(self.thrust)
+            elif name == 'BTM':
+                self.thrust = force * (32767.0)
+                self.thrstr6.publish(self.thrust)                                    
+        elif self.kill = 'False':
+                self.thrstr1.publish(0)
+                self.thrstr2.publish(0)
+                self.thrstr3.publish(0)
+                self.thrstr4.publish(0)
+                self.thrstr5.publish(0)
+                self.thrstr6.publish(0)
 
     def ROV_kill(self, data):
 	    self.kill = data
