@@ -13,31 +13,39 @@ from nav_msgs.msg import Odometry
 class control_sub():
 
 	def PD(self, data):
-		kp = np.array([1, 1, 1])  # proportional gain (body frame roll, pitch, yaw)
-		kd = np.array([1, 1, 1])  # derivative gain (body frame rolling, pitching, yawing)
+		kp = np.array([.9, .9, .9])  # proportional gain (body frame roll, pitch, yaw)
+		kd = np.array([1.1, 1.1, 1.1])  # derivative gain (body frame rolling, pitching, yawing)
 
-		self.q = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
+		self.qW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
 		self.w = np.array([data.twist.twist.angular.x, data.twist.twist.angular.y, data.twist.twist.angular.z])
 		
-		self.q_des = np.array([1.0, 0.0, 0.0, 0.0])
+		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
 		self.w_des = np.array([0, 0, 0])
 
-		self.qW = trns.quaternion_matrix(self.q)
+		self.qtrns = trns.quaternion_matrix(self.qW)
 
 		#rospy.logwarn(self.qW)
 
-		self.qW = self.qW[:3,:3]
-
-		rospy.logwarn(self.qW)
+		self.q9 = self.qtrns[:3,:3]
+		
+		#rospy.logwarn(self.qW)
+		
+		self.qT = np.transpose(self.q9)
+		
+		#rospy.logwarn(self.qW)
 
 		self.w_err = self.w_des - self.w
 
-		self.q_err = ori.error(self.q, self.q_des)
-		#self.q_err = np.dot(ori.error(self.q, self.q_des),(self.qW.reshape(-1)))
+
+
+		#self.q_err = ori.error(self.q, self.q_des)
+		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)
+
+		#rospy.logwarn(self.q_err)
 
 		#kdW = np.diag(ori.qapply_matrix(q, np.diag(kd)))
 
-		torque_amnt = (kd * self.w_err) #+ (kp * self.q_err)
+		torque_amnt = (kd * self.w_err) + (kp * self.q_err)
 		#print torque
 
 		wrench = WrenchStamped()

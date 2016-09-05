@@ -49,10 +49,13 @@
                       another instance of robot_localization! However, that instance should *not* fuse the global data. -->
       <!-- Defaults to "map" if unspecified -->
       <param name="map_frame" value="map"/>
+
       <!-- Defaults to "odom" if unspecified -->
       <param name="odom_frame" value="odom"/>
+
       <!-- Defaults to "base_link" if unspecified -->
       <param name="base_link_frame" value="base_link"/>
+
       <!-- Defaults to the value of "odom_frame" if unspecified -->
       <param name="world_frame" value="map"/>
 
@@ -109,7 +112,7 @@
            future measurements. While you can achieve the same effect with the differential paremeter, the key difference is
            that the relative parameter doesn't cause the measurement to be converted to a velocity before integrating it. If
            you simply want your measurements to start at 0 for a given sensor, set this to true. -->
-      <param name="imu0_relative" value="true"/>
+      <param name="imu0_relative" value="false"/>
 
       <!-- If we're including accelerations in our state estimate, then we'll probably want to remove any acceleration that
            is due to gravity for each IMU. If you don't want to, then set this to false. Defaults to false if unspecified. -->
