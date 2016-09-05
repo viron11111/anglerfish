@@ -5,7 +5,7 @@ import sys
 #from arduino_thruster_driver.msg import ThrusterCmd
 from std_msgs.msg import Int16, String, Float32
 from sub8_msgs.msg import Thrust, ThrusterCmd
-from std_srvs.srv import SetBool
+from std_srvs.srv import SetBool, SetBoolResponse
 
 
 class ThrusterDriver:
@@ -13,11 +13,15 @@ class ThrusterDriver:
         '''Callback for recieving thrust commands
         These messages contain a list of instructions, one for each thruster
         '''
+
+	#rospy.logwarn(self.kill)
+
+
         for thrust_cmd in list(msg.thruster_commands):
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
     def command_thruster(self, name, force):
-        if self.kill = 'True':
+        if self.kill == False:
             if name == 'TOP':
                 self.thrust = force * (32767.0) #- 836
                 self.thrstr1.publish(self.thrust)
@@ -36,7 +40,7 @@ class ThrusterDriver:
             elif name == 'BTM':
                 self.thrust = force * (32767.0)
                 self.thrstr6.publish(self.thrust)                                    
-        elif self.kill = 'False':
+        elif self.kill == True:
                 self.thrstr1.publish(0)
                 self.thrstr2.publish(0)
                 self.thrstr3.publish(0)
@@ -44,10 +48,10 @@ class ThrusterDriver:
                 self.thrstr5.publish(0)
                 self.thrstr6.publish(0)
 
-    def ROV_kill(self, data):
-	    self.kill = data
-            rospy.logwarn(self.kill)
-            return self.kill
+    def ROV_kill(self, kill_cmd):
+	    self.kill = kill_cmd.data
+            #rospy.logwarn(self.kill)
+            return SetBoolResponse(success = True, message = str(self.kill))
 
     def __init__(self):
         #rospy.Subscriber('name', String, self.name_func, queue_size = 1)
@@ -55,7 +59,7 @@ class ThrusterDriver:
         self.thrust_sub = rospy.Subscriber('thrusters/thrust', Thrust, self.thrust_cb, queue_size=1)
 
 	rospy.Service('rov_kill', SetBool, self.ROV_kill)
-	self.ROV_kill('False')
+	self.kill = True
 
 
         self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)

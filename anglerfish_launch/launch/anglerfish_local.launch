@@ -36,7 +36,7 @@
 
   <include file="$(find navigation)/launch/ekf.launch"/>
 
-  <!-- <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
-  </node> -->
+  <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
+  </node>
 
 </launch>
