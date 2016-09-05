@@ -5,6 +5,8 @@ import sys
 #from arduino_thruster_driver.msg import ThrusterCmd
 from std_msgs.msg import Int16, String, Float32
 from sub8_msgs.msg import Thrust, ThrusterCmd
+from std_srvs.srv import SetBool
+
 
 class ThrusterDriver:
     def thrust_cb(self, msg):
@@ -35,10 +37,16 @@ class ThrusterDriver:
             self.thrust = force * (32767.0)
             self.thrstr6.publish(self.thrust)                                    
 
+    def ROV_kill(self):
+            print("hello")
+
     def __init__(self):
         #rospy.Subscriber('name', String, self.name_func, queue_size = 1)
         #rospy.Subscriber('thrust', Float32, self.thrust_func, queue_size = 1)
         self.thrust_sub = rospy.Subscriber('thrusters/thrust', Thrust, self.thrust_cb, queue_size=1)
+
+	s = rospy.Service('rov_kill', SetBool, self.ROV_kill)
+	#self.kill = rospy.ServiceProxy('rov_kill', ROV_kill)
 
         self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         self.thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)
