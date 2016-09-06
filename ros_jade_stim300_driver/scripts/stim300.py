@@ -26,7 +26,7 @@ class Interface(object):
     # Rate, acceleration, incliination
 
     def __init__(self):
-        self.serial = serial.Serial('/dev/ttyUSB1', baudrate=self._baudrate)
+        self.serial = serial.Serial('/dev/serial/by-id/usb-FTDI_USB-RS422_Cable_FTXV40FP-if00-port0', baudrate=self._baudrate)
         self.datagram_identifier = chr(0x93) #Rate, acceleration, and inclination
         self.pub = rospy.Publisher('imu/data_raw', Imu, queue_size=1)
         #self.roll_pub = rospy.Publisher('roll', Float32, queue_size=1)

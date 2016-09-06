@@ -135,8 +135,8 @@ class measure_depth:
 		rate = rospy.Rate(20)	
 		initialize_sensor()
 
-		self.frame_id = '/odom'
-		self.child_frame_id = '/base_footprint'
+		self.frame_id = '/map'
+		self.child_frame_id = '/base_link'
 		
 		while not rospy.is_shutdown():
 			depth_af,temperature_af, pressure_af = read()
