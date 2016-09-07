@@ -16,17 +16,17 @@
 
     <!-- Mine -->
     <!--<param name="mag_bias_x" value="0.011776"/>
-    <param name="mag_bias_y" value="-0.003496"/>
-    <param name="mag_bias_z" value="-0.000598"/>-->
+    <param name="mag_bias_y" value="0.0"/>
+    <param name="mag_bias_z" value="0.0"/>-->
 
     <!-- From ROS program, not mine-->
     <!--<param name="mag_bias_x" value="0.00178298"/>
     <param name="mag_bias_y" value="-0.01288817"/>
     <param name="mag_bias_z" value="-0.00079289"/>-->
 
-    <param name="zeta" value="4.8481366753355e-6"/>
+    <!--<param name="zeta" value="4.8481366753355e-6"/>-->
     <param name="use_magnetic_field_msg" value="true"/>
-    <param name="gain" value=".2"/>
+    <param name="gain" value=".5"/>
 
 
   </node>

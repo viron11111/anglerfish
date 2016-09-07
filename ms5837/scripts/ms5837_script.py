@@ -12,8 +12,8 @@ import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import Header
 from ms5837.msg import ms5837
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point
+#from nav_msgs.msg import PoseStampedWithCovariance
+from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 import numpy as np
 
 bus = smbus.SMBus(1)
@@ -128,16 +128,16 @@ class measure_depth:
 
 	def __init__(self):
 		self.ROV_pub = rospy.Publisher('ms5837_pressure_sensor', ms5837, queue_size=1)
-		self.odom_pub = rospy.Publisher('depth', Odometry, queue_size = 1)
+		self.pose_pub = rospy.Publisher('depth', PoseWithCovarianceStamped, queue_size = 1)
 
-		pres = Odometry()
+		pres = PoseWithCovarianceStamped()
 		rov = ms5837()
 
 		rate = rospy.Rate(20)	
 		initialize_sensor()
 
 		self.frame_id = '/map'
-		self.child_frame_id = '/base_link'
+		#self.child_frame_id = '/base_link'
 		
 		while not rospy.is_shutdown():
 			depth_af,temperature_af, pressure_af = read()
@@ -153,12 +153,12 @@ class measure_depth:
 			
 			pres.header.stamp = rospy.Time.now()
 		        pres.header.frame_id = self.frame_id # i.e. '/odom'
-		        pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
+		        #pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
 
 			pres.pose.pose.position.z = rov.depth
 			pres.pose.covariance=(np.eye(6)*.000000001).flatten()
 
-			self.odom_pub.publish(pres)
+			self.pose_pub.publish(pres)
 			self.ROV_pub.publish(rov)
 			rate.sleep()
 

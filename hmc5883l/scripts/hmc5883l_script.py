@@ -87,9 +87,9 @@ class measure_headings():
                     frame_id = 'magnetometer_raw'
                 ),
                 magnetic_field = Vector3(self.x_out, self.y_out, self.z_out),
-                magnetic_field_covariance = [ 0.1, 0.0, 0.0,
-                                              0.0, 0.1, 0.0,
-                                              0.0, 0.0, 0.1]
+                magnetic_field_covariance = [ 0.01, 0.0, 0.0,
+                                              0.0, 0.01, 0.0,
+                                              0.0, 0.0, 0.01]
                 )
 
                 rpy.header = Header(

@@ -192,9 +192,9 @@ class Interface(object):
                                          0.0, .0001, 0.0,
                                          0.0, 0.0, .0001],
             linear_acceleration=Vector3(*linear_acceleration),
-            linear_acceleration_covariance=[.1, 0.0, 0.0,
-                                         0.0, .1, 0.0,
-                                         0.0, 0.0, .1]
+            linear_acceleration_covariance=[.2, 0.0, 0.0,
+                                         0.0, .2, 0.0,
+                                         0.0, 0.0, .2]
 
             #orientation=Quaternion(*orientation_quaternion)
         )
