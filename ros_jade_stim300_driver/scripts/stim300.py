@@ -188,7 +188,14 @@ class Interface(object):
                 stamp=rospy.get_rostime()
             ),
             angular_velocity=Vector3(*gyro),
-            linear_acceleration=Vector3(*linear_acceleration)
+            angular_velocity_covariance=[.0001, 0.0, 0.0,
+                                         0.0, .0001, 0.0,
+                                         0.0, 0.0, .0001],
+            linear_acceleration=Vector3(*linear_acceleration),
+            linear_acceleration_covariance=[.1, 0.0, 0.0,
+                                         0.0, .1, 0.0,
+                                         0.0, 0.0, .1]
+
             #orientation=Quaternion(*orientation_quaternion)
         )
 
@@ -219,7 +226,7 @@ class Interface(object):
     #def holder(self):
 
     def close_port():
-	ser = serial.Serial('/dev/ttyUSB1')
+	ser = serial.Serial('/dev/serial/by-id/usb-FTDI_USB-RS422_Cable_FTXV40FP-if00-port0')
 	ser.close()
 
     rospy.on_shutdown(close_port)

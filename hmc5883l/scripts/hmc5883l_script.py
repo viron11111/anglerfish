@@ -86,10 +86,10 @@ class measure_headings():
                     stamp = rospy.get_rostime(),
                     frame_id = 'magnetometer_raw'
                 ),
-                magnetic_field = Vector3(self.x_out, self.y_out, self.z_out)#,
-                # magnetic_field_covariance = [ 2.19918421e+01, 6.13875066e-01, 3.68221974e-01,
-                #     0, 2.17394286e+01, -5.56954205e-03, 
-                #     0, 0, 2.41408444e+01]
+                magnetic_field = Vector3(self.x_out, self.y_out, self.z_out),
+                magnetic_field_covariance = [ 0.1, 0.0, 0.0,
+                                              0.0, 0.1, 0.0,
+                                              0.0, 0.0, 0.1]
                 )
 
                 rpy.header = Header(

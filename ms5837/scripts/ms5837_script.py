@@ -14,6 +14,7 @@ from std_msgs.msg import Header
 from ms5837.msg import ms5837
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point
+import numpy as np
 
 bus = smbus.SMBus(1)
 
@@ -155,6 +156,7 @@ class measure_depth:
 		        pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
 
 			pres.pose.pose.position.z = rov.depth
+			pres.pose.covariance=(np.eye(6)*.000000001).flatten()
 
 			self.odom_pub.publish(pres)
 			self.ROV_pub.publish(rov)
