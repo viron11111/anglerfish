@@ -27,7 +27,7 @@
     <!--<param name="zeta" value="4.8481366753355e-6"/>-->
     <param name="use_magnetic_field_msg" value="true"/>
     <param name="gain" value=".5"/>
-
+    <param name="publish_tf" value="false"/>
 
   </node>
 

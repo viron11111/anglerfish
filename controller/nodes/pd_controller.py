@@ -18,6 +18,10 @@ class control_sub():
 
 		self.qW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
 		self.w = np.array([data.twist.twist.angular.x, data.twist.twist.angular.y, data.twist.twist.angular.z])
+
+		self.pW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z])
+
+		self.p_desW = np.array([0.0, 0.0, 0.75])
 		
 		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
 		self.w_des = np.array([0, 0, 0])

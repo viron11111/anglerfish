@@ -184,7 +184,7 @@ class Interface(object):
 
         imu_msg = Imu(            
             header= Header(
-                frame_id = 'base_link',
+                frame_id = 'stim300',
                 stamp=rospy.get_rostime()
             ),
             angular_velocity=Vector3(*gyro),
@@ -192,9 +192,9 @@ class Interface(object):
                                          0.0, .0001, 0.0,
                                          0.0, 0.0, .0001],
             linear_acceleration=Vector3(*linear_acceleration),
-            linear_acceleration_covariance=[.2, 0.0, 0.0,
-                                         0.0, .2, 0.0,
-                                         0.0, 0.0, .2]
+            linear_acceleration_covariance=[.01, 0.0, 0.0,
+                                         0.0, .01, 0.0,
+                                         0.0, 0.0, .01]
 
             #orientation=Quaternion(*orientation_quaternion)
         )

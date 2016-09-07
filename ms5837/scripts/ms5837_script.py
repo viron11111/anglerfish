@@ -136,7 +136,7 @@ class measure_depth:
 		rate = rospy.Rate(20)	
 		initialize_sensor()
 
-		self.frame_id = '/map'
+		self.frame_id = '/pressure'
 		#self.child_frame_id = '/base_link'
 		
 		while not rospy.is_shutdown():
@@ -152,11 +152,17 @@ class measure_depth:
 			rov.ex_pressure = pressure_af
 			
 			pres.header.stamp = rospy.Time.now()
-		        pres.header.frame_id = self.frame_id # i.e. '/odom'
+		        pres.header.frame_id = 'odom' # i.e. '/odom'
 		        #pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
 
 			pres.pose.pose.position.z = rov.depth
-			pres.pose.covariance=(np.eye(6)*.000000001).flatten()
+			pres.pose.pose.position.x = 10
+
+			pres.pose.pose.orientation.w = 1.0
+			pres.pose.pose.orientation.x = 0
+			pres.pose.pose.orientation.y = 0
+			pres.pose.pose.orientation.z = 0
+			pres.pose.covariance=(np.eye(6)*.05).flatten()
 
 			self.pose_pub.publish(pres)
 			self.ROV_pub.publish(rov)
