@@ -57,69 +57,14 @@ class calibrate_mag():
 		self.y_out = data.magnetic_field.y
 		self.z_out = data.magnetic_field.z
 
-		if self.x_out > self.max_x:
-			self.max_x = self.x_out
-		elif self.x_out < self.min_x:
-			self.min_x = self.x_out
+		scale = np.array([[1.0714378832691909, -0.015322830481058149, -0.00834936516729351],
+			              [-0.015322830481058147, 1.0532182584281793, -0.0037378090763520036], 
+			              [-0.008349365167293515, -0.0037378090763520344, 0.8864286692747041]])
 
-		if self.y_out > self.max_y:
-			self.max_y = self.y_out
-		elif self.y_out < self.min_y:
-			self.min_y = self.y_out
+		self.corrected = np.dot([self.x_out, self.y_out, self.z_out],scale) + np.array([0.0023695539567580625, 
+			                                                                           -0.0031120847411907973,
+			                                                                            0.012247528394784992])
 
-		if self.z_out > self.max_z:
-			self.max_z = self.z_out
-		elif self.z_out < self.min_z:
-			self.min_z = self.z_out
-
-		self.x_bias = ((self.max_x + self.min_x)/2.0) #for calculating bias
-		self.y_bias = ((self.max_y + self.min_y)/2.0) #not to be used again until new location or new magnetometer
-		self.z_bias = ((self.max_z + self.min_z)/2.0)
-
-		#f = (self.max_x + self.max_y + self.max_z)/3.0
-		#print "f: %f" % f
-		#f = .050232
-		f = .050723
-
-		print '************'
-		print self.x_bias
-		print self.y_bias
-		print self.z_bias
-
-		x_thruster_offset = self.thruster1_x_offset + self.thruster2_x_offset + self.thruster3_x_offset + self.thruster4_x_offset + self.thruster5_x_offset + self.thruster6_x_offset
-		y_thruster_offset = self.thruster1_y_offset + self.thruster2_y_offset + self.thruster3_y_offset + self.thruster4_y_offset + self.thruster5_y_offset + self.thruster6_y_offset
-		z_thruster_offset = self.thruster1_z_offset + self.thruster2_z_offset + self.thruster3_z_offset + self.thruster4_z_offset + self.thruster5_z_offset + self.thruster6_z_offset
-		
-		self.x_out_hard = self.x_out - 0.011638
-		self.y_out_hard = self.y_out - (-0.008602)
-		self.z_out_hard = self.z_out - 0.002898
-		
-		self.x_simple_cal = self.x_out_hard * (f/0.070288) - x_thruster_offset
-		self.y_simple_cal = self.y_out_hard * (f/0.035696) - y_thruster_offset
-		self.z_simple_cal = self.z_out_hard * (f/0.046184) - z_thruster_offset
-
-		self.roll  = math.atan2(self.y_simple_cal, self.z_simple_cal) 
-	        if (self.roll < 0):
-	    	  self.roll += 2 * math.pi
-
-                self.pitch  = math.atan2(self.x_simple_cal, self.z_simple_cal) 
-	    	if (self.pitch < 0):
-		  self.pitch += 2 * math.pi
-
-            	self.yaw  = math.atan2(self.y_simple_cal, self.x_simple_cal) 
-	    	if (self.yaw < 0):
-		  self.yaw += 2 * math.pi
-
-
-		#rospy.logwarn("comp: %f, orig: %f, diff: %f" % (self.x_simple_cal, self.x_out_hard, self.x_simple_cal - 0.009331))
-
-		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
-
-		soft_matrix = np.matrix('22.18458769, 0.68136508, 0.39133311; 0.0, 22.4054685, -0.2618374; 0.0, 0.0,  24.14833212')
-
-		self.calibrated_values = soft_matrix * self.hard_vals
-
-		#print self.calibrated_values[0]
 		
 
 
@@ -167,9 +112,7 @@ class calibrate_mag():
 		self.y_out = 0.0
 		self.z_out = 0.0
 
-		self.x_bias = 0.0
-		self.y_bias = 0.0
-		self.z_bias = 0.0
+		self.corrected = np.array([0,0,0])
 
 		self.x_out_hard = 0.0
 		self.y_out_hard = 0.0
@@ -188,7 +131,7 @@ class calibrate_mag():
 		rate = rospy.Rate(75)
 
 		while not rospy.is_shutdown():
-			magval.header = Header(
+			'''magval.header = Header(
 			    stamp = rospy.get_rostime(),
 			    frame_id = 'magnetometer_comp_values')
 	    	        
@@ -197,15 +140,19 @@ class calibrate_mag():
 			magval.mag_pre_comp_z = self.z_out_hard
 			magval.comp_roll = self.roll
 			magval.comp_pitch = self.pitch
-			magval.comp_yaw = self.yaw
+			magval.comp_yaw = self.yaw'''
 
 
 			mag = MagneticField(header = 
           	        Header(stamp = rospy.get_rostime(),
-                	frame_id = 'magnetometer_corrected'),
-	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal))
+                	frame_id = 'base_link'),
+	                magnetic_field = Vector3(self.corrected[0], self.corrected[1], self.corrected[2]),
+	                magnetic_field_covariance = [ 0.1, 0.0, 0.0,
+                                                  0.0, 0.1, 0.0,
+                                                  0.0, 0.0, 0.1])
 
-			self.mag_vals_pub.publish(magval)
+
+			#self.mag_vals_pub.publish(magval)
 		        self.dynamic_pub.publish(mag)
 	       	        rate.sleep()
 
