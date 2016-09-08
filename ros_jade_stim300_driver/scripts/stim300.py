@@ -184,7 +184,7 @@ class Interface(object):
 
         imu_msg = Imu(            
             header= Header(
-                frame_id = 'stim300',
+                frame_id = 'base_link',
                 stamp=rospy.get_rostime()
             ),
             angular_velocity=Vector3(*gyro),

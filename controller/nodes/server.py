@@ -6,8 +6,7 @@ from dynamic_reconfigure.server import Server
 from controller.cfg import GainsConfig
 
 def callback(config, level):
-    rospy.loginfo("""pdx: {int_param}, pdy: {double_param},\ 
-          {str_param}, {bool_param}, {size}""".format(**config))
+    rospy.loginfo("""Reconfigure Request: {t_kp_x}, {t_kp_y}""".format(**config))
     return config
 
 if __name__ == "__main__":

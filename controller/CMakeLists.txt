@@ -7,6 +7,7 @@ project(controller)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   rospy
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -131,7 +132,7 @@ include_directories(
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # make sure configure headers are built before any node using them
-add_dependencies(example_node ${PROJECT_NAME}_gencfg)
+#add_dependencies(pd_controller ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(controller_node

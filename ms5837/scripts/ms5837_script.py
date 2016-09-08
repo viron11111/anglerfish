@@ -156,7 +156,7 @@ class measure_depth:
 		        #pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
 
 			pres.pose.pose.position.z = rov.depth
-			pres.pose.pose.position.x = 10
+			#pres.pose.pose.position.x = 
 
 			pres.pose.pose.orientation.w = 1.0
 			pres.pose.pose.orientation.x = 0
