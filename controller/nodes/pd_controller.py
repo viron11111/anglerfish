@@ -9,7 +9,6 @@ from orientation_library import transformations as trns
 from orientation_library import oritools as ori
 from nav_msgs.msg import Odometry
 
-
 class control_sub():
 
 	def PD(self, data):
