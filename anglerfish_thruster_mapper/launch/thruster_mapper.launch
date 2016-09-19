@@ -1,40 +1,52 @@
 <launch>
   <rosparam>
     busses:
-      - port: /dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_75533343236351B002C1-if00
+      - port: /dev/serial/by-id/usb-Teensyduino_USB_Serial_1962610-if00
         thrusters:
           TOP: {
-            node_id: 10,
+            node_id: 1,
             frame_id: /base_link,
             position: [0.041, 0.008, 0.012],
             direction: [0, 1, 0]
           }
           FL: {
-            node_id: 11,
+            node_id: 2,
             frame_id: /base_link,
-            position: [0.038, 0.242, 0.0],
-            direction: [-1, 0, 0]
+            position: [0.1, 0.219, 0.117],
+            direction: [0, 0, -1]
+          }
+          ML: {
+            node_id: 3,
+            frame_id: /base_link,
+            position: [0.045, 0.221, 0.151],
+            direction: [1,0,0]
           }
           BL: {
-            node_id: 10,
+            node_id: 4,
             frame_id: /base_link,
-            position: [-0.104, 0.242, 0.008],
+            position: [-0.154, 0.242, 0.008],
             direction: [0, 0, -1]
           }
           FR: {
-            node_id: 11,
+            node_id: 5,
             frame_id: /base_link,
-            position: [0.03, -0.242, 0.007],
+            position: [0.173, .219, 0.117],
             direction: [0, 0, -1]
           }
-          BR: {
-            node_id: 10,
+          MR:  {
+            node_id: 6,
             frame_id: /base_link,
-            position: [-0.096, -0.241, 0.0],
-            direction: [-1, 0, 0]
+            position: [0.1, 0.211, 0.131],
+            direction: [0,0,-1]
+          }
+          BR: {
+            node_id: 7,
+            frame_id: /base_link,
+            position: [0.044, 0.242, 0.116],
+            direction: [1, 0, 0]
           }
           BTM: {
-            node_id: 11,
+            node_id: 8,
             frame_id: /base_link,
             position: [0.041, .008, -0.12],
             direction: [0, -1, 0]
@@ -47,30 +59,40 @@
   <!-- NOTE: BOUNDS ARE FOR SIMULATION ONLY -->
   <rosparam>
     thrusters:
-      thruster_names: [TOP, FL, BL, FR, BR, BTM]
+      thruster_names: [TOP, FL, ML, BL, FR, MR, BR, BTM]
       TOP:
         position: [0.041, 0.008, 0.012]
         direction: [0, 1, 0]
         bounds: [-90, 90]
 
       FL:
-        position: [0.038, 0.242, 0.0]
-        direction: [-1, 0, 0]
+        position: [0.1, 0.219, 0.117]
+        direction: [0, 0, -1]
+        bounds: [-90, 90]
+
+      ML:
+        position: [0.045, 0.221, 0.151]
+        direction: [1, 0, 0]
         bounds: [-90, 90]
 
       BL:
-        position: [-0.104, 0.242, 0.008]
+        position: [-0.154, 0.242, 0.008]
         direction: [0, 0, -1]
         bounds: [-90, 90]
 
       FR:
-        position: [0.03, -0.242, 0.007]
+        position: [0.173, .219, 0.117]
         direction: [0, 0, -1]
         bounds: [-90, 90]
 
+      MR:
+        position: [0.041, .008, -0.12]
+        direction: [0, -1, 0]
+        bounds: [-90, 90]
+
       BR:
-        position: [-0.096, -0.241, 0.0]
-        direction: [-1, 0, 0]
+        position: [0.041, .008, -0.12]
+        direction: [0, -1, 0]
         bounds: [-90, 90]
 
       BTM:
