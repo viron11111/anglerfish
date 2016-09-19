@@ -103,7 +103,7 @@ class ThrusterDriver:
         self.thrstr7 = rospy.Publisher('thruster_cmd7', Int16, queue_size=1)
         self.thrstr8 = rospy.Publisher('thruster_cmd8', Int16, queue_size=1)
 
-        rate = rospy.Rate(20)   
+        rate = rospy.Rate(15)   
         self.thrust = 0.0
 
         while not rospy.is_shutdown():
