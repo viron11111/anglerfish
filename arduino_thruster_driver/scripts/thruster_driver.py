@@ -15,8 +15,6 @@ class ThrusterDriver:
         '''
 
 	#rospy.logwarn(self.kill)
-
-
         for thrust_cmd in list(msg.thruster_commands):
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
@@ -42,9 +40,9 @@ class ThrusterDriver:
             elif name == 'FR':
                 self.thrust = force * (32767.0) #+ 386
                 self.thrstr5.publish(int(self.thrust))
-            elif name == 'MR':
-                self.thrust = force * (32767.0)
-                self.thrstr6.publish(int(self.thrust))
+            #elif name == 'MR':
+            #    self.thrust = force * (32767.0)
+            #    self.thrstr6.publish(int(self.thrust))
             elif name == 'BR':
                 self.thrust = force * (32767.0)
                 self.thrstr7.publish(int(self.thrust))
@@ -57,7 +55,7 @@ class ThrusterDriver:
                 self.thrstr3.publish(0)
                 self.thrstr4.publish(0)
                 self.thrstr5.publish(0)
-                self.thrstr6.publish(0)
+                #self.thrstr6.publish(0)
                 self.thrstr7.publish(0)
                 self.thrstr8.publish(0)
 
@@ -72,7 +70,7 @@ class ThrusterDriver:
         thrstr3 = rospy.Publisher('thruster_cmd3', Int16, queue_size=1)
         thrstr4 = rospy.Publisher('thruster_cmd4', Int16, queue_size=1)
         thrstr5 = rospy.Publisher('thruster_cmd5', Int16, queue_size=1)
-        thrstr6 = rospy.Publisher('thruster_cmd6', Int16, queue_size=1)
+        #thrstr6 = rospy.Publisher('thruster_cmd6', Int16, queue_size=1)
         thrstr7 = rospy.Publisher('thruster_cmd7', Int16, queue_size=1)
         thrstr8 = rospy.Publisher('thruster_cmd8', Int16, queue_size=1)
         thrstr1.publish(0)
@@ -80,7 +78,7 @@ class ThrusterDriver:
         thrstr3.publish(0)
         thrstr4.publish(0)
         thrstr5.publish(0)
-        thrstr6.publish(0)
+        #thrstr6.publish(0)
         thrstr7.publish(0)
         thrstr8.publish(0)
 
@@ -99,11 +97,11 @@ class ThrusterDriver:
         self.thrstr3 = rospy.Publisher('thruster_cmd3', Int16, queue_size=1)
         self.thrstr4 = rospy.Publisher('thruster_cmd4', Int16, queue_size=1)
         self.thrstr5 = rospy.Publisher('thruster_cmd5', Int16, queue_size=1)
-        self.thrstr6 = rospy.Publisher('thruster_cmd6', Int16, queue_size=1)
+        #self.thrstr6 = rospy.Publisher('thruster_cmd6', Int16, queue_size=1)
         self.thrstr7 = rospy.Publisher('thruster_cmd7', Int16, queue_size=1)
         self.thrstr8 = rospy.Publisher('thruster_cmd8', Int16, queue_size=1)
 
-        rate = rospy.Rate(15)   
+        rate = rospy.Rate(25)   
         self.thrust = 0.0
 
         while not rospy.is_shutdown():

@@ -22,7 +22,7 @@ class control_sub():
 
 		
 		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
-		self.w_des = np.array([0, 0, 0])
+		self.w_des = np.array([0.0, 0.0, 0.0])
 
 		self.qtrns = trns.quaternion_matrix(self.qW)
 
