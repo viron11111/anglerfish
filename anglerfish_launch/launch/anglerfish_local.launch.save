@@ -34,9 +34,9 @@
 
   <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>
 
-  <include file="$(find navigation)/launch/ekf.launch"/>
+  <!-- <include file="$(find navigation)/launch/ekf.launch"/> -->
 
-  <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
-  </node>
+  <!-- <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
+  </node> -->
 
 </launch>

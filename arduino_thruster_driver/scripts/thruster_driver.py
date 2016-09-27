@@ -26,13 +26,13 @@ class ThrusterDriver:
 
         if self.kill == False:
             if name == 'TOP':
-                self.thrust = force * (32767.0) #- 836
+                self.thrust = force * (32767.0) - 2080
                 self.thrstr1.publish(int(self.thrust))
             elif name == 'FL':
                 self.thrust = force * (32767.0)
                 self.thrstr2.publish(int(self.thrust))
             elif name == 'ML':
-                self.thrust = force * (32767.0)
+                self.thrust = force * (32767.0) + 1568
                 self.thrstr3.publish(int(self.thrust))
             elif name == 'BL':
                 self.thrust = force * (32767.0) #+ 404
@@ -47,7 +47,7 @@ class ThrusterDriver:
                 self.thrust = force * (32767.0)
                 self.thrstr7.publish(int(self.thrust))
             elif name == 'BTM':
-                self.thrust = force * (32767.0)
+                self.thrust = force * (32767.0) - 2068
                 self.thrstr8.publish(int(self.thrust))                                    
         elif self.kill == True:
                 self.thrstr1.publish(0)
