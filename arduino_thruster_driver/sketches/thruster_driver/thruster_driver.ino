@@ -1,4 +1,4 @@
-//#define TWI_FREQ 100000l // Can be changed to reduce I2C frequency
+#define TWI_FREQ 12500l // Can be changed to reduce I2C frequency
 
 #include <Wire.h>
 #include "Arduino_I2C_ESC.h"
@@ -27,34 +27,82 @@ ros::NodeHandle  nh;
 
 void thruster_string1( const std_msgs::Int16& thrust_cmd){
   speed1 = thrust_cmd.data;
+  if (speed1 >= 32767){
+    speed1 = 32767;
+  }
+  else if (speed1 <= -32767){
+    speed1 = -32767;
+  }
 }
 
 void thruster_string2( const std_msgs::Int16& thrust_cmd){
   speed2 = thrust_cmd.data;
+  if (speed2 >= 32767){
+    speed2 = 32767;
+  }
+  else if (speed2 <= -32767){
+    speed2 = -32767;
+  }
 }
 
 void thruster_string3( const std_msgs::Int16& thrust_cmd){
   speed3 = thrust_cmd.data;
+  if (speed3 >= 32767){
+    speed3 = 32767;
+  }
+  else if (speed3 <= -32767){
+    speed3 = -32767;
+  }
 }
 
 void thruster_string4( const std_msgs::Int16& thrust_cmd){
   speed4 = thrust_cmd.data;
+  if (speed4 >= 32767){
+    speed4 = 32767;
+  }
+  else if (speed4 <= -32767){
+    speed4 = -32767;
+  }  
 }
 
 void thruster_string5( const std_msgs::Int16& thrust_cmd){
   speed5 = thrust_cmd.data;
+  if (speed5 >= 32767){
+    speed5 = 32767;
+  }
+  else if (speed5 <= -32767){
+    speed5 = -32767;
+  }  
 }
 
 void thruster_string6( const std_msgs::Int16& thrust_cmd){
   speed6 = thrust_cmd.data;
+  if (speed6 >= 32767){
+    speed6 = 32767;
+  }
+  else if (speed6 <= -32767){
+    speed6 = -32767;
+  }  
 }
 
 void thruster_string7( const std_msgs::Int16& thrust_cmd){
   speed7 = thrust_cmd.data;
+  if (speed7 >= 32767){
+    speed7 = 32767;
+  }
+  else if (speed7 <= -32767){
+    speed7 = -32767;
+  }  
 }
 
 void thruster_string8( const std_msgs::Int16& thrust_cmd){
   speed8 = thrust_cmd.data;
+  if (speed8 >= 32767){
+    speed8 = 32767;
+  }
+  else if (speed8 <= -32767){
+    speed8 = -32767;
+  }  
 }
 
 ros::Subscriber<std_msgs::Int16> sub1("thruster_cmd1", &thruster_string1 );
