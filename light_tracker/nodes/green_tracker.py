@@ -21,7 +21,7 @@ class ThrusterDriver:
 		self.blur_pub = rospy.Publisher("blurred",Image, queue_size = 1)
 		self.bridge = CvBridge()
 
-		greenLower = (0, 0, 220)
+		greenLower = (0, 0, 245)
 		greenUpper = (0, 0, 255)
 
 		img = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -64,7 +64,8 @@ class ThrusterDriver:
 				vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 				#soh cah toa
-				L = 1.5254
+				L = 1.12
+				#L = self.depth
 
 
 
@@ -72,12 +73,12 @@ class ThrusterDriver:
 
 				hypotenuse = actual_distance_from_center/math.asin(vector_angle)
 
-				threeD_point = D_vec*hypotenuse
+				self.threeD_point = D_vec*hypotenuse
 
 
 				#rospy.loginfo(mag_D_vec)
 				#rospy.loginfo("angle %f degrees", math.degrees(vector_angle))
-				rospy.loginfo("3d %f %f %f meters", *threeD_point)
+				rospy.loginfo("3d %f %f %f meters", *self.threeD_point)
 				#rospy.loginfo("distance %f", actual_distance_from_center)
 
 				angle = math.atan2(cy-240,cx-376)
@@ -91,8 +92,40 @@ class ThrusterDriver:
 
 	def __init__(self):
 		self.depth = 0
+		self.threeD_point = [0,0,0]
+
 		self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
+		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
+
+		pos = PoseWithCovarianceStamped()
+		rate = rospy.Rate(20)
+
+		self.frame_id = '/green_led'
+
+		while not rospy.is_shutdown():
+
+			pos.header.stamp = rospy.Time.now()
+			pos.header.frame_id = 'odom' # i.e. '/odom'
+			#pres.child_frame_id = self.child_frame_id # i.e. '/base_footprint'
+
+			pos.pose.pose.position.x = -self.threeD_point[1]
+			pos.pose.pose.position.y = -self.threeD_point[0]
+			pos.pose.pose.position.z = self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
+
+			#pres.pose.pose.position.x = 
+
+			pos.pose.pose.orientation.w = 1.0
+			pos.pose.pose.orientation.x = 0
+			pos.pose.pose.orientation.y = 0
+			pos.pose.pose.orientation.z = 0
+			pos.pose.covariance=(np.eye(6)*.05).flatten()
+
+			self.pose_pub.publish(pos)
+
+			rate.sleep()
+
+
 
 
 
