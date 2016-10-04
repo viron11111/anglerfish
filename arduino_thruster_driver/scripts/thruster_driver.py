@@ -3,7 +3,7 @@
 import rospy
 import sys
 #from arduino_thruster_driver.msg import ThrusterCmd
-from std_msgs.msg import Int16, String, Float32
+from std_msgs.msg import Int16, String, Float32, Bool
 from sub8_msgs.msg import Thrust, ThrusterCmd
 from std_srvs.srv import SetBool, SetBoolResponse
 
@@ -25,6 +25,9 @@ class ThrusterDriver:
             force = -1.0
 
         if self.kill == False:
+
+	    green = rospy.Publisher('Green_led', Bool, queue_size=1)
+            green.publish(True)
             #if name == 'TOP':
             #    self.thrust = force * (32767.0) - 2080
             #    self.thrstr1.publish(int(self.thrust))
@@ -32,7 +35,7 @@ class ThrusterDriver:
                 self.thrust = force * (32767.0)
                 self.thrstr2.publish(int(self.thrust))
             elif name == 'ML':
-                self.thrust = force * (32767.0) + 1568
+                self.thrust = force * (32767.0) + 448
                 self.thrstr3.publish(int(self.thrust))
             elif name == 'BL':
                 self.thrust = force * (32767.0) #+ 404
@@ -41,15 +44,19 @@ class ThrusterDriver:
                 self.thrust = force * (32767.0) #+ 386
                 self.thrstr5.publish(int(self.thrust))
             elif name == 'MR':
-                self.thrust = force * (32767.0)
+                self.thrust = force * (32767.0) + 383
                 self.thrstr6.publish(int(self.thrust))
             elif name == 'BR':
                 self.thrust = force * (32767.0)
                 self.thrstr7.publish(int(self.thrust))
             elif name == 'BTM':
-                self.thrust = force * (32767.0) - 2068
+                self.thrust = force * (32767.0) - 899
                 self.thrstr8.publish(int(self.thrust))                                    
         elif self.kill == True:
+
+                green = rospy.Publisher('Green_led', Bool, queue_size=1)
+                green.publish(False)
+
                 #self.thrstr1.publish(0)
                 self.thrstr2.publish(0)
                 self.thrstr3.publish(0)
