@@ -6,6 +6,7 @@ import sys
 from sub8_msgs.msg import Thrust
 import geometry_msgs.msg 
 from geometry_msgs.msg import WrenchStamped, Twist, PoseStamped
+from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 from orientation_library import transformations as trns
 from orientation_library import oritools as ori
 from nav_msgs.msg import Odometry
@@ -21,21 +22,21 @@ class control_sub():
 		self.p_desW = np.array([data.pose.pose.x, data.pose.pose.y, data.pose.pose.z])
 		self.q_desW = np.array([data.pose.orientation.w, data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z])
 
-        br = tf2_ros.TransformBroadcaster()
-        t = geometry_msgs.msg.TransformStamped()
+       	        br = tf2_ros.TransformBroadcaster()
+       		t = geometry_msgs.msg.TransformStamped()
 
-        #odom = Odometry()
+	        #odom = Odometry()
 
-        t.header.stamp = rospy.Time.now()
-        t.header.frame_id = "odom"
-        t.child_frame_id = "directed"
-        t.transform.translation.x = self.p_desW[0]
-        t.transform.translation.y = self.p_desW[1]
-        t.transform.translation.z = self.p_desW[2]
-        t.transform.rotation.w = self.q_desW[0]
-        t.transform.rotation.x = self.q_desW[1]
-        t.transform.rotation.y = self.q_desW[2]
-        t.transform.rotation.z = self.q_desW[3]
+	        t.header.stamp = rospy.Time.now()
+	        t.header.frame_id = "odom"
+	        t.child_frame_id = "directed"
+	        t.transform.translation.x = self.p_desW[0]
+	        t.transform.translation.y = self.p_desW[1]
+	        t.transform.translation.z = self.p_desW[2]
+	        t.transform.rotation.w = self.q_desW[0]
+	        t.transform.rotation.x = self.q_desW[1]
+	        t.transform.rotation.y = self.q_desW[2]
+	        t.transform.rotation.z = self.q_desW[3]
 
 
 
@@ -65,7 +66,7 @@ class control_sub():
 
 		np.clip(self.i_err, -5, 5, self.i_err)
 
-		rospy.logwarn(torque_amnt)
+		#rospy.logwarn(torque_amnt)
 
 
 		force_amnt = (self.f_kp *  self.p_err)
@@ -86,23 +87,23 @@ class control_sub():
 
 		self.thruster.publish(wrench)
 
-        br = tf2_ros.TransformBroadcaster()
-        t = geometry_msgs.msg.TransformStamped()
+	        br = tf2_ros.TransformBroadcaster()
+       		t = geometry_msgs.msg.TransformStamped()
 
-        #odom = Odometry()
+	        #odom = Odometry()
 
-        t.header.stamp = rospy.Time.now()
-        t.header.frame_id = "map"
-        t.child_frame_id = "desired_position"
-        t.transform.translation.x = self.p_desW[0]
-        t.transform.translation.y = self.p_desW[1]
-        t.transform.translation.z = self.p_desW[2]
-        t.transform.rotation.x = self.q_desW[3]
-        t.transform.rotation.y = self.q_desW[2]
-        t.transform.rotation.z = self.q_desW[1]
-        t.transform.rotation.w = self.q_desW[0]
+	        t.header.stamp = rospy.Time.now()
+	        t.header.frame_id = "map"
+	        t.child_frame_id = "desired_position"
+	        t.transform.translation.x = self.p_desW[0]
+	        t.transform.translation.y = self.p_desW[1]
+	        t.transform.translation.z = self.p_desW[2]
+	        t.transform.rotation.x = self.q_desW[3]
+	        t.transform.rotation.y = self.q_desW[2]
+	        t.transform.rotation.z = self.q_desW[1]
+	        t.transform.rotation.w = self.q_desW[0]
 
-        br.sendTransform(t)
+	        br.sendTransform(t)
 
 	def callback_gains(self, config, level):
 		self.t_kp[0] = "{t_kp_x}".format(**config)
