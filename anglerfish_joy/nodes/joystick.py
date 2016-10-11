@@ -43,6 +43,10 @@ class joystick(object):
 		self.base_link_rotz = 0#data.pose.pose.orientation.z
 		self.base_link_rotw = 1.0#data.pose.pose.orientation.w
 
+		self.movex = 0.0
+		self.movey = 0.0
+		self.yaw = 0.0
+
 	def start(self):
 		self.subposx = 0
 		self.subposy = 0
@@ -69,33 +73,25 @@ class joystick(object):
 		elif data.buttons[0] == 1:
 			self.subposz -= .1
 
-		if data.axes[1] != 0.0:
-			self.subposx += data.axes[1]*.01
+		if data.axes[1] < 0.015 and data.axes[1] > -0.015:
+			self.movex = 0.0
+		elif data.axes[1] != 0.0:
+			self.movex = data.axes[1]*.05
 
-		if data.axes[0] != 0.0:
-			self.subposy += data.axes[0]*.01
+		if data.axes[0] < 0.015 and data.axes[0] > -0.015:
+			self.movey = 0.0
+		elif data.axes[0] != 0.0:
+			self.movey = data.axes[0]*.05
 
+		if data.axes[3] < 0.015 and data.axes[3] > -0.015:
+			self.yaw = 0.0
 		if data.axes[3] != 0.0:
-			quat = (
-				self.subrotx,
-				self.subroty,
-				self.subrotz,
-				self.subrotw)
+			self.yaw = data.axes[3]*0.1
 
-			euler = tf.transformations.euler_from_quaternion(quat)
-			
-			yaw = euler[2] + data.axes[3]*.1
-			euler = (
-				euler[0],
-				euler[1],
-				yaw)
-			#rospy.loginfo(euler)
 
-			quat = tf.transformations.quaternion_from_euler(euler[0],euler[1], euler[2])
-			self.subrotx = quat[0]
-			self.subroty = quat[1]
-			self.subrotz = quat[2]
-			self.subrotw = quat[3]
+
+
+
 
 		#odom = Odometry()
 
@@ -114,6 +110,30 @@ class joystick(object):
 			br = tf2_ros.TransformBroadcaster()
 			t = geometry_msgs.msg.TransformStamped()
 
+			self.subposx += self.movex
+			self.subposy += self.movey
+
+			quat = (
+				self.subrotx,
+				self.subroty,
+				self.subrotz,
+				self.subrotw)
+
+			euler = tf.transformations.euler_from_quaternion(quat)
+			
+			turn = euler[2] + self.yaw
+			euler = (
+				euler[0],
+				euler[1],
+				turn)
+			#rospy.loginfo(euler)
+
+			quat = tf.transformations.quaternion_from_euler(euler[0],euler[1], euler[2])
+			self.subrotx = quat[0]
+			self.subroty = quat[1]
+			self.subrotz = quat[2]
+			self.subrotw = quat[3]
+
 			t.transform.translation.x = self.subposx
 			t.transform.translation.y = self.subposy
 			t.transform.translation.z = self.subposz
@@ -129,13 +149,13 @@ class joystick(object):
 			t.child_frame_id = "desired_position"
 			br.sendTransform(t)	
 
-			t.transform.translation.x = self.subposx
-			t.transform.translation.y = self.subposy
-			t.transform.translation.z = self.subposz
-			t.transform.rotation.x = self.subrotx
-			t.transform.rotation.y = self.subroty
-			t.transform.rotation.z = self.subrotz
-			t.transform.rotation.w = self.subrotw
+			t.transform.translation.x = 0
+			t.transform.translation.y = 0
+			t.transform.translation.z = 0
+			t.transform.rotation.x = 0
+			t.transform.rotation.y = 0
+			t.transform.rotation.z = 0
+			t.transform.rotation.w = 1.0
 
 			#odom = Odometry()
 
