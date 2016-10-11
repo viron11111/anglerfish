@@ -12,17 +12,39 @@ from nav_msgs.msg import Odometry
 import tf, tf2_ros
 
 from dynamic_reconfigure.server import Server
-from controller.cfg import GainsConfig, PositionConfig
+from controller.cfg import GainsConfig
 
 class control_sub():
+
+	def rc_pos(self, data):
+
+		self.p_desW = np.array([data.pose.pose.x, data.pose.pose.y, data.pose.pose.z])
+		self.q_desW = np.array([data.pose.orientation.w, data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z])
+
+        br = tf2_ros.TransformBroadcaster()
+        t = geometry_msgs.msg.TransformStamped()
+
+        #odom = Odometry()
+
+        t.header.stamp = rospy.Time.now()
+        t.header.frame_id = "odom"
+        t.child_frame_id = "directed"
+        t.transform.translation.x = self.p_desW[0]
+        t.transform.translation.y = self.p_desW[1]
+        t.transform.translation.z = self.p_desW[2]
+        t.transform.rotation.w = self.q_desW[0]
+        t.transform.rotation.x = self.q_desW[1]
+        t.transform.rotation.y = self.q_desW[2]
+        t.transform.rotation.z = self.q_desW[3]
+
+
 
 	def PD(self, data):
 		self.qW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
 		self.w = np.array([data.twist.twist.angular.x, data.twist.twist.angular.y, data.twist.twist.angular.z])
 
 		self.pW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z]) #current position
-
-		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
+		
 		self.w_des = np.array([0.0, 0.0, 0.0])
 
 		self.qtrns = trns.quaternion_matrix(self.qW)
@@ -64,74 +86,66 @@ class control_sub():
 
 		self.thruster.publish(wrench)
 
-                br = tf2_ros.TransformBroadcaster()
-                t = geometry_msgs.msg.TransformStamped()
+        br = tf2_ros.TransformBroadcaster()
+        t = geometry_msgs.msg.TransformStamped()
 
-                #odom = Odometry()
+        #odom = Odometry()
 
-                t.header.stamp = rospy.Time.now()
-                t.header.frame_id = "map"
-                t.child_frame_id = "desired_position"
-                t.transform.translation.x = self.p_desW[0]
-                t.transform.translation.y = self.p_desW[1]
-                t.transform.translation.z = self.p_desW[2]
-                t.transform.rotation.x = self.q_desW[3]
-                t.transform.rotation.y = self.q_desW[2]
-                t.transform.rotation.z = self.q_desW[1]
-                t.transform.rotation.w = self.q_desW[0]
+        t.header.stamp = rospy.Time.now()
+        t.header.frame_id = "map"
+        t.child_frame_id = "desired_position"
+        t.transform.translation.x = self.p_desW[0]
+        t.transform.translation.y = self.p_desW[1]
+        t.transform.translation.z = self.p_desW[2]
+        t.transform.rotation.x = self.q_desW[3]
+        t.transform.rotation.y = self.q_desW[2]
+        t.transform.rotation.z = self.q_desW[1]
+        t.transform.rotation.w = self.q_desW[0]
 
-                br.sendTransform(t)
+        br.sendTransform(t)
 
-        def callback_gains(self, config, level):
-            self.t_kp[0] = "{t_kp_x}".format(**config)
-            self.t_kp[1] = "{t_kp_y}".format(**config)
-            self.t_kp[2] = "{t_kp_z}".format(**config)
+	def callback_gains(self, config, level):
+		self.t_kp[0] = "{t_kp_x}".format(**config)
+		self.t_kp[1] = "{t_kp_y}".format(**config)
+		self.t_kp[2] = "{t_kp_z}".format(**config)
 
-            self.t_kd[0] = "{t_kd_x}".format(**config)
-            self.t_kd[1] = "{t_kd_y}".format(**config)
-            self.t_kd[2] = "{t_kd_z}".format(**config)
+		self.t_kd[0] = "{t_kd_x}".format(**config)
+		self.t_kd[1] = "{t_kd_y}".format(**config)
+		self.t_kd[2] = "{t_kd_z}".format(**config)
 
-			self.t_ki[0] = "{t_ki_x}".format(**config)
-			self.t_ki[1] = "{t_ki_y}".format(**config)
-			self.t_ki[2] = "{t_ki_z}".format(**config)
+		self.t_ki[0] = "{t_ki_x}".format(**config)
+		self.t_ki[1] = "{t_ki_y}".format(**config)
+		self.t_ki[2] = "{t_ki_z}".format(**config)
 
-            self.f_kp[0] = "{f_kp_x}".format(**config)
-            self.f_kp[1] = "{f_kp_y}".format(**config)
-            self.f_kp[2] = "{f_kp_z}".format(**config)
+		self.f_kp[0] = "{f_kp_x}".format(**config)
+		self.f_kp[1] = "{f_kp_y}".format(**config)
+		self.f_kp[2] = "{f_kp_z}".format(**config)
 
-            return config
-
-        def callback_position(self, config, level):
-            self.p_desW[0] = "{desired_posx}".format(**config)
-            self.p_desW[1] = "{desired_posy}".format(**config)
-            self.p_desW[2] = "{desired_posz}".format(**config)
-
-            self.roll  = "{desired_rotx}".format(**config)
-            self.pitch = "{desired_roty}".format(**config)
-            self.yaw   = "{desired_rotz}".format(**config)
-
-            return config            
+		return config           
 
 	def __init__(self):
 		rospy.Subscriber("/odometry/filtered", Odometry, self.PD)
+		rospy.Subscriber("RC_position", PoseWithCovarianceStamped, self.rc_pos)
 		self.thruster = rospy.Publisher("/wrench", WrenchStamped, queue_size=1)
+		rospy.Subscriber
 
-        self.t_kp = np.array([0.0, 0.0, 0.0])  # proportional gain (body frame roll, pitch, yaw)
-        self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
-        self.t_ki = np.array([0.0, 0.0, 0.0])
-        self.f_kp = np.array([0.0, 0.0, 0.0])
+		self.t_kp = np.array([0.0, 0.0, 0.0])  # proportional gain (body frame roll, pitch, yaw)
+		self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
+		self.t_ki = np.array([0.0, 0.0, 0.0])
+		self.f_kp = np.array([0.0, 0.0, 0.0])
 
 		self.i_err = np.array([0.0, 0.0, 0.0])
 
 		self.p_desW = np.array([0.0, 0.0, 0.0])
+		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
 
 
 		srv = Server(GainsConfig, self.callback_gains)
 
-    	r = rospy.Rate(10)
-		
+		r = rospy.Rate(20)
+
 		while not rospy.is_shutdown():
-        		r.sleep()
+				r.sleep()
 
 def main(args):
 	rospy.init_node('pd_controller', anonymous=True)

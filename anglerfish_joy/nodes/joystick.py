@@ -72,6 +72,24 @@ class joystick(object):
 			self.subposz += .1
 		elif data.buttons[0] == 1:
 			self.subposz -= .1
+		elif data.buttons[3] == 1:
+			rc = PoseWithCovarianceStamped()
+
+			rc.header.stamp = rospy.Time.now()
+			rc.header.frame_id = 'desired_position' # i.e. '/odom'
+
+			rc.pose.pose.position.x = self.subposx
+			rc.pose.pose.position.y = self.subposy
+			rc.pose.pose.position.z = self.subposz
+			rc.pose.pose.orientation.x = self.subrotx
+			rc.pose.pose.orientation.y = self.subroty
+			rc.pose.pose.orientation.z = self.subrotz
+			rc.pose.pose.orientation.w = self.subrotw
+			#rc.pose.covariance=(np.eye(6)*.001).flatten()
+
+			self.pose_pub.publish(rc)
+			#rospy.logwarn(rc)
+
 
 		if data.axes[1] < 0.015 and data.axes[1] > -0.015:
 			self.movex = 0.0
@@ -100,7 +118,9 @@ class joystick(object):
 
 		self.base_link()
 		rospy.Subscriber("joy", Joy, self.action)
-		#rospy.Subscriber("odometry/filtered", Odometry, self.base_link)
+		self.pose_pub = rospy.Publisher("RC_position", PoseWithCovarianceStamped, queue_size = 1)
+
+
 
 		rate = rospy.Rate(20)
 		self.start()

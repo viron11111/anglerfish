@@ -64,7 +64,7 @@ class ThrusterDriver:
 				vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 				#soh cah toa
-				L = 1.12
+				L = 1.14
 				#L = self.depth
 
 
