@@ -34,14 +34,23 @@ buttons:
 
 class joystick(object):
 
-	def base_link(self):#, data):
-		self.base_link_posx = 0#data.pose.pose.position.x
-		self.base_link_posy = 0#data.pose.pose.position.y
-		self.base_link_posz = 0#data.pose.pose.position.z
-		self.base_link_rotx = 0#data.pose.pose.orientation.x
-		self.base_link_roty = 0#data.pose.pose.orientation.y
-		self.base_link_rotz = 0#data.pose.pose.orientation.z
-		self.base_link_rotw = 1.0#data.pose.pose.orientation.w
+	def odom_location(self, data):
+		self.base_link_posx = data.pose.pose.position.x
+		self.base_link_posy = data.pose.pose.position.y
+		self.base_link_posz = data.pose.pose.position.z
+		self.base_link_rotx = data.pose.pose.orientation.x
+		self.base_link_roty = data.pose.pose.orientation.y
+		self.base_link_rotz = data.pose.pose.orientation.z
+		self.base_link_rotw = data.pose.pose.orientation.w
+
+	def base(self):#, data):
+		self.base_link_posx = 0 #data.pose.pose.position.x
+		self.base_link_posy = 0 #data.pose.pose.position.y
+		self.base_link_posz = 0 #data.pose.pose.position.z
+		self.base_link_rotx = 0 #data.pose.pose.orientation.x
+		self.base_link_roty = 0 #data.pose.pose.orientation.y
+		self.base_link_rotz = 0 #data.pose.pose.orientation.z
+		self.base_link_rotw = 1.0 #data.pose.pose.orientation.w
 
 		self.movex = 0.0
 		self.movey = 0.0
@@ -116,8 +125,9 @@ class joystick(object):
 
 	def __init__(self):
 
-		self.base_link()
+		self.base()
 		rospy.Subscriber("joy", Joy, self.action)
+		rospy.Subscriber("/odometry/filtered", Odometry, self.odom_location)
 		self.pose_pub = rospy.Publisher("RC_position", PoseWithCovarianceStamped, queue_size = 1)
 
 
@@ -165,11 +175,11 @@ class joystick(object):
 			#odom = Odometry()
 
 			t.header.stamp = rospy.Time.now()
-			t.header.frame_id = "odom"
+			t.header.frame_id = "map"
 			t.child_frame_id = "desired_position"
 			br.sendTransform(t)	
 
-			t.transform.translation.x = 0
+			'''t.transform.translation.x = 0
 			t.transform.translation.y = 0
 			t.transform.translation.z = 0
 			t.transform.rotation.x = 0
@@ -182,7 +192,7 @@ class joystick(object):
 			t.header.stamp = rospy.Time.now()
 			t.header.frame_id = "map"
 			t.child_frame_id = "odom"
-			br.sendTransform(t)	
+			br.sendTransform(t)	'''
 
 			rate.sleep()
 

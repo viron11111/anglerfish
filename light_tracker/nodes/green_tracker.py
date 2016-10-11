@@ -21,7 +21,7 @@ class ThrusterDriver:
 		self.blur_pub = rospy.Publisher("blurred",Image, queue_size = 1)
 		self.bridge = CvBridge()
 
-		greenLower = (0, 0, 245)
+		greenLower = (0, 0, 25)
 		greenUpper = (0, 0, 255)
 
 		img = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -29,7 +29,7 @@ class ThrusterDriver:
 		vid = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
 		#vid = cv2.imread(data)
-		vid = cv2.GaussianBlur(vid,(9,9),1)
+		vid = cv2.GaussianBlur(vid,(1,1),1)
 		hsv = cv2.cvtColor(vid, cv2.COLOR_BGR2HSV)
 
 		mask = cv2.inRange(hsv, greenLower, greenUpper)
@@ -64,7 +64,7 @@ class ThrusterDriver:
 				vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 				#soh cah toa
-				L = 1.14
+				L = -1.14
 				#L = self.depth
 
 
@@ -73,8 +73,13 @@ class ThrusterDriver:
 
 				hypotenuse = actual_distance_from_center/math.asin(vector_angle)
 
-				self.threeD_point = D_vec*hypotenuse
+				#self.threeD_point = D_vec*hypotenuse
+				orig_3d = D_vec*hypotenuse
 
+				#for rotation 90 degrees
+				self.threeD_point[0] = orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+				self.threeD_point[1] = orig_3d[0]*math.sin(1.571) + orig_3d[1]*math.cos(1.571) 
+				self.threeD_point[2] = orig_3d[2]
 
 				#rospy.loginfo(mag_D_vec)
 				#rospy.loginfo("angle %f degrees", math.degrees(vector_angle))
