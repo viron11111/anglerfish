@@ -19,13 +19,12 @@ class control_sub():
 
 	def rc_pos(self, data):
 
-		self.p_desW = np.array([data.pose.pose.x, data.pose.pose.y, data.pose.pose.z])
-		self.q_desW = np.array([data.pose.orientation.w, data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z])
+		#rospy.logwarn(data.pose.pose.orientation)
+		self.p_desW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z])
+		self.q_desW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z])
 
 		br = tf2_ros.TransformBroadcaster()
 		t = geometry_msgs.msg.TransformStamped()
-
-		#odom = Odometry()
 
 		t.header.stamp = rospy.Time.now()
 		t.header.frame_id = "odom"
@@ -37,7 +36,7 @@ class control_sub():
 		t.transform.rotation.x = self.q_desW[1]
 		t.transform.rotation.y = self.q_desW[2]
 		t.transform.rotation.z = self.q_desW[3]
-
+		br.sendTransform(t)
 
 
 	def PD(self, data):
@@ -88,7 +87,7 @@ class control_sub():
 		self.thruster.publish(wrench)
 
 		br = tf2_ros.TransformBroadcaster()
-			t = geometry_msgs.msg.TransformStamped()
+		t = geometry_msgs.msg.TransformStamped()
 
 		#odom = Odometry()
 
