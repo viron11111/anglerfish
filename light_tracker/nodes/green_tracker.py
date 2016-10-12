@@ -9,6 +9,12 @@ import math
 from numpy.linalg import inv
 from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 
+####################################################################
+####################################################################
+#########Left off at making pre publisher to look for green light
+######################################################################
+
+
 class ThrusterDriver:
 
 	def pressure(self, data):
@@ -18,7 +24,10 @@ class ThrusterDriver:
 
 	def import_vid(self,data):
 		self.image_pub = rospy.Publisher("down_camera_out",Image, queue_size = 1)
-		self.blur_pub = rospy.Publisher("blurred",Image, queue_size = 1)
+		self.green_pub = rospy.Publisher("green",Image, queue_size = 1)
+		self.white_pub = rospy.Publisher("white",Image, queue_size = 1)
+		self.combined_pub = rospy.Publisher("combined",Image, queue_size = 1)
+		self.pre_pub = rospy.Publisher("pre",Image, queue_size = 1)
 		self.bridge = CvBridge()
 
 		greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
@@ -31,34 +40,73 @@ class ThrusterDriver:
 
 		vid = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
+		blank_image_green = np.zeros((480,752,1), np.uint8)
+		blank_image_white = np.zeros((480,752,1), np.uint8)
+		#blank_image_combined = np.zeros((480,752,1), np.uint8)
+
 		#vid = cv2.imread(data)
 		#vid = cv2.GaussianBlur(vid,(1,1),1)
 		hsv = cv2.cvtColor(vid, cv2.COLOR_BGR2HSV)
 
-		mask = cv2.inRange(hsv, greenLower, greenUpper)
-		mask = cv2.erode(mask, None, iterations=1) #3
-		mask = cv2.dilate(mask, None, iterations=7) #3
-		mask = cv2.erode(mask, None, iterations=5) #3
-		mask = 255 - mask
+		mask_green = cv2.inRange(hsv, greenLower, greenUpper)
+		mask_green = cv2.erode(mask_green, None, iterations=1) #3
+		mask_green = cv2.dilate(mask_green, None, iterations=7) #3
+		mask_green = cv2.erode(mask_green, None, iterations=5) #3
+		mask_green = 255 - mask_green
 
-		self.blur_pub.publish(self.bridge.cv2_to_imgmsg(mask, "8UC1"))
-
-
-
-		image, contours, hierarchy = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+		image, contours, hierarchy = cv2.findContours(mask_green,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 		
+		listed_contours = []
 
 		for cnt in contours:
 			M = cv2.moments(cnt)
 			if cnt != None and M['m00'] != 0: 				
 
-				if cv2.contourArea(cnt) < 1000 and cv2.contourArea(cnt) > 100 and cv2.arcLength(cnt,True):
+				x,y,w,h = cv2.boundingRect(cnt)
+				aspect_ratio = float(w)/h
+
+				if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 3000 and aspect_ratio > .8 and aspect_ratio < 1.2: # and cv2.arcLength(cnt,True):
+
+					listed_contours.append(cnt)
 
 					cx = int(M['m10']/M['m00'])
 					cy = int(M['m01']/M['m00'])
 
-					cv2.drawContours(img, cnt, -1, (0,0,0), 3)
-					img = cv2.circle(img, (cx,cy), 2, (0,0,255), 5)
+					cv2.drawContours(blank_image_green, listed_contours, -1, (255), -1)
+
+
+		mask_white = cv2.inRange(hsv, whiteLower, whiteUpper)
+		mask_white = cv2.erode(mask_white, None, iterations=3) #3
+		mask_white = cv2.dilate(mask_white, None, iterations=3) #3
+		#mask_white = cv2.erode(mask_white, None, iterations=5) #3
+		mask_white = 255 - mask_white
+
+		image, contours, hierarchy = cv2.findContours(mask_white,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+		
+		listed_contours = []
+
+		for cnt in contours:
+			M = cv2.moments(cnt)
+			if cnt != None and M['m00'] != 0: 				
+
+				x,y,w,h = cv2.boundingRect(cnt)
+				aspect_ratio = float(w)/h
+
+				if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 3000 and aspect_ratio > .8 and aspect_ratio < 1.2: # and cv2.arcLength(cnt,True):
+
+					listed_contours.append(cnt)
+
+					cx = int(M['m10']/M['m00'])
+					cy = int(M['m01']/M['m00'])
+
+					cv2.drawContours(blank_image_white, listed_contours, -1, (255), -1)
+
+
+
+
+
+
+					'''img = cv2.circle(img, (cx,cy), 2, (0,0,255), 5)
 					img = cv2.line(img, (376,240), (cx,cy), (255,0,0), 5)
 					#if cv2.arcLength(cnt,True) == True:
 
@@ -97,9 +145,12 @@ class ThrusterDriver:
 					self.threeD_point[2] = orig_3d[2]
 
 					angle = math.atan2(cy-240,cx-376)
-					img = cv2.ellipse(img,(376,240),(100,100),0, 0, math.degrees(angle), (0,255,0), 5)
+					img = cv2.ellipse(img,(376,240),(100,100),0, 0, math.degrees(angle), (0,255,0), 5)'''
 
-		#self.image_pub.publish(self.bridge.cv2_to_imgmsg(imgray, "8UC1"))
+		blank_image_combined = cv2.bitwise_and(blank_image_white, blank_image_green)
+		self.green_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_green, "8UC1"))					
+		self.white_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_white, "8UC1"))
+		self.combined_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_combined, "8UC1"))
 		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
 
 	def __init__(self):
@@ -110,11 +161,11 @@ class ThrusterDriver:
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
-		H_green = 180
+		H_green = 160 #180
 		S_green = 72
 		V_green = 100
 
-		slop = .5  #percent of slop
+		slop = .50  #percent of slop
 
 		self.H_green_low = H_green - H_green*slop
 		self.S_green_low = (S_green*2.55) - (S_green*2.55)*slop
