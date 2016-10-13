@@ -133,7 +133,7 @@
       <param name="imu0_relative" value="false"/>
       <param name="imu1_relative" value="false"/>
       <param name="pose0_relative" value="true"/>
-      <param name="pose0_relative" value="false"/>
+      <param name="pose1_relative" value="false"/>
 
       <!-- If we're including accelerations in our state estimate, then we'll probably want to remove any acceleration that
            is due to gravity for each IMU. If you don't want to, then set this to false. Defaults to false if unspecified. -->

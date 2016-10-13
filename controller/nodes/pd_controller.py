@@ -27,7 +27,7 @@ class control_sub():
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "odom"
+		t.header.frame_id = "map"
 		t.child_frame_id = "directed"
 		t.transform.translation.x = self.p_desW[0]
 		t.transform.translation.y = self.p_desW[1]
@@ -86,7 +86,7 @@ class control_sub():
 
 		self.thruster.publish(wrench)
 
-		br = tf2_ros.TransformBroadcaster()
+		'''br = tf2_ros.TransformBroadcaster()
 		t = geometry_msgs.msg.TransformStamped()
 
 		#odom = Odometry()
@@ -102,7 +102,7 @@ class control_sub():
 		t.transform.rotation.z = self.q_desW[1]
 		t.transform.rotation.w = self.q_desW[0]
 
-		br.sendTransform(t)
+		br.sendTransform(t)'''
 
 	def callback_gains(self, config, level):
 		self.t_kp[0] = "{t_kp_x}".format(**config)

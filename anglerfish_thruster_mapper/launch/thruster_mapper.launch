@@ -3,12 +3,12 @@
     busses:
       - port: /dev/serial/by-id/usb-Teensyduino_USB_Serial_1962610-if00
         thrusters:
-         <!--  TOP: {
+          TOP: {
             node_id: 1,
             frame_id: /base_link,
             position: [0.041, -0.008, 0.12],
             direction: [0, 1, 0]
-          } -->
+          } 
           FL: {
             node_id: 2,
             frame_id: /base_link,

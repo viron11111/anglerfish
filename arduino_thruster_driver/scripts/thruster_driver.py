@@ -28,36 +28,36 @@ class ThrusterDriver:
 
 	    green = rospy.Publisher('Green_led', Bool, queue_size=1)
             green.publish(True)
-            #if name == 'TOP':
-            #    self.thrust = force * (32767.0) - 2080
-            #    self.thrstr1.publish(int(self.thrust))
-            if name == 'FL':
+            if name == 'TOP':
+                self.thrust = force * (32767.0) - 3078
+                self.thrstr1.publish(int(self.thrust))
+            elif name == 'FL':
                 self.thrust = force * (32767.0)
                 self.thrstr2.publish(int(self.thrust))
             elif name == 'ML':
-                self.thrust = force * (32767.0) + 448
+                self.thrust = force * (32767.0) + 1119
                 self.thrstr3.publish(int(self.thrust))
             elif name == 'BL':
-                self.thrust = force * (32767.0) #+ 404
+                self.thrust = force * (32767.0) 
                 self.thrstr4.publish(int(self.thrust))
             elif name == 'FR':
-                self.thrust = force * (32767.0) #+ 386
+                self.thrust = force * (32767.0) - 356
                 self.thrstr5.publish(int(self.thrust))
             elif name == 'MR':
-                self.thrust = force * (32767.0) + 383
+                self.thrust = force * (32767.0) + 1119
                 self.thrstr6.publish(int(self.thrust))
             elif name == 'BR':
-                self.thrust = force * (32767.0)
+                self.thrust = force * (32767.0) - 358
                 self.thrstr7.publish(int(self.thrust))
             elif name == 'BTM':
-                self.thrust = force * (32767.0) - 899
+                self.thrust = force * (32767.0) - 3078
                 self.thrstr8.publish(int(self.thrust))                                    
         elif self.kill == True:
 
                 green = rospy.Publisher('Green_led', Bool, queue_size=1)
                 green.publish(False)
 
-                #self.thrstr1.publish(0)
+                self.thrstr1.publish(0)
                 self.thrstr2.publish(0)
                 self.thrstr3.publish(0)
                 self.thrstr4.publish(0)
@@ -72,7 +72,7 @@ class ThrusterDriver:
             return SetBoolResponse(success = True, message = str(self.kill))
 
     def stop_motor():
-        #thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
+        thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)
         thrstr3 = rospy.Publisher('thruster_cmd3', Int16, queue_size=1)
         thrstr4 = rospy.Publisher('thruster_cmd4', Int16, queue_size=1)
@@ -80,7 +80,7 @@ class ThrusterDriver:
         thrstr6 = rospy.Publisher('thruster_cmd6', Int16, queue_size=1)
         thrstr7 = rospy.Publisher('thruster_cmd7', Int16, queue_size=1)
         thrstr8 = rospy.Publisher('thruster_cmd8', Int16, queue_size=1)
-        #thrstr1.publish(0)
+        thrstr1.publish(0)
         thrstr2.publish(0)
         thrstr3.publish(0)
         thrstr4.publish(0)
@@ -99,7 +99,7 @@ class ThrusterDriver:
 	self.kill = True
 
 
-        #self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
+        self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         self.thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)
         self.thrstr3 = rospy.Publisher('thruster_cmd3', Int16, queue_size=1)
         self.thrstr4 = rospy.Publisher('thruster_cmd4', Int16, queue_size=1)
