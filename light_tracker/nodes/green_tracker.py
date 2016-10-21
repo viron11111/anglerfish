@@ -28,10 +28,13 @@ class ThrusterDriver:
 		self.pre_pub = rospy.Publisher("pre",Image, queue_size = 1)
 		self.bridge = CvBridge()
 
-		greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
-		greenUpper = (self.H_green_high, self.S_green_high, self.V_green_high)
+		#greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
+		#greenUpper = (self.H_green_high, self.S_green_high, self.V_green_high)
 
-		whiteLower = (0, 0, 245)
+		greenLower = ((64.0/360)*255, 0.15*255, 0.1*255)
+		greenUpper = ((150.0/360)*255, 255, 255)
+
+		whiteLower = (0, 0, 255)
 		whiteUpper = (0, 0, 255)
 
 		img = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -58,7 +61,10 @@ class ThrusterDriver:
 
 		for cnt in contours:
 			M = cv2.moments(cnt)
-			if cnt != None and M['m00'] != 0: 				
+			if cnt != None and M['m00'] != 0: 	
+
+				listed_contours.append(cnt)
+				cv2.drawContours(blank_image_green, listed_contours, -1, (255), -1)			
 
 				x,y,w,h = cv2.boundingRect(cnt)
 				aspect_ratio = float(w)/h
@@ -70,7 +76,7 @@ class ThrusterDriver:
 					#cx = int(M['m10']/M['m00'])
 					#cy = int(M['m01']/M['m00'])
 
-					cv2.drawContours(blank_image_green, listed_contours, -1, (255), -1)
+					#cv2.drawContours(blank_image_green, listed_contours, -1, (255), -1)
 
 
 		mask_white = cv2.inRange(hsv, whiteLower, whiteUpper)
@@ -125,7 +131,9 @@ class ThrusterDriver:
 
 			#rospy.loginfo (cv2.arcLength(cnt,True))
 
-			K = ([[607.830496, 0.000000, 364.584318], [0.000000, 605.641275, 210.198029], [0.000000, 0.000000, 1.000000]])
+			#K = ([[607.830496, 0.000000, 364.584318], [0.000000, 605.641275, 210.198029], [0.000000, 0.000000, 1.000000]])
+			K = ([[385.839243, 0.000000, 373.724209], [0.000000, 383.636586, 223.867784], [0.000000, 0.000000, 1.000000]])
+
 			target_point = [[cx],[cy],[1]]
 			#ref_point =
 
@@ -143,14 +151,14 @@ class ThrusterDriver:
 			vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 			#soh cah toa
-			L = -1.98
-			#L = self.depth
+			#L = -1.98
+			L = self.depth
 			actual_distance_from_center = math.tan(vector_angle)*L
 
 			hypotenuse = actual_distance_from_center/math.asin(vector_angle)
 
-			#self.threeD_point = D_vec*hypotenuse
-			orig_3d = D_vec*hypotenuse
+			self.threeD_point = D_vec*hypotenuse
+			'''orig_3d = D_vec*hypotenuse
 
 			#*****************************************************************************************************
 			#for rotation 90 degrees
@@ -158,7 +166,8 @@ class ThrusterDriver:
 			self.threeD_point[1] = orig_3d[0]*math.sin(1.571) + orig_3d[1]*math.cos(1.571) 
 			self.threeD_point[2] = orig_3d[2]
 			#*****************************************************************************************************
-			
+			'''
+
 			angle = math.atan2(cy-240,cx-376)
 			img = cv2.ellipse(img,(376,240),(100,100),0, 0, math.degrees(angle), (0,255,0), 5)
 
@@ -175,11 +184,11 @@ class ThrusterDriver:
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
-		H_green = 160 #180
-		S_green = 72
-		V_green = 100
+		H_green = 160 #160, 80
+		S_green = 72 #72
+		V_green = 100 #100
 
-		slop = .50  #percent of slop
+		slop = .25  #percent of slop
 
 		self.H_green_low = H_green - H_green*slop
 		self.S_green_low = (S_green*2.55) - (S_green*2.55)*slop

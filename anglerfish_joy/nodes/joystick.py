@@ -77,6 +77,15 @@ class joystick(object):
 			self.subroty = self.base_link_roty
 			self.subrotz = self.base_link_rotz
 			self.subrotw = self.base_link_rotw
+		elif data.buttons[5] == 1:
+			self.subposx = 0
+			self.subposy = 0
+			self.subposz = 0
+			self.subrotx = 0
+			self.subroty = 0
+			self.subrotz = 0
+			self.subrotw = 1.0
+
 		elif data.buttons[2] == 1:
 			self.subposz += .1
 		elif data.buttons[0] == 1:
