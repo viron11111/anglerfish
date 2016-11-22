@@ -69,7 +69,7 @@ class ThrusterDriver:
 				x,y,w,h = cv2.boundingRect(cnt)
 				aspect_ratio = float(w)/h
 
-				if cv2.contourArea(cnt) > 100 and cv2.contourArea(cnt) < 3000 and aspect_ratio > .5 and aspect_ratio < 1.5: # and cv2.arcLength(cnt,True):
+				if cv2.contourArea(cnt) > 50 and cv2.contourArea(cnt) < 3000 and aspect_ratio > .5 and aspect_ratio < 1.5: # and cv2.arcLength(cnt,True):
 
 					listed_contours.append(cnt)
 
@@ -100,8 +100,11 @@ class ThrusterDriver:
 
 					listed_contours.append(cnt)
 
-					#cx = int(M['m10']/M['m00'])
-					#cy = int(M['m01']/M['m00'])
+					cx = int(M['m10']/M['m00'])
+					cy = int(M['m01']/M['m00'])
+					
+					img = cv2.circle(img, (cx,cy), 2, (0,0,255), 5)
+					img = cv2.line(img, (376,240), (cx,cy), (255,0,0), 5)
 
 					cv2.drawContours(blank_image_white, listed_contours, -1, (255), -1)
 
@@ -125,8 +128,8 @@ class ThrusterDriver:
 			cx = int(M['m10']/M['m00'])
 			cy = int(M['m01']/M['m00'])
 
-			img = cv2.circle(img, (cx,cy), 2, (0,0,255), 5)
-			img = cv2.line(img, (376,240), (cx,cy), (255,0,0), 5)
+			#img = cv2.circle(img, (cx,cy), 2, (0,0,255), 5)
+			#img = cv2.line(img, (376,240), (cx,cy), (255,0,0), 5)
 			#if cv2.arcLength(cnt,True) == True:
 
 			#rospy.loginfo (cv2.arcLength(cnt,True))
