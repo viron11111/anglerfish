@@ -162,6 +162,7 @@ class joystick(object):
 			self.subposx += self.movex
 			self.subposy += self.movey
 
+			#this section converts quaternions to euler, applys yaw, then converts euler back to quaternion
 			quat = (
 				self.subrotx,
 				self.subroty,
@@ -183,6 +184,7 @@ class joystick(object):
 			self.subrotz = quat[2]
 			self.subrotw = quat[3]
 
+			#publish updated desired TF POSE
 			t.transform.translation.x = self.subposx
 			t.transform.translation.y = self.subposy
 			t.transform.translation.z = self.subposz
@@ -197,21 +199,6 @@ class joystick(object):
 			t.header.frame_id = "map"
 			t.child_frame_id = "desired_position"
 			br.sendTransform(t)	
-
-			'''t.transform.translation.x = 0
-			t.transform.translation.y = 0
-			t.transform.translation.z = 0
-			t.transform.rotation.x = 0
-			t.transform.rotation.y = 0
-			t.transform.rotation.z = 0
-			t.transform.rotation.w = 1.0
-
-			#odom = Odometry()
-
-			t.header.stamp = rospy.Time.now()
-			t.header.frame_id = "map"
-			t.child_frame_id = "odom"
-			br.sendTransform(t)	'''
 
 			rate.sleep()
 
