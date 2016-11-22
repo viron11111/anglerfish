@@ -1,6 +1,6 @@
 #anglerfish_joy
 
-Joy node for use with Logitech F710 controller.
+Node for use with Logitech F710 controller.  Uses ROS Joy_node: http://wiki.ros.org/joy
 
 Button/axes functions:
 
