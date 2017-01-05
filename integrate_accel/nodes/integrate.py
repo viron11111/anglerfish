@@ -157,12 +157,12 @@ class integration():
 
 				#acceleration_based_on_orientation - measured_acceleration
 
-				x_accel_diff = measured - orientation #self.x_grav - self.x_accel
+				x_accel_diff = orientation - measured #self.x_grav - self.x_accel
 				y_accel_diff = self.y_grav - self.y_accel
 				z_accel_diff = self.z_grav - self.z_accel
 
-
-				x_pos = x_accel_diff
+				y_pos = x_accel_diff
+				
 
 				#FIR low pass filter
 				fir1 = x_accel_diff
@@ -170,6 +170,7 @@ class integration():
 				#fir3 = fir2
 				fir2 = fir1
 
+				x_pos = acceleration
 				
 
 				velfir1 = x_accel_diff*self.sum_time
