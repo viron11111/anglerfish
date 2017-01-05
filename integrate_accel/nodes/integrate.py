@@ -47,12 +47,6 @@ class integration():
 			self.x_grav = math.sin(pitch)*-9.80665
 			self.z_grav = -math.cos(pitch)*math.cos(roll)*-9.80665
 			self.calculated_flag = 1
-		
-		self.new_time = rospy.get_rostime()
-		self.time_diff = self.new_time - self.old_time
-		self.old_time = rospy.get_rostime()
-
-		self.sum_time = self.time_diff.secs + self.time_diff.nsecs/100000000.0
 
 
 	def __init__(self):
@@ -85,6 +79,14 @@ class integration():
 		self.subrotw = 0.0
 
 		holder = 0.0
+		x_vel_old = 0.0
+		x_vel = 0.0
+
+		y_vel = 0.0
+		z_vel = 0.0
+
+		x_accel_diff_old = 0.0
+
 		x_pos = 0.0
 		y_pos = 0.0
 		z_pos = 0.0
@@ -94,13 +96,43 @@ class integration():
 		while not rospy.is_shutdown():
 
 			if self.accel_flag == 1 and self.calculated_flag == 1:
-				xdiff = self.x_accel - self.x_grav
-				ydiff = self.y_accel - self.y_grav
-				zdiff = self.z_accel - self.z_grav
 
-				x_pos = xdiff*math.pow(self.sum_time,2) + x_pos
-				y_pos = ydiff*self.sum_time + y_pos
-				z_pos = zdiff*self.sum_time + z_pos
+
+				#acceleration_based_on_orientation - measured_acceleration
+				x_accel_diff_new = self.x_grav - self.x_accel
+				y_accel_diff = self.y_grav - self.y_accel
+				z_accel_diff = self.z_grav - self.z_accel
+
+				if abs(x_accel_diff_new) < 0.15:
+					x_accel_diff_new = 0.0
+
+
+				#rospy.logwarn(xdiff)
+
+				self.new_time = rospy.get_rostime()
+				self.time_diff = self.new_time - self.old_time
+				self.sum_time = self.time_diff.secs + self.time_diff.nsecs/100000000.0
+
+				#rospy.loginfo((x_accel_diff_new-x_accel_diff_old)/2)
+
+				x_accel_diff = x_accel_diff_old + ((x_accel_diff_new-x_accel_diff_old)/2)*self.sum_time
+				x_accel_diff_old = x_accel_diff_new
+
+				x_vel_diff = x_vel_diff_old + ((x_vel_new-x_vel_old)/2)*self.sum_time
+				x_vel_diff_old = x_vel_diff_new
+
+				x_vel = x_vel_diff + x_accel_diff
+
+				#x_vel_new = x_vel_old + x_accel_diff
+
+				#x_vel_diff = x_vel_diff + #((x_vel_new-x_vel_old)/2)*self.sum_time
+
+				#x_vel_old = x_vel_new
+
+				x_pos = x_pos +  x_vel
+				#y_pos = ydiff*math.pow(self.sum_time,2)  + y_pos
+				#z_pos = zdiff*math.pow(self.sum_time,2)  + z_pos
+
 				holder = self.sum_time 
 
 				pospub.header.stamp = rospy.Time.now()
@@ -116,6 +148,7 @@ class integration():
 				#pospub.pose.covariance=(np.eye(6)*.001).flatten()
 
 				self.pose_pub.publish(pospub)
+				self.old_time = rospy.get_rostime()
 
 				#rospy.loginfo(x_pos)
 				#rospy.loginfo("time_diff: %i" % (self.time_diff.nsecs))
