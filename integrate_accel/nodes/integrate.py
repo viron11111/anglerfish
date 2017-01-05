@@ -12,6 +12,7 @@ class integration():
 
 	def linear_accel(self, data):
 		if self.accel_flag == 0:
+
 			self.x_accel = data.linear_acceleration.x
 			self.y_accel = data.linear_acceleration.y
 			self.z_accel = data.linear_acceleration.z
@@ -91,47 +92,94 @@ class integration():
 		y_pos = 0.0
 		z_pos = 0.0
 
+		fir1 = 0
+		fir2 = 0
+		fir3 = 0
+		fir4 = 0.0
+
+		measfir1 = 0.0
+		measfir2 = 0.0
+		measfir3 = 0.0
+		measfir4 = 0.0
+		measfir5 = 0.0
+
+		orinfir1 = 0.0
+		orinfir2 = 0.0
+		orinfir3 = 0.0
+		orinfir4 = 0.0
+		orinfir5 = 0.0
+
+		accfir1 = 0.0
+		accfir2 = 0.0
+
+		velfir1 = 0.0
+		velfir2 = 0.0
+
+		vel = 0.0
+
+		posfir1 = 0.0
+		posfir2 = 0.0
+
+		pos = 0.0
+
+		diff1 = 0.0
+		diff2 = 0.0
+
 		r = rospy.Rate(50)
 
 		while not rospy.is_shutdown():
 
 			if self.accel_flag == 1 and self.calculated_flag == 1:
 
+				self.new_time = rospy.get_rostime()
+				self.time_diff = self.new_time - self.old_time
+				self.sum_time = self.time_diff.secs + self.time_diff.nsecs/1000000000.0
+
+				#FIR low pass filter
+				measfir1 = self.x_accel
+				measured = measfir1*0.2 + measfir2*0.2 + measfir3*0.2 + measfir4*0.2 + measfir5*0.2
+				measfir5 = measfir4
+				measfir4 = measfir3
+				measfir3 = measfir2
+				measfir2 = measfir1
+
+				#FIR low pass filter
+				orinfir1 = self.x_grav
+				orientation = orinfir1*0.2 + orinfir2*0.2 + orinfir3*0.2 + orinfir4*0.2 + orinfir5*0.2
+				orinfir5 = orinfir4
+				orinfir4 = orinfir3
+				orinfir3 = orinfir2
+				orinfir2 = orinfir1		
+
+				#x_pos = measured #x_pos + vel
+				y_pos = orientation
+
 
 				#acceleration_based_on_orientation - measured_acceleration
-				x_accel_diff_new = self.x_grav - self.x_accel
+
+				x_accel_diff = measured - orientation #self.x_grav - self.x_accel
 				y_accel_diff = self.y_grav - self.y_accel
 				z_accel_diff = self.z_grav - self.z_accel
 
-				if abs(x_accel_diff_new) < 0.15:
-					x_accel_diff_new = 0.0
+
+				x_pos = x_accel_diff
+
+				#FIR low pass filter
+				fir1 = x_accel_diff
+				acceleration = fir1*.5+ fir2*0.5
+				#fir3 = fir2
+				fir2 = fir1
+
+				
+
+				velfir1 = x_accel_diff*self.sum_time
+				vel = vel + velfir1 #2*(velfir1*0.5 - velfir2*0.5)
+				velfir2 = velfir1
+
+				
 
 
-				#rospy.logwarn(xdiff)
-
-				self.new_time = rospy.get_rostime()
-				self.time_diff = self.new_time - self.old_time
-				self.sum_time = self.time_diff.secs + self.time_diff.nsecs/100000000.0
-
-				#rospy.loginfo((x_accel_diff_new-x_accel_diff_old)/2)
-
-				x_accel_diff = x_accel_diff_old + ((x_accel_diff_new-x_accel_diff_old)/2)*self.sum_time
-				x_accel_diff_old = x_accel_diff_new
-
-				x_vel_diff = x_vel_diff_old + ((x_vel_new-x_vel_old)/2)*self.sum_time
-				x_vel_diff_old = x_vel_diff_new
-
-				x_vel = x_vel_diff + x_accel_diff
-
-				#x_vel_new = x_vel_old + x_accel_diff
-
-				#x_vel_diff = x_vel_diff + #((x_vel_new-x_vel_old)/2)*self.sum_time
-
-				#x_vel_old = x_vel_new
-
-				x_pos = x_pos +  x_vel
-				#y_pos = ydiff*math.pow(self.sum_time,2)  + y_pos
-				#z_pos = zdiff*math.pow(self.sum_time,2)  + z_pos
+				pos = pos + vel*self.sum_time
 
 				holder = self.sum_time 
 
