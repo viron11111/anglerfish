@@ -54,7 +54,7 @@ class start_lights():
 			else:
 				self.pig.write(16, 0)
 
-		    rate.sleep()	
+			rate.sleep()	
 
     	rospy.on_shutdown(lights_off)
 
