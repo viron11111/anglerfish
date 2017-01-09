@@ -12,6 +12,13 @@
   <node pkg="ros_jade_stim300_driver" type="stim300.py" name="STIM300" respawn="true">
   </node>
 
+  <!--<node name="stim300_node" pkg="stim300_ros" type="stim300lib.py" output="screen">
+      <param name="device_id" value="/dev/serial/by-id/usb-FTDI_USB-RS422_Cable_FTXV40FP-if00-port0"/>
+      <param name="topic_name" value="imu/data_raw"/>
+      <param name="frame_id" value="/base_link"/>
+  </node>-->
+
+
   <node pkg="hmc5883l" type="hmc5883l_script.py" name="HMC5883L" respawn="true">
   </node>
 

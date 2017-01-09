@@ -46,7 +46,7 @@ class start_lights():
 		while not rospy.is_shutdown():
 			if self.green_flag == 0:
 				self.pig.write(16, 0)
-			elif self.green_flag == 0:
+			elif self.green_flag == 1:
 				if (counter % 2 == 0): #even 
 					self.pig.write(16, 0)
 				else: #odd
