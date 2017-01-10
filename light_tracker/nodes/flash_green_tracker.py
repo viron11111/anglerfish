@@ -8,6 +8,7 @@ import numpy as np
 import math
 from numpy.linalg import inv
 from geometry_msgs.msg import Point, PoseWithCovarianceStamped
+from std_msgs.msg import Bool
 
 class ThrusterDriver:
 
@@ -26,6 +27,7 @@ class ThrusterDriver:
 		self.white_pub = rospy.Publisher("white",Image, queue_size = 1)
 		self.combined_pub = rospy.Publisher("combined",Image, queue_size = 1)
 		self.pre_pub = rospy.Publisher("pre",Image, queue_size = 1)
+		self.light_pub = rospy.Publisher("Green_led", Bool, queue_size = 1)
 		self.bridge = CvBridge()
 
 		#greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
@@ -180,10 +182,9 @@ class ThrusterDriver:
 		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
 
 	def __init__(self):
-		self.depth = 0
-		self.threeD_point = [0,0,0]
 
-		self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
+
+		self.image_sub = rospy.Subscriber("/camera/down/image_raw",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 

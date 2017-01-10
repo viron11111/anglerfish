@@ -27,7 +27,7 @@ class ThrusterDriver:
         if self.kill == False:
 
 	    green = rospy.Publisher('Green_led', Bool, queue_size=1)
-            green.publish(True)
+            #green.publish(True)
             if name == 'TOP':
                 self.thrust = force * (32767.0) - 3078
                 self.thrstr1.publish(int(self.thrust))
@@ -54,8 +54,8 @@ class ThrusterDriver:
                 self.thrstr8.publish(int(self.thrust))                                    
         elif self.kill == True:
 
-                green = rospy.Publisher('Green_led', Bool, queue_size=1)
-                green.publish(False)
+                #green = rospy.Publisher('Green_led', Bool, queue_size=1)
+                #green.publish(False)
 
                 self.thrstr1.publish(0)
                 self.thrstr2.publish(0)
