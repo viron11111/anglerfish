@@ -4,9 +4,11 @@
 
   <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
 
-  <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>
+  <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>-->
 
-  <include file="$(find navigator_launch)/launch/subsystems/cameras/downward.launch"/> -->
+  <include file="$(find anglerfish_launch)/launch/camera.launch"/>
+
+
 
   <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
