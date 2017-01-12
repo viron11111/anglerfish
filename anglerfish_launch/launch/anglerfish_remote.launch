@@ -6,14 +6,15 @@
 
   <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>-->
 
-  <include file="$(find anglerfish_launch)/launch/camera.launch"/>
+  <!-- <include file="$(find anglerfish_launch)/launch/camera.launch"/> -->
 
+  <!-- <node pkg="light_tracker" type="flash_green_tracker.py" name="led_tracker" respawn="true">
+  </node> -->
 
-
-  <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
+  <node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
   </node>
 
-  <node pkg="light_tracker" type="flash_green_tracker.py" name="led_tracker" respawn="true">
+  <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
 
   <node pkg="rosserial_python" type="serial_node.py" name="serial_node_kill" respawn="true">

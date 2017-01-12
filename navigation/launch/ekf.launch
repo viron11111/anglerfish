@@ -71,7 +71,7 @@
       <param name="imu0" value="imu/data"/>
       <param name="imu1" value="imu/razor"/>
       <param name="pose0" value="depth"/>
-      <!-- <param name="pose1" value="xy_position"/> -->
+      <param name="pose1" value="xy_position"/>
 
       <!-- Each sensor reading updates some or all of the filter's state. These options give you greater control over
            which values from each measurement are fed to the filter. For example, if you have an odometry message as input,
@@ -98,11 +98,11 @@
                                       false, false, false,
                                       false, false, false]</rosparam>                                      
 
-      <!-- <rosparam param="pose1_config">[true,  true, true,
+      <rosparam param="pose1_config">[true,  true, true,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
-                                      false, false, false]</rosparam> -->
+                                      false, false, false]</rosparam>
 
 
       <!-- The best practice for including new sensors in robot_localization's state estimation nodes is to pass in velocity
@@ -124,7 +124,7 @@
       <param name="imu0_differential" value="false"/>
       <param name="imu1_differential" value="true"/>
       <param name="pose0_differential" value="false"/>
-      <!-- <param name="pose1_differential" value="false"/> -->
+      <param name="pose1_differential" value="false"/>
 
       <!-- When the node starts, if this parameter is true, then the first measurement is treated as a "zero point" for all
            future measurements. While you can achieve the same effect with the differential paremeter, the key difference is
@@ -133,7 +133,7 @@
       <param name="imu0_relative" value="false"/>
       <param name="imu1_relative" value="false"/>
       <param name="pose0_relative" value="true"/>
-      <!-- <param name="pose1_relative" value="false"/> -->
+      <param name="pose1_relative" value="false"/>
 
       <!-- If we're including accelerations in our state estimate, then we'll probably want to remove any acceleration that
            is due to gravity for each IMU. If you don't want to, then set this to false. Defaults to false if unspecified. -->
