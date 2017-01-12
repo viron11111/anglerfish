@@ -9,12 +9,13 @@ from std_srvs.srv import SetBool, SetBoolResponse
 
 
 class ThrusterDriver:
+
     def thrust_cb(self, msg):
         '''Callback for recieving thrust commands
         These messages contain a list of instructions, one for each thruster
         '''
 
-	#rospy.logwarn(self.kill)
+        #rospy.logwarn(self.kill)
         for thrust_cmd in list(msg.thruster_commands):
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
@@ -24,10 +25,11 @@ class ThrusterDriver:
         elif force < -1.0:
             force = -1.0
 
-        if self.kill == False:
+        if self.kill == False: #kill command is false
 
-	    green = rospy.Publisher('Green_led', Bool, queue_size=1)
-            #green.publish(True)
+            green = rospy.Publisher('Green_led', Bool, queue_size=1)
+            green.publish(True) #turn on green light
+
             if name == 'TOP':
                 self.thrust = force * (32767.0) - 3078
                 self.thrstr1.publish(int(self.thrust))
@@ -51,11 +53,12 @@ class ThrusterDriver:
                 self.thrstr7.publish(int(self.thrust))
             elif name == 'BTM':
                 self.thrust = force * (32767.0) - 3078
-                self.thrstr8.publish(int(self.thrust))                                    
-        elif self.kill == True:
+                self.thrstr8.publish(int(self.thrust))     
 
-                #green = rospy.Publisher('Green_led', Bool, queue_size=1)
-                #green.publish(False)
+        elif self.kill == True: #Kill command has been received
+
+                green = rospy.Publisher('Green_led', Bool, queue_size=1)
+                green.publish(False)  #turn off green light
 
                 self.thrstr1.publish(0)
                 self.thrstr2.publish(0)
@@ -67,9 +70,9 @@ class ThrusterDriver:
                 self.thrstr8.publish(0)
 
     def ROV_kill(self, kill_cmd):
-	    self.kill = kill_cmd.data
-            #rospy.logwarn(self.kill)
-            return SetBoolResponse(success = True, message = str(self.kill))
+        self.kill = kill_cmd.data
+        #rospy.logwarn(self.kill)
+        return SetBoolResponse(success = True, message = str(self.kill))
 
     def stop_motor():
         thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
@@ -95,9 +98,8 @@ class ThrusterDriver:
         #rospy.Subscriber('thrust', Float32, self.thrust_func, queue_size = 1)
         self.thrust_sub = rospy.Subscriber('thrusters/thrust', Thrust, self.thrust_cb, queue_size=1)
 
-	rospy.Service('rov_kill', SetBool, self.ROV_kill)
-	self.kill = True
-
+	   rospy.Service('rov_kill', SetBool, self.ROV_kill)
+	   self.kill = True
 
         self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         self.thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)
