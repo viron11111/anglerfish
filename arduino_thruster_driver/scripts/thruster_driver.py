@@ -98,8 +98,8 @@ class ThrusterDriver:
         #rospy.Subscriber('thrust', Float32, self.thrust_func, queue_size = 1)
         self.thrust_sub = rospy.Subscriber('thrusters/thrust', Thrust, self.thrust_cb, queue_size=1)
 
-	   rospy.Service('rov_kill', SetBool, self.ROV_kill)
-	   self.kill = True
+        rospy.Service('rov_kill', SetBool, self.ROV_kill)
+        self.kill = True
 
         self.thrstr1 = rospy.Publisher('thruster_cmd1', Int16, queue_size=1)
         self.thrstr2 = rospy.Publisher('thruster_cmd2', Int16, queue_size=1)
