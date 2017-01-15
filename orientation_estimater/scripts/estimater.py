@@ -35,6 +35,7 @@ class Interface(object):
 		rospy.Subscriber("imu/data", Imu, self.stim300)
 		rospy.Subscriber("imu/razor", Imu, self.razor)
 		rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
+		#rospy.Subscriber("imu/camera_data", Imu, self.camera_imu)
 		rospy.Subscriber("odometry/filtered", Odometry, self.base_link)
 
 		self.depth = 0.0        
@@ -75,6 +76,22 @@ class Interface(object):
 		t.transform.rotation.w = 1.0
 		br.sendTransform(t)
 
+	def camera_imu(self, data):
+		br = tf2_ros.TransformBroadcaster()
+		t = geometry_msgs.msg.TransformStamped()
+
+		t.header.stamp = rospy.Time.now()
+		t.header.frame_id = "map"
+		t.child_frame_id = "camera_imu"
+		t.transform.translation.x = 1.0
+		t.transform.translation.y = 0.0 
+		t.transform.translation.z = 0.0
+		t.transform.rotation.x = data.orientation.x
+		t.transform.rotation.y = data.orientation.y
+		t.transform.rotation.z = data.orientation.z
+		t.transform.rotation.w = data.orientation.w
+		br.sendTransform(t)		
+
 	def base_link(self, data):
 		br = tf2_ros.TransformBroadcaster()
 		t = geometry_msgs.msg.TransformStamped()
@@ -112,11 +129,11 @@ class Interface(object):
 
 		br.sendTransform(t)
 
-		quaternion = (
+		'''quaternion = (
 			data.orientation.x,
 			data.orientation.y,
 			data.orientation.z,
-			data.orientation.w)
+			data.orientation.w)'''
 
 
 
