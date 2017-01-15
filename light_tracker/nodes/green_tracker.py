@@ -175,15 +175,15 @@ class ThrusterDriver:
 			img = cv2.ellipse(img,(376,240),(100,100),0, 0, math.degrees(angle), (0,255,0), 5)
 
 			
-		self.green_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_green, "8UC1"))					
-		self.white_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_white, "8UC1"))
-		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
+		#self.green_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_green, "8UC1"))					
+		#self.white_pub.publish(self.bridge.cv2_to_imgmsg(blank_image_white, "8UC1"))
+		#self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
 
 	def __init__(self):
 		self.depth = 0
 		self.threeD_point = [0,0,0]
 
-		self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
+		#self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
