@@ -228,7 +228,7 @@ class ThrusterDriver:
 
 			pos.pose.pose.position.x = -self.threeD_point[1]
 			pos.pose.pose.position.y = -self.threeD_point[0]
-			pos.pose.pose.position.z = self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
+			pos.pose.pose.position.z = self.depth#self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
 
 			#pres.pose.pose.position.x = 
 
