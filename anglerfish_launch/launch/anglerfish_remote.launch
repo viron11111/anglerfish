@@ -17,10 +17,10 @@
   <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
 
-  <node pkg="rosserial_python" type="serial_node.py" name="serial_node_kill" respawn="true">
+  <!-- <node pkg="rosserial_python" type="serial_node.py" name="serial_node_kill" respawn="true">
     <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_1962720-if00"/>
     <param name="baud" value="115200"/>
-  </node>
+  </node> -->
 
   <node pkg="joy" type="joy_node" name="joystick_driver" respawn="true">
     <param name="joy_node/dev" value="/dev/input/js1"/>

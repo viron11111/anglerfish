@@ -11,8 +11,32 @@ from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image, Imu, MagneticField
 import tf, tf2_ros
+from std_msgs.msg import Float64
+
+import csv
+from time import localtime,strftime
+import datetime
 
 class ThrusterDriver:
+
+	def create_files(self):
+		self.start_time = 0
+		self.time_diff = 0
+
+		date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
+		file_name1 = "/home/andy/catkin_ws/src/anglerfish/light_tracker/data/offset_%s.csv" % date_time
+		
+		self.velocity_file = csv.writer(open(file_name1,'w'))
+		self.velocity_file.writerow(["ROV_heading", "Camera_heading", "Difference"])
+
+	def camera_roll(self,data):
+		self.roller = data.data*(math.pi/180)
+
+	def camera_pitch(self,data):
+		self.pitcher = data.data*(math.pi/180)	
+	
+	def camera_yaw(self,data):
+		self.yaw = data.data*(math.pi/180)			
 
 	def sub_orientation(self, data):
 
@@ -24,15 +48,23 @@ class ThrusterDriver:
 
 		euler = tf.transformations.euler_from_quaternion(quat)
 
-		self.rov_heading = euler[2]
+		#self.rov_heading = euler[2]
+		error_eq = (0.006*math.pow(euler[2],5) - 0.019*math.pow(euler[2],4) 
+			- 0.038*math.pow(euler[2], 3) + 0.224*math.pow(euler[2],2) 
+			- 0.048*euler[2] - 0.292)
 
+		self.rov_heading = euler[2] - error_eq
 
 	def pressure(self, data):
 		self.depth = data.pose.pose.position.z
 		#ospy.loginfo(self.depth)
 
-	def camera_imu(self, data):
+	def magnetic_field(self, data):
+		self.cx = data.magnetic_field.x
+		self.cy = data.magnetic_field.y
+		self.cz = data.magnetic_field.z				
 
+	def camera_imu(self, data):
 		quat = (
 		data.orientation.x,
 		data.orientation.y,
@@ -41,7 +73,40 @@ class ThrusterDriver:
 
 		euler = tf.transformations.euler_from_quaternion(quat)
 
-		self.camera_heading = euler[2]
+		self.roll = euler[0]
+		self.pitch = euler[1]
+		#self.yaw = euler[2]'''
+
+		xh=self.cx*math.cos(self.pitch)+self.cy*math.sin(self.pitch)*math.sin(self.roll)+self.cz*math.cos(self.roll)*math.sin(self.pitch)
+		yh=self.cy*math.cos(self.roll)-self.cz*math.sin(self.roll)
+
+		#var_compass=math.atan2(-yh,xh)
+		self.camera_heading = math.atan2(-yh,xh)
+
+		'''self.holder1 = var_compass# + 1.0
+		self.camera_heading = self.holder1*.2 + self.holder2*.2 + self.holder3*.2 + self.holder4*.2 + self.holder5*.2
+		self.holder5 = self.holder4
+		self.holder4 = self.holder3
+		self.holder3 = self.holder2
+		self.holder2 = self.holder1	'''	
+
+
+		'''if(self.camera_heading < 0):
+			self.camera_heading += 2*math.pi
+
+		if(self.camera_heading > 2*math.pi):
+			self.camera_heading -= 2*math.pi'''
+
+		#rospy.logwarn(self.cx)
+
+		#self.camera_heading -= math.pi
+
+		#self.camera_heading = math.atan2(self.cy, self.cx)
+
+		#self.velocity_file.writerow([self.rov_heading, self.camera_heading, self.rov_heading - self.camera_heading])
+
+
+		#rospy.logwarn("rov: %f camera: %f diff: %f" % (self.rov_heading,self.camera_heading, self.rov_heading - self.camera_heading))
 
 	def import_vid(self,data):
 
@@ -70,9 +135,32 @@ class ThrusterDriver:
 
 		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
 
+		self.camera_turn = rospy.Publisher('camera_heading', Float64, queue_size = 1)
+		self.rov_turn = rospy.Publisher('rov_heading', Float64, queue_size = 1)
+
+		self.camera_turn.publish(self.camera_heading)
+		self.rov_turn.publish(self.rov_heading)
+
 	def __init__(self):
+		
+		#self.create_files()
+
 		self.depth = 0
 		self.threeD_point = [0,0,0]
+
+		self.roll = 0
+		self.pitch = 0
+		self.yaw = 0
+
+		self.cx = 0
+		self.cy = 0
+		self.cz = 0
+
+		self.holder1 = 0.0
+		self.holder2 = 0.0
+		self.holder3 = 0.0
+		self.holder4 = 0.0
+		self.holder5 = 0.0
 
 		self.camera_heading = 0.0
 		self.rov_heading = 0.0
@@ -80,7 +168,11 @@ class ThrusterDriver:
 		self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.camera_sub = rospy.Subscriber("/imu/camera_tilt", Imu, self.camera_imu)
+		self.camera_mag_sub = rospy.Subscriber("/imu/mag_camera", MagneticField, self.magnetic_field)
 		self.rov_orientation_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.sub_orientation)
+		self.roll_sub = rospy.Subscriber("camera_roll", Float64, self.camera_roll)
+		self.pitch_sub = rospy.Subscriber("camera_pitch", Float64, self.camera_pitch)
+		self.yaw_sub = rospy.Subscriber("camera_yaw", Float64, self.camera_yaw)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
 		H_green = 160 #160, 80

@@ -11,6 +11,7 @@ from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 import serial
 import tf, tf2_ros
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
 
 class track_camera:
 
@@ -19,6 +20,9 @@ class track_camera:
 		self.DEVICE_ID = rospy.get_param('~device_id','/dev/serial/by-id/usb-SparkFun_SFE_9DOF-D21-if00')
 		self.imu_pub = rospy.Publisher('imu/camera_tilt', Imu, queue_size = 1)
 		self.mag_pub = rospy.Publisher("/imu/mag_camera", MagneticField, queue_size=1)
+		self.roll_pub = rospy.Publisher("camera_roll", Float64, queue_size = 1)
+		self.pitch_pub = rospy.Publisher("camera_pitch", Float64, queue_size = 1)
+		self.yaw_pub = rospy.Publisher("camera_yaw", Float64, queue_size = 1)
 		#self.mag_pub = rospy.Publisher('imu/camera_mag', MagneticField, queue_size = 1)
 
 		head1 = 0
@@ -49,13 +53,17 @@ class track_camera:
 				magn = line.split("," , 4)
 				line = ser.readline()				
 				quat = line.split("," , 5)
+				line = ser.readline()
+				rpy = line.split("," , 4)
 
-			magneticsphere = ([0.9970799639389134, -0.21967402500896524, -0.07617040674380507],
-							 [-0.21967402500896527, 1.9256241772665124, 0.08379480885111384],
-							 [-0.07617040674380506, 0.08379480885111382, 0.5424720769663267])
-			bias = ([0.12470811309833418],
-			        [-0.061695545138222285],
-			        [0.4131656893713451])
+			magneticsphere = ([1.0974375136949293, 0.008593465160122918, 0.0003032211129407881],
+							 [0.008593465160122857, 1.1120651652148803, 0.8271491584066613],
+							 [0.00030322111294077105, 0.0926004380061327, 0.5424720769663267])
+			
+			bias = ([-0.021621641870448665],
+			        [-0.10661356710756408],
+			        [0.4377993330407842])
+			
 			raw_values = ([float(magn[1])],
 						  [float(magn[2])],
 						  [float(magn[3])])
@@ -66,7 +74,7 @@ class track_camera:
 
 
 			magneticfield = np.dot(magneticsphere, shift)
-			rospy.loginfo(magneticfield)
+			#rospy.loginfo(magneticfield)
 
 			imu.header.stamp = rospy.Time.now()
 			imu.header.frame_id = '/base_link' # i.e. '/odom'
@@ -85,6 +93,9 @@ class track_camera:
                                          		  0.0, .01, 0.0,
                                                   0.0, 0.0, .01]
 
+			mag.header.stamp = rospy.Time.now()
+			mag.header.frame_id = '/base_link' # i.e. '/odom'                                                  
+
 			mag.magnetic_field.x = float(magn[1])/100.0
 			mag.magnetic_field.y = float(magn[2])/100.0
 			mag.magnetic_field.z = float(magn[3])/100.0
@@ -92,10 +103,10 @@ class track_camera:
                                          	0.0, .01, 0.0,
                                             0.0, 0.0, .01]
 
-			imu.orientation.w = float(quat[4])
-			imu.orientation.x = float(quat[1])
-			imu.orientation.y = float(quat[2])
-			imu.orientation.z = float(quat[3])
+			imu.orientation.w = float(quat[1])
+			imu.orientation.x = float(quat[2])
+			imu.orientation.y = float(quat[3])
+			imu.orientation.z = float(quat[4])
 			imu.orientation_covariance = [.01, 0.0, 0.0,
                                           0.0, .01, 0.0,
                                           0.0, 0.0, .01]
@@ -107,6 +118,9 @@ class track_camera:
 			#	heading += 360                                                                                                                          
 			#rospy.loginfo(head[1])
 
+			self.roll_pub.publish(float(rpy[1]))
+			self.pitch_pub.publish(float(rpy[2]))
+			self.pitch_pub.publish(float(rpy[3]))
 			self.imu_pub.publish(imu)
 			self.mag_pub.publish(mag)
 
