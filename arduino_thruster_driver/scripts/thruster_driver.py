@@ -6,6 +6,7 @@ import sys
 from std_msgs.msg import Int16, String, Float32, Bool
 from sub8_msgs.msg import Thrust, ThrusterCmd
 from std_srvs.srv import SetBool, SetBoolResponse
+from ctypes import c_ushort 
 
 
 class ThrusterDriver:
@@ -20,40 +21,51 @@ class ThrusterDriver:
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
     def command_thruster(self, name, force):
-        if force > 1.0:
-            force = 1.0
-        elif force < -1.0:
-            force = -1.0
+        if force > 0.75:
+            force = 0.75
+        elif force < -0.75:
+            force = -0.75
 
         if self.kill == False: #kill command is false
 
             green = rospy.Publisher('Green_led', Bool, queue_size=1)
             green.publish(True) #turn on green light
 
+		#c_ushort(int(data,16)).value
+
             if name == 'TOP':
-                self.thrust = force * (32767.0) - 3078
-                self.thrstr1.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) - 3078
+		#self.thrust = Int16(self.thrust)
+                self.thrstr1.publish(self.thrust)
             elif name == 'FL':
-                self.thrust = force * (32767.0)
-                self.thrstr2.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0))
+		#self.thrust = Int16(self.thrust)
+                self.thrstr2.publish(self.thrust)
             elif name == 'ML':
-                self.thrust = force * (32767.0) + 1119
-                self.thrstr3.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) + 1119
+		#self.thrust = Int16(self.thrust)
+                self.thrstr3.publish(self.thrust)
             elif name == 'BL':
-                self.thrust = force * (32767.0) 
-                self.thrstr4.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) 
+		#self.thrust = Int16(self.thrust)
+                self.thrstr4.publish(self.thrust)
             elif name == 'FR':
-                self.thrust = force * (32767.0) - 356
-                self.thrstr5.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) - 356
+		#self.thrust = Int16(self.thrust)
+                self.thrstr5.publish(self.thrust)
             elif name == 'MR':
-                self.thrust = force * (32767.0) + 1119
-                self.thrstr6.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) + 1119
+		#self.thrust = Int16(self.thrust)
+                self.thrstr6.publish(self.thrust)
             elif name == 'BR':
-                self.thrust = force * (32767.0) - 358
-                self.thrstr7.publish(int(self.thrust))
+                self.thrust = int(force * (32767.0)) - 358
+		self.thrust = Int16(self.thrust)
+                #self.thrstr7.publish(self.thrust)
             elif name == 'BTM':
-                self.thrust = force * (32767.0) - 3078
-                self.thrstr8.publish(int(self.thrust))     
+                self.thrust = int(force * (32767.0)) - 3078
+		#self.thrust = Int16(self.thrust)
+                self.thrstr8.publish(self.thrust)
+                #self.thrstr8.publish(int(self.thrust,16))     
 
         elif self.kill == True: #Kill command has been received
 
