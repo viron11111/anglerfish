@@ -12,6 +12,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image, Imu, MagneticField
 import tf, tf2_ros
 from std_msgs.msg import Float64
+from orientation_library import transformations as trns
 
 import csv
 from time import localtime,strftime
@@ -29,15 +30,6 @@ class ThrusterDriver:
 		self.velocity_file = csv.writer(open(file_name1,'w'))
 		self.velocity_file.writerow(["ROV_heading", "Camera_heading", "Difference"])
 
-	def camera_roll(self,data):
-		self.roller = data.data*(math.pi/180)
-
-	def camera_pitch(self,data):
-		self.pitcher = data.data*(math.pi/180)	
-	
-	def camera_yaw(self,data):
-		self.yaw = data.data*(math.pi/180)			
-
 	def sub_orientation(self, data):
 
 		quat = (
@@ -48,21 +40,10 @@ class ThrusterDriver:
 
 		euler = tf.transformations.euler_from_quaternion(quat)
 
-		#self.rov_heading = euler[2]
-		error_eq = (0.006*math.pow(euler[2],5) - 0.019*math.pow(euler[2],4) 
-			- 0.038*math.pow(euler[2], 3) + 0.224*math.pow(euler[2],2) 
-			- 0.048*euler[2] - 0.292)
-
-		self.rov_heading = euler[2] - error_eq
+		self.rov_heading = euler[2]
 
 	def pressure(self, data):
 		self.depth = data.pose.pose.position.z
-		#ospy.loginfo(self.depth)
-
-	def magnetic_field(self, data):
-		self.cx = data.magnetic_field.x
-		self.cy = data.magnetic_field.y
-		self.cz = data.magnetic_field.z				
 
 	def camera_imu(self, data):
 		quat = (
@@ -71,42 +52,13 @@ class ThrusterDriver:
 		data.orientation.z,
 		data.orientation.w)
 
-		euler = tf.transformations.euler_from_quaternion(quat)
+		(self.roll, self.pitch, self.yaw) = tf.transformations.euler_from_quaternion(quat)
 
-		self.roll = euler[0]
-		self.pitch = euler[1]
-		#self.yaw = euler[2]'''
+		#self.roll = euler[0]
+		#self.pitch = euler[1]
+		#self.yaw = euler[2]
 
-		xh=self.cx*math.cos(self.pitch)+self.cy*math.sin(self.pitch)*math.sin(self.roll)+self.cz*math.cos(self.roll)*math.sin(self.pitch)
-		yh=self.cy*math.cos(self.roll)-self.cz*math.sin(self.roll)
-
-		#var_compass=math.atan2(-yh,xh)
-		self.camera_heading = math.atan2(-yh,xh)
-
-		'''self.holder1 = var_compass# + 1.0
-		self.camera_heading = self.holder1*.2 + self.holder2*.2 + self.holder3*.2 + self.holder4*.2 + self.holder5*.2
-		self.holder5 = self.holder4
-		self.holder4 = self.holder3
-		self.holder3 = self.holder2
-		self.holder2 = self.holder1	'''	
-
-
-		'''if(self.camera_heading < 0):
-			self.camera_heading += 2*math.pi
-
-		if(self.camera_heading > 2*math.pi):
-			self.camera_heading -= 2*math.pi'''
-
-		#rospy.logwarn(self.cx)
-
-		#self.camera_heading -= math.pi
-
-		#self.camera_heading = math.atan2(self.cy, self.cx)
-
-		#self.velocity_file.writerow([self.rov_heading, self.camera_heading, self.rov_heading - self.camera_heading])
-
-
-		#rospy.logwarn("rov: %f camera: %f diff: %f" % (self.rov_heading,self.camera_heading, self.rov_heading - self.camera_heading))
+		self.camera_heading = self.yaw
 
 	def import_vid(self,data):
 
@@ -119,21 +71,91 @@ class ThrusterDriver:
 		#self.white_pub = rospy.Publisher("white",Image, queue_size = 1)
 		#self.combined_pub = rospy.Publisher("combined",Image, queue_size = 1)
 		#self.pre_pub = rospy.Publisher("pre",Image, queue_size = 1)
+
+		greenLower = (40, 100, 0)
+		greenUpper = (80, 255, 255)		
+		kernel = np.ones((5,5),np.uint8)
+
 		self.bridge = CvBridge()
 
 		#greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
 		#greenUpper = (self.H_green_high, self.S_green_high, self.V_green_high)
 
-		img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+		image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+
+		img = cv2.blur(image,(5,5))
+		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+		gray /= 10
+		gray *= gray		
+
+		gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
+		gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)	
+
+		ret,thresh = cv2.threshold(gray,100,255,0)
+
+		im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+		for cnt in contours:
+			if cnt != None:
+				M = cv2.moments(cnt)
+				cx = int(M["m10"] / M["m00"])
+				cy = int(M["m01"] / M["m00"])
+				cv2.circle(image, (cx, cy), 7, (255, 0, 0), -1)
+				cv2.drawContours(image, contours, -1, (0,0,255), 3)
+
+				#lens calibration numbers
+				K = ([[391.230961, 0.000000, 394.789113], [0.000000, 389.820978, 218.309630], [0.000000, 0.000000, 1.000000]])
+
+				target_point = [[cx],[cy],[1]]
+				#ref_point =
+
+				D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
+				L_vec = [0,0,1]  #vector from center of camera
+
+				mag_D_vec = np.linalg.norm(D_vec) 
+				mag_L_vec = np.linalg.norm(L_vec)
+
+				D_vec = D_vec/mag_D_vec
+
+				vec_dot = np.dot(L_vec, D_vec)
+
+				vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
+
+				#soh cah toa
+				#L = -1.98
+				L = -0.9271#self.depth
+				actual_distance_from_center = math.tan(vector_angle)*L
+
+				hypotenuse = actual_distance_from_center/math.asin(vector_angle)
+
+				self.threeD_point = D_vec*hypotenuse
+				orig_3d = D_vec*hypotenuse
+
+				#rotate_matrix = trns.rotation_matrix(self.camera_heading, orig_3d)
+
+				#rospy.logwarn("initial: %s rotate: %s" % (orig_3d, rotate_matrix))
+
+				#rospy.logwarn(self.camera_heading)
+
+				#*****************************************************************************************************
+				#for rotation 90 degrees
+				self.threeD_point[0] = orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+				self.threeD_point[1] = orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
+				self.threeD_point[2] = orig_3d[2]
+
+				#rospy.logwarn(self.threeD_point[0])
 
 		heading = self.rov_heading - self.camera_heading
+		#rospy.logwarn("cam: %f rov: %f" % (self.camera_heading, self.rov_heading))
 
 		degrees = -heading*(180/3.14157)
 
-		cv2.putText(img,'%f' % heading,(10,240), font, 1,(255,255,255),2,cv2.LINE_AA)
-		cv2.ellipse(img,(256,256),(100,50),0,0,degrees - 90,255,-1)
+		cv2.putText(image,'%f' % heading,(10,20), font, 0.5,(255,255,255),1,cv2.LINE_AA)
+		cv2.ellipse(image,(125,25),(25,25),0,0,degrees - 90,255,-1)
 
-		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
+		#cv2.circle(image, (400,200), 1, )
+
+		self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
 
 		self.camera_turn = rospy.Publisher('camera_heading', Float64, queue_size = 1)
 		self.rov_turn = rospy.Publisher('rov_heading', Float64, queue_size = 1)
@@ -167,12 +189,8 @@ class ThrusterDriver:
 
 		self.image_sub = rospy.Subscriber("/down/down/image_raw",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
-		self.camera_sub = rospy.Subscriber("/imu/camera_tilt", Imu, self.camera_imu)
-		self.camera_mag_sub = rospy.Subscriber("/imu/mag_camera", MagneticField, self.magnetic_field)
+		self.camera_sub = rospy.Subscriber("/imu/razor", Imu, self.camera_imu)
 		self.rov_orientation_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.sub_orientation)
-		self.roll_sub = rospy.Subscriber("camera_roll", Float64, self.camera_roll)
-		self.pitch_sub = rospy.Subscriber("camera_pitch", Float64, self.camera_pitch)
-		self.yaw_sub = rospy.Subscriber("camera_yaw", Float64, self.camera_yaw)
 		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
 		H_green = 160 #160, 80
@@ -216,7 +234,7 @@ class ThrusterDriver:
 
 			pos.pose.pose.position.x = -self.threeD_point[1]
 			pos.pose.pose.position.y = -self.threeD_point[0]
-			pos.pose.pose.position.z = self.depth#self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
+			pos.pose.pose.position.z = -0.9271#self.depth#self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
 
 			#pres.pose.pose.position.x = 
 

@@ -35,7 +35,7 @@ class Interface(object):
 		rospy.Subscriber("imu/data", Imu, self.stim300)
 		rospy.Subscriber("imu/razor", Imu, self.razor)
 		rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
-		rospy.Subscriber("imu/camera_tilt", Imu, self.camera_imu)
+		#rospy.Subscriber("imu/camera_tilt", Imu, self.camera_imu)
 		rospy.Subscriber("odometry/filtered", Odometry, self.base_link)
 
 		self.depth = 0.0        
@@ -143,16 +143,16 @@ class Interface(object):
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "base_link"
-		t.child_frame_id = "razor"
-		t.transform.translation.x = 0.061
-		t.transform.translation.y = -0.004
-		t.transform.translation.z = 0.022
+		t.header.frame_id = "odom"
+		t.child_frame_id = "down_camera"
+		t.transform.translation.x = 0.0
+		t.transform.translation.y = 0.0
+		t.transform.translation.z = -0.08
 		
-		t.transform.rotation.x = 0.0
-		t.transform.rotation.y = 0.0
-		t.transform.rotation.z = 0.0
-		t.transform.rotation.w = 1.0
+		t.transform.rotation.x = data.orientation.x
+		t.transform.rotation.y = data.orientation.y
+		t.transform.rotation.z = data.orientation.z
+		t.transform.rotation.w = data.orientation.w
 
 		br.sendTransform(t)
 
