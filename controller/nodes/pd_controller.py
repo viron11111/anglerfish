@@ -45,7 +45,7 @@ class control_sub():
 
 		self.pW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z]) #current position
 		
-		self.w_des = np.array([0.0, 0.0, 0.0])
+		self.w_des = np.array([0.0, 0.0, 0.0]) #np.array([])
 
 		self.qtrns = trns.quaternion_matrix(self.qW)
 
@@ -57,18 +57,18 @@ class control_sub():
 
 		self.p_err = np.dot(self.qT, (self.p_desW - self.pW))  #position error
 
-		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)
+		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)  
 
-		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err)
+		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
 
-		self.i_err = np.array(self.i_err + torque_amnt)
+		self.i_err = np.array(self.i_err + torque_amnt)  #integrator error
 
-		np.clip(self.i_err, -5, 5, self.i_err)
+		np.clip(self.i_err, -5, 5, self.i_err) #clipping integrat error to -5 or to 5 (prevent "run-off")
 
 		#rospy.logwarn(torque_amnt)
 
 
-		force_amnt = (self.f_kp *  self.p_err)
+		force_amnt = (self.f_kp *  self.p_err)  #P equation for force (position)
 
 		wrench = WrenchStamped()
 
@@ -142,7 +142,7 @@ class control_sub():
 
 		srv = Server(GainsConfig, self.callback_gains)
 
-		r = rospy.Rate(20)
+		r = rospy.Rate(30)
 
 		while not rospy.is_shutdown():
 				r.sleep()

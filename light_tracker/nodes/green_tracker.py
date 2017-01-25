@@ -123,7 +123,7 @@ class ThrusterDriver:
 
 				#soh cah toa
 				#L = -1.98
-				L = -0.9271#self.depth
+				L = self.depth  #-0.9271#self.depth
 				actual_distance_from_center = math.tan(vector_angle)*L
 
 				hypotenuse = actual_distance_from_center/math.asin(vector_angle)
@@ -234,7 +234,7 @@ class ThrusterDriver:
 
 			pos.pose.pose.position.x = -self.threeD_point[1]
 			pos.pose.pose.position.y = -self.threeD_point[0]
-			pos.pose.pose.position.z = -0.9271#self.depth#self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
+			pos.pose.pose.position.z = self.depth #-0.9271#self.depth#self.threeD_point[2]  #comment me out when using pressure sensor!!!!!!
 
 			#pres.pose.pose.position.x = 
 
