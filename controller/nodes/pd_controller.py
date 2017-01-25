@@ -27,7 +27,7 @@ class control_sub():
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "map"
+		t.header.frame_id = "odom"
 		t.child_frame_id = "directed"
 		t.transform.translation.x = self.p_desW[0]
 		t.transform.translation.y = self.p_desW[1]
@@ -57,9 +57,11 @@ class control_sub():
 
 		self.p_err = np.dot(self.qT, (self.p_desW - self.pW))  #position error
 
-		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)  
+		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)
 
 		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
+
+		rospy.logwarn(torque_amnt)
 
 		self.i_err = np.array(self.i_err + torque_amnt)  #integrator error
 
