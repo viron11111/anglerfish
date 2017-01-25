@@ -31,7 +31,7 @@ class Interface(object):
 
 	def __init__(self):
 
-		#self.pose_pub = rospy.Publisher("/static_point", PoseStamped, queue_size = 0)
+		self.pose_pub = rospy.Publisher("/static_point", PoseWithCovarianceStamped, queue_size = 0)
 		rospy.Subscriber("imu/data", Imu, self.stim300)
 		rospy.Subscriber("imu/razor", Imu, self.razor)
 		rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
@@ -41,6 +41,8 @@ class Interface(object):
 		self.depth = 0.0        
 		self.window_size = 5
 		self.slider = [0] * self.window_size
+
+
 
 	def green_led(self):
 		br = tf2_ros.TransformBroadcaster()
@@ -81,7 +83,7 @@ class Interface(object):
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "map"
+		t.header.frame_id = "odom"
 		t.child_frame_id = "camera_imu"
 		t.transform.translation.x = 1.0
 		t.transform.translation.y = 0.0 
@@ -97,6 +99,18 @@ class Interface(object):
 		t = geometry_msgs.msg.TransformStamped()
 
 		#odom = Odometry()
+		'''t.header.stamp = rospy.Time.now()
+		t.header.frame_id = "map"
+		t.child_frame_id = "odom"
+		t.transform.translation.x = 0
+		t.transform.translation.y = 0 
+		t.transform.translation.z = 0
+		t.transform.rotation.x = 0
+		t.transform.rotation.y = 0
+		t.transform.rotation.z = 0
+		t.transform.rotation.w = 1.0
+
+		br.sendTransform(t)'''
 
 		t.header.stamp = rospy.Time.now()
 		t.header.frame_id = "odom"

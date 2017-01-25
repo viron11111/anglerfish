@@ -70,15 +70,15 @@ class joystick(object):
 
 	def action(self, data):
 
-		#set desired TF to Anglerfish's current position
+		#set desired TF to 0,0 with north heading, maintain depth
 		if data.buttons[1] == 1:
-			self.subposx = self.base_link_posx
-			self.subposy = self.base_link_posy
-			self.subposz = self.base_link_posz
-			self.subrotx = self.base_link_rotx
-			self.subroty = self.base_link_roty
-			self.subrotz = self.base_link_rotz
-			self.subrotw = self.base_link_rotw
+			self.subposx = 0
+			self.subposy = 0
+			self.subposz = self.subposz
+			self.subrotx = 0
+			self.subroty = 0
+			self.subrotz = 0
+			self.subrotw = 1.0
 
 		#reset desired TF to 0 (pos: 0,0,0 rot: 0,0,0,1)
 		elif data.buttons[5] == 1:
@@ -196,7 +196,7 @@ class joystick(object):
 			#odom = Odometry()
 
 			t.header.stamp = rospy.Time.now()
-			t.header.frame_id = "map"
+			t.header.frame_id = "odom"
 			t.child_frame_id = "desired_position"
 			br.sendTransform(t)	
 
