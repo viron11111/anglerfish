@@ -85,13 +85,13 @@
                                       true, true, true,
                                       true, true, true]</rosparam>
 
-      <rosparam param="pose0_config">[false,  false, false,
+      <rosparam param="pose0_config">[false,  false, true,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false]</rosparam>                                      
 
-      <rosparam param="pose1_config">[true,  true, true,
+      <rosparam param="pose1_config">[true,  true, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
