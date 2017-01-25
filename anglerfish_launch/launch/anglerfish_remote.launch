@@ -11,8 +11,8 @@
   <!-- <node pkg="light_tracker" type="flash_green_tracker.py" name="led_tracker" respawn="true">
   </node> -->
 
-  <!--<node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
-  </node>-->
+  <node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
+  </node>
 
   <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
@@ -29,5 +29,7 @@
 
   <node pkg="anglerfish_joy" type="joystick.py" name="joystick_tf" respawn="true">
   </node>
+
+  <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/>
 
 </launch>
