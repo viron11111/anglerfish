@@ -50,10 +50,11 @@ class start_lights():
 				if counter == 0 or counter == 1 or counter == 2 or counter == 3 or counter == 4 or counter == 5 or counter == 6 or counter == 7:  
 					self.pig.write(16, 1)
 				else:
-					self.pig.write(16, 0)
+					self.pig.write(16, 1) #self.pig.write(16, 0)
 			counter += 1
 
 			if counter > 23:
+				#this resets the counter
 				counter = 0
 			rate.sleep()	
 

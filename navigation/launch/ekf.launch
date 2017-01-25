@@ -85,13 +85,13 @@
                                       true, true, true,
                                       true, true, true]</rosparam>
 
-      <rosparam param="pose0_config">[false,  false, true,
+      <rosparam param="pose0_config">[false,  false, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false]</rosparam>                                      
 
-      <rosparam param="pose1_config">[true,  true, false,
+      <rosparam param="pose1_config">[true,  true, true,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
@@ -143,7 +143,6 @@
       <!-- By default, the subscription queue size for each message type is 1. If you wish to increase that so as not
            miss any messages (even if your frequency is set to a relatively small value), increase these. -->
       <param name="imu0_queue_size" value="3"/>
-      <param name="imu1_queue_size" value="3"/>
 
       <!-- If your data is subject to outliers, use these threshold settings, expressed as Mahalanobis distances, to control
            how far away from the current vehicle state a sensor measurement is permitted to be. Each defaults to
