@@ -59,8 +59,8 @@ class ThrusterDriver:
                 self.thrstr6.publish(self.thrust)
             elif name == 'BR':
                 self.thrust = int(force * (32767.0)) - 358
-		self.thrust = Int16(self.thrust)
-                #self.thrstr7.publish(self.thrust)
+		#self.thrust = Int16(self.thrust)
+                self.thrstr7.publish(self.thrust)
             elif name == 'BTM':
                 self.thrust = int(force * (32767.0)) - 3078
 		#self.thrust = Int16(self.thrust)
