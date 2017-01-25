@@ -61,7 +61,7 @@ class control_sub():
 
 		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
 
-		rospy.logwarn(torque_amnt)
+		#rospy.logwarn(torque_amnt)
 
 		self.i_err = np.array(self.i_err + torque_amnt)  #integrator error
 

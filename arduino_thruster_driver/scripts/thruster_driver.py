@@ -31,41 +31,30 @@ class ThrusterDriver:
             green = rospy.Publisher('Green_led', Bool, queue_size=1)
             green.publish(True) #turn on green light
 
-		#c_ushort(int(data,16)).value
-
             if name == 'TOP':
                 self.thrust = int(force * (32767.0)) - 3078
-		#self.thrust = Int16(self.thrust)
                 self.thrstr1.publish(self.thrust)
             elif name == 'FL':
                 self.thrust = int(force * (32767.0))
-		#self.thrust = Int16(self.thrust)
                 self.thrstr2.publish(self.thrust)
             elif name == 'ML':
                 self.thrust = int(force * (32767.0)) + 1119
-		#self.thrust = Int16(self.thrust)
                 self.thrstr3.publish(self.thrust)
             elif name == 'BL':
                 self.thrust = int(force * (32767.0)) 
-		#self.thrust = Int16(self.thrust)
                 self.thrstr4.publish(self.thrust)
             elif name == 'FR':
                 self.thrust = int(force * (32767.0)) - 356
-		#self.thrust = Int16(self.thrust)
                 self.thrstr5.publish(self.thrust)
             elif name == 'MR':
                 self.thrust = int(force * (32767.0)) + 1119
-		#self.thrust = Int16(self.thrust)
                 self.thrstr6.publish(self.thrust)
             elif name == 'BR':
                 self.thrust = int(force * (32767.0)) - 358
-		#self.thrust = Int16(self.thrust)
                 self.thrstr7.publish(self.thrust)
             elif name == 'BTM':
                 self.thrust = int(force * (32767.0)) - 3078
-		#self.thrust = Int16(self.thrust)
                 self.thrstr8.publish(self.thrust)
-                #self.thrstr8.publish(int(self.thrust,16))     
 
         elif self.kill == True: #Kill command has been received
 
