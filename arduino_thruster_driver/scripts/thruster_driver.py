@@ -21,10 +21,10 @@ class ThrusterDriver:
             self.command_thruster(thrust_cmd.name, thrust_cmd.thrust)
 
     def command_thruster(self, name, force):
-        if force > 0.75:
-            force = 0.75
-        elif force < -0.75:
-            force = -0.75
+        if force > 0.90:
+            force = 0.90
+        elif force < -0.90:
+            force = -0.90
 
         if self.kill == False: #kill command is false
 
