@@ -57,13 +57,21 @@ class calibrate_mag():
 		self.y_out = data.magnetic_field.y
 		self.z_out = data.magnetic_field.z
 
-		scale = np.array([[1.051523805884331, -0.020851706173945314, 0.01997186678167343],
+		scale = np.array([[1.0689906033106207, -0.013458980658749902, -0.013392777875163523],
+			              [-0.01345898065874976, 1.0656936720009005, 0.0017471175015205786], 
+			              [-0.013392777875163514, 0.0017471175015206298, 0.8781059859164992]])
+
+		self.corrected = np.dot([self.x_out, self.y_out, self.z_out],scale) + np.array([0.006234997669602136, 
+			                                                                           0.006520797107196374,
+			                                                                            0.011305070150862356])
+
+		'''scale = np.array([[1.051523805884331, -0.020851706173945314, 0.01997186678167343],
 			              [-0.020851706173945314, 1.0577586404365373, 0.018433880871105954], 
 			              [0.019971866781673394, 0.018433880871105965, 0.9001379227195077]])
 
 		self.corrected = np.dot([self.x_out, self.y_out, self.z_out],scale) + np.array([0.0057537116805245515, 
 			                                                                           -0.004091635490622386,
-			                                                                            0.01347351737044513])
+			                                                                            0.01347351737044513])'''
 
 		
 
@@ -101,12 +109,12 @@ class calibrate_mag():
 	        self.min_z = 0.0
 
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
-		rospy.Subscriber('/thruster1_force', Float32, self.thruster_1_cal)
+		'''rospy.Subscriber('/thruster1_force', Float32, self.thruster_1_cal)
 		rospy.Subscriber('/thruster2_force', Float32, self.thruster_2_cal)
 		rospy.Subscriber('/thruster3_force', Float32, self.thruster_3_cal)
 		rospy.Subscriber('/thruster4_force', Float32, self.thruster_4_cal)
 		rospy.Subscriber('/thruster5_force', Float32, self.thruster_5_cal)
-		rospy.Subscriber('/thruster6_force', Float32, self.thruster_6_cal)
+		rospy.Subscriber('/thruster6_force', Float32, self.thruster_6_cal)'''
 		
 		self.x_out = 0.0
 		self.y_out = 0.0
