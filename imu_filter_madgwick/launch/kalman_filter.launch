@@ -14,22 +14,12 @@
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
-    <!-- Mine -->
-    <!--<param name="mag_bias_x" value="0.011776"/>
-    <param name="mag_bias_y" value="0.0"/>
-    <param name="mag_bias_z" value="0.0"/>-->
-
-    <!-- From ROS program, not mine-->
-    <!--<param name="mag_bias_x" value="0.00178298"/>
-    <param name="mag_bias_y" value="-0.01288817"/>-->
-
-    <!--<param name="zeta" value="4.8481366753355e-6"/>-->
-
-
+    <param name="world_frame" value="enu"/>
+    <param name="use_mag" value="true"/>
     <param name="use_magnetic_field_msg" value="true"/>
     <param name="gain" value=".5"/>
-    <!-- <param name="mag_bias_z" value="2.0"/> -->
-    <param name="publish_tf" value="false"/>
+    <param name="publish_tf" value="true"/>
+    <param name="fixed_frame" value="hmc5833l"/>
 
   </node>
 

@@ -153,7 +153,7 @@ class calibrate_mag():
 
 			mag = MagneticField(header = 
           	        Header(stamp = rospy.get_rostime(),
-                	frame_id = 'base_link'),
+                	frame_id = 'hmc5833l'),
 	                magnetic_field = Vector3(self.corrected[0], self.corrected[1], self.corrected[2]),
 	                magnetic_field_covariance = [ 0.01, 0.0, 0.0,
                                                   0.0, 0.01, 0.0,
