@@ -6,6 +6,7 @@ from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 from sensor_msgs.msg import Joy
 import tf, tf2_ros
 from nav_msgs.msg import Odometry
+from anglerfish_joy.msg import rpy
 
 '''
 axes:
@@ -66,6 +67,28 @@ class joystick(object):
 		self.subroty = 0
 		self.subrotz = 0
 		self.subrotw = 1.0
+
+	def rpy(self, data):
+
+		quat = (
+			self.subrotx,
+			self.subroty,
+			self.subrotz,
+			self.subrotw)
+
+		euler = tf.transformations.euler_from_quaternion(quat)
+		
+		euler = (
+			data.Roll,
+			data.Pitch,
+			data.Yaw)
+		#rospy.loginfo(euler)
+
+		quat = tf.transformations.quaternion_from_euler(euler[0],euler[1], euler[2])
+		self.subrotx = quat[0]
+		self.subroty = quat[1]
+		self.subrotz = quat[2]
+		self.subrotw = quat[3]
 
 
 	def action(self, data):
@@ -147,6 +170,7 @@ class joystick(object):
 		rospy.Subscriber("joy", Joy, self.action)
 
 		rospy.Subscriber("/odometry/filtered", Odometry, self.odom_location)
+		rospy.Subscriber("/rpy", rpy, self.rpy)
 		
 		#desire TF
 		self.pose_pub = rospy.Publisher("RC_position", PoseWithCovarianceStamped, queue_size = 1)
