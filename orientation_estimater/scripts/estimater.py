@@ -157,11 +157,11 @@ class Interface(object):
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "odom"
+		t.header.frame_id = "base_link"
 		t.child_frame_id = "down_camera"
 		t.transform.translation.x = 0.0
-		t.transform.translation.y = 0.0
-		t.transform.translation.z = -0.08
+		t.transform.translation.y = 0.1
+		t.transform.translation.z = 0#-0.08
 		
 		t.transform.rotation.x = data.orientation.x
 		t.transform.rotation.y = data.orientation.y
