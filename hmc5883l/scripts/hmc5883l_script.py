@@ -33,9 +33,9 @@ class measure_headings():
 	    self.bus.write_byte_data(self.HMC5883L_ADDR, adr, value)
 
 	def get_reading(self):
-		self.x_out = (self.read_word_2c(3) * self.scale)#/10000  #10000 for Gauss to Tesla conversion
-		self.y_out = (self.read_word_2c(7) * self.scale)#/10000
-		self.z_out = (self.read_word_2c(5) * self.scale)#/10000
+		self.x_out = (self.read_word_2c(3) * self.scale)/10000  #10000 for Gauss to Tesla conversion
+		self.y_out = (self.read_word_2c(7) * self.scale)/10000
+		self.z_out = (self.read_word_2c(5) * self.scale)/10000
 
 
 		#print self.x_out
@@ -83,7 +83,6 @@ class measure_headings():
 
                 #print mag.header	
                 self.mag_pub.publish(mag)
-		self.rpy_pub.publish(rpy)
                 rate.sleep()
 
 def main(args):

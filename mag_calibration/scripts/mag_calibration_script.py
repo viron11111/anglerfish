@@ -37,6 +37,11 @@ class calibrate_mag():
 
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 
+                self.corrected = [0,0,0]
+                self.x_out = 0
+                self.y_out = 0
+                self.z_out = 0
+
 		rate = rospy.Rate(75)
 
 		while not rospy.is_shutdown():
