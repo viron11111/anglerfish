@@ -1,7 +1,25 @@
 <launch>
+  <!-- <include file="$(find anglerfish_launch)/launch/camera.launch"/> -->
+
+  <node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
+  </node>
+
   <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
 
-  <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node_kill" respawn="true">
+    <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_1962720-if00"/>
+    <param name="baud" value="115200"/>
+  </node>
+
+  <node pkg="joy" type="joy_node" name="joystick_driver" respawn="true">
+    <param name="joy_node/dev" value="/dev/input/js1"/>
+    <param name="deadzone" value="0.0"/>
+  </node>
+
+  <node pkg="anglerfish_joy" type="joystick.py" name="joystick_tf" respawn="true">
+  </node>
+
+  <!-- <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/> -->
 
 </launch>

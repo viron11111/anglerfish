@@ -31,14 +31,14 @@ class read_registers():
 
 		# THERMISTOR SPECIFICATIONS
 		# resistance at 25 degrees C
-		THERMISTORNOMINAL = 10000      
+		THERMISTORNOMINAL = 10000
 		# temp. for nominal resistance (almost always 25 C)
-		TEMPERATURENOMINAL =  25   
+		TEMPERATURENOMINAL =  25
 		# The beta coefficient of the thermistor (usually 3000-4000)
 		BCOEFFICIENT = 3900
 		# the value of the 'other' resistor
-		SERIESRESISTOR = 3300 
-		
+		SERIESRESISTOR = 3300
+
 		if temp_reg == 0:
 			rospy.logwarn("temp_reg zero error: %d %s" % (temp_reg, self.T100_NAME))
 			temp_reg = 30000
@@ -50,8 +50,8 @@ class read_registers():
 		steinhart /= BCOEFFICIENT                  # 1/B * ln(R/Ro)
 		steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15) # + (1/To)
 		steinhart = 1.0 / steinhart                 # Invert
-		steinhart -= 273.15  
-		self.thruster_temp = steinhart 
+		steinhart -= 273.15
+		self.thruster_temp = steinhart
 
 	#voltage calculation
 	def voltage(self):
@@ -59,7 +59,7 @@ class read_registers():
 		volt_1 = bus.read_byte_data(self.T100_ADDR, self.T100_VOLTAGE_1)
 		volt_2 = bus.read_byte_data(self.T100_ADDR, self.T100_VOLTAGE_2)
 
-	        voltage_raw = volt_1 << 8 | volt_2		
+	        voltage_raw = volt_1 << 8 | volt_2
 		self.actual_voltage = (voltage_raw*.0004921)
 
 	#current calculation taken from BlueRobotics
@@ -68,7 +68,7 @@ class read_registers():
 		curr_1 = bus.read_byte_data(self.T100_ADDR, self.T100_CURRENT_1)
 		curr_2 = bus.read_byte_data(self.T100_ADDR, self.T100_CURRENT_2)
 
-	        current_raw = curr_1 << 8 | curr_2		
+	        current_raw = curr_1 << 8 | curr_2
 		self.actual_current = ((current_raw-32767)*.001122)
 
 	#take pulse count over time, calculate RPM
@@ -77,9 +77,9 @@ class read_registers():
 		#read pulse reg to calculate RPM
 		pulse1_read = bus.read_byte_data(self.T100_ADDR, self.T100_PULSE_COUNT_1)
 		pulse2_read = bus.read_byte_data(self.T100_ADDR, self.T100_PULSE_COUNT_2)
-		
+
 		#bit shift 2 bytes
-	        pulse_count_reg = pulse1_read << 8 | pulse2_read				
+	        pulse_count_reg = pulse1_read << 8 | pulse2_read
 
 		self.actual_rpm = (float(pulse_count_reg)/((time.clock()-self.rpmTimer)*120))*60
 
@@ -87,24 +87,28 @@ class read_registers():
 
 
 	def thrust(self, force):
-		if force.data > 2.36:
+		if force.data > 1.0:
 			#rospy.logwarn("Max forward thrust = 2.36 kgf.  Input, %0.2f kgf changed to 2.36 kgf", force.data)
-			force.data = 2.36
-			
-		elif force.data < -1.82:
+			force.data = 1.0
+		elif force.data < -1.0:
 			#rospy.logwarn("Max reverse thrust = -1.82 kgf.  Input, %0.2f kgf changed to -1.82 kgf", force.data)
-			force.data = -1.82
-		
-		if force.data < 0.0000:
-			#rospy.logwarn("desired force: %d" % force.data)
-			output = (force.data/-1.82)*-32767
-			#rospy.logwarn("output: %d" % output)
-		elif force.data > 0.0000:
-			output = (force.data/2.36)*32767
+			force.data = -1.0
+
+		if force.data < 0.0:
+			#rospy.logwarn("desired force: %f" % force.data)
+			output = (force.data)*32767
+			#rospy.logwarn("output: %f" % output)
+			#output = -output
+			#rospy.logwarn("neg_output: %f" % output)
+
+		elif force.data > 0.0:
+			output = (force.data)*32767
 		else:
 			output = 0.0
 
 		output = int(output)
+
+		#rospy.logwarn("output: %d" % output)
 
 		self.signal = output
 
@@ -124,11 +128,10 @@ class read_registers():
 
 		if (self.spin_warn_time - self.spin_warn_trigger) > 500 and force.data != 0.000 and self.trigger==1:
 			rospy.logerr("NO SPIN: %s" % self.T100_NAME)
-			
 
 	def stop_motor():
 	        bus.write_byte_data(rospy.get_param('~register'), 0x00, 0)
-	        bus.write_byte_data(rospy.get_param('~register'), 0x01, 0)	
+	        bus.write_byte_data(rospy.get_param('~register'), 0x01, 0)
 
 	def __init__(self):
 		#ROS params for definging node for each thruster

@@ -10,9 +10,11 @@ class start_lights():
 
 	def green(self, power):
 	    if power.data == 1:
-		self.pig.write(16, 1)
+		#self.pig.write(16, 1)
+		self.green_flag = 1
 	    else:
-		self.pig.write(16, 0)
+		#self.pig.write(16, 0)
+		self.green_flag = 0
 
 	def white(self, power):
 	    if power.data == 1:
@@ -35,12 +37,26 @@ class start_lights():
 		self.pig = pigpio.pi()
 		self.pig.set_mode(12, pigpio.OUTPUT)
 		self.pig.set_mode(16, pigpio.OUTPUT)
+		self.green_flag = 0
 
-		rate = rospy.Rate(10) #Hz
+		rate = rospy.Rate(360) #Hz
+
+		counter = 0
 
 		while not rospy.is_shutdown():
+			if self.green_flag == 0:
+				self.pig.write(16, 0)
+			elif self.green_flag == 1:
+				if counter == 0 or counter == 1 or counter == 2 or counter == 3 or counter == 4 or counter == 5 or counter == 6 or counter == 7:  
+					self.pig.write(16, 1)
+				else:
+					self.pig.write(16, 1) #self.pig.write(16, 0)
+			counter += 1
 
-		    rate.sleep()	
+			if counter > 23:
+				#this resets the counter
+				counter = 0
+			rate.sleep()	
 
     	rospy.on_shutdown(lights_off)
 

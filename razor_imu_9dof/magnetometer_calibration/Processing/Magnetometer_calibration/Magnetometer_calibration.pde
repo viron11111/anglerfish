@@ -91,7 +91,7 @@ void setup() {
   // Setup serial port I/O
   println("AVAILABLE SERIAL PORTS:");
   println(Serial.list());
-  String portName = Serial.list()[SERIAL_PORT_NUM];
+  String portName = "/dev/ttyUSB0";//Serial.list()[SERIAL_PORT_NUM];
   println();
   println("HAVE A LOOK AT THE LIST ABOVE AND SET THE RIGHT SERIAL PORT NUMBER IN THE CODE!");
   println("  -> Using port " + SERIAL_PORT_NUM + ": " + portName);

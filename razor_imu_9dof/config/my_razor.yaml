@@ -1,15 +1,15 @@
 ## USB port
-port: /dev/ttyUSB0
+port: /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A8007ZGn-if00-port0
 
 
 ##### Calibration ####
 ### accelerometer
-accel_x_min: -250.0
-accel_x_max: 250.0
-accel_y_min: -250.0
-accel_y_max: 250.0
-accel_z_min: -250.0
-accel_z_max: 250.0
+accel_x_min: -277.0
+accel_x_max: 281.0
+accel_y_min: -263.0
+accel_y_max: 284.0
+accel_z_min: -272.0
+accel_z_max: 263.0
 
 ### magnetometer
 # standard calibration
@@ -21,14 +21,14 @@ magn_z_min: -600.0
 magn_z_max: 600.0
 
 # extended calibration
-calibration_magn_use_extended: false
-magn_ellipsoid_center: [0, 0, 0]
-magn_ellipsoid_transform: [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+calibration_magn_use_extended: true
+magn_ellipsoid_center: [68.1380, -7.74242, -22.6953]
+magn_ellipsoid_transform: [[0.974380, -0.0312942, -0.00485862], [-0.0312942, 0.943474, 0.0183718], [-0.00485862, 0.0183718, 0.966795]]
 
 # AHRS to robot calibration
 imu_yaw_calibration: 0.0
 
 ### gyroscope
-gyro_average_offset_x: 0.0
-gyro_average_offset_y: 0.0
-gyro_average_offset_z: 0.0
+gyro_average_offset_x: 1.60
+gyro_average_offset_y: 28.14
+gyro_average_offset_z: 5.61

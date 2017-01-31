@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node">
+    <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_1962610-if00"/>
+    <param name="baud" value="57600"/>
+  </node>
+  <node pkg="arduino_thruster_driver" type="thruster_driver.py" name="T100_driver">
+  </node>
+</launch>

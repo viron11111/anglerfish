@@ -297,6 +297,8 @@ void ImuFilterRos::publishFilteredMsg(const ImuMsg::ConstPtr& imu_msg_raw)
   imu_msg->orientation.y = q2;
   imu_msg->orientation.z = q3;
 
+  orientation_variance_ = 0.001;
+
   imu_msg->orientation_covariance[0] = orientation_variance_;
   imu_msg->orientation_covariance[1] = 0.0;
   imu_msg->orientation_covariance[2] = 0.0;

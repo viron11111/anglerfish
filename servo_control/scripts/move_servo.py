@@ -17,12 +17,12 @@ class servo_control():
     self.pwm.setPWM(channel, 0, pulse)
 
   def moving(self, pos):
-    if pos.data < 140:
-      rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
-      pos.data = 140
-    elif pos.data > 710:
-      rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
-      pos.data = 710
+    if pos.data < 200:
+      #rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
+      pos.data = 200
+    elif pos.data > 550:
+      #rospy.logwarn("Servo min/max values exceeded: %d.  Acceptable range: 140-710" % pos.data)
+      pos.data = 550
 
     self.pwm.setPWM(0, 0, pos.data)    
 

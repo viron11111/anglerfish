@@ -5,10 +5,14 @@ import sys
 import math
 import rospy
 import numpy as np
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Float32
 from std_msgs.msg import Header
 from geometry_msgs.msg import Vector3
 from sensor_msgs.msg import MagneticField
+from t100_thruster.msg import t100_thruster_feedback
+from mag_calibration.msg import mag_values
+#from mag_calibration.msg import mag_values
+#from anglerfish.msg import t100_thruster_feedback
 
 class calibrate_mag():
 
@@ -17,93 +21,41 @@ class calibrate_mag():
 		self.y_out = data.magnetic_field.y
 		self.z_out = data.magnetic_field.z
 
-		if self.x_out > self.max_x:
-			self.max_x = self.x_out
-		elif self.x_out < self.min_x:
-			self.min_x = self.x_out
+		scale = np.array([[1.0668297239276732, -0.013402138039921378, -0.014120127475188347],
+			              [-0.013402138039921463, 1.0672934593219578, 0.0006424302836179077], 
+			              [-0.014120127475188338, 0.000642430283618064, 0.8785814940921376]])
 
-		if self.y_out > self.max_y:
-			self.max_y = self.y_out
-		elif self.y_out < self.min_y:
-			self.min_y = self.y_out
-
-		if self.z_out > self.max_z:
-			self.max_z = self.z_out
-		elif self.z_out < self.min_z:
-			self.min_z = self.z_out
-
-		self.x_bias = ((self.max_x + self.min_x)/2.0) #for calculating bias
-		self.y_bias = ((self.max_y + self.min_y)/2.0) #not to be used again until new location
-		self.z_bias = ((self.max_z + self.min_z)/2.0)
-
-		#f = (self.max_x + self.max_y + self.max_z)/3.0
-		#print f
-		f = .050232
-
-		#print '************'
-		#print self.max_x
-		#print self.max_y
-		#print self.max_z
-		
-		self.x_out_hard = self.x_out - 0.011868
-		self.y_out_hard = self.y_out - (-0.017066)
-		self.z_out_hard = self.z_out - 0.002116
-
-		self.x_simple_cal = self.x_out_hard * (f/0.070288)
-		self.y_simple_cal = self.y_out_hard * (f/0.034224)
-		self.z_simple_cal = self.z_out_hard * (f/0.046092)
-
-		self.hard_vals = np.matrix('%f;%f;%f' % (self.x_out_hard,self.y_out_hard, self.z_out_hard))
-
-		soft_matrix = np.matrix('22.18458769, 0.68136508, 0.39133311; 0.0, 22.4054685, -0.2618374; 0.0, 0.0,  24.14833212')
-
-		self.calibrated_values = soft_matrix * self.hard_vals
-
-		#print self.calibrated_values[0]
-		
-
+		self.corrected = np.dot([self.x_out, self.y_out, self.z_out],scale) + np.array([0.00610837387568588, 
+			                                                                           0.0066839069662578705,
+			                                                                            0.011252580642419059])
 
 	def __init__(self):
 		self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
+		self.mag_vals_pub = rospy.Publisher("/comp_mag_values", mag_values, queue_size=1)
+
+		magval = mag_values()
+
 		rospy.Subscriber("/imu/mag_raw", MagneticField, self.min_max)
 
-		self.max_x = 0.0001
-		self.min_x = 0.0
-		self.max_y = 0.0001
-		self.min_y = 0.0
-		self.max_z = 0.0001
-		self.min_z = 0.0
-
-		self.x_out = 0.0
-		self.y_out = 0.0
-		self.z_out = 0.0
-
-		self.x_bias = 0.0
-		self.y_bias = 0.0
-		self.z_bias = 0.0
-
-		self.x_out_hard = 0.0
-		self.y_out_hard = 0.0
-		self.z_out_hard = 0.0
-
-		self.x_simple_cal = .04
-		self.y_simple_cal = .04
-		self.z_simple_cal = .04
-
-		self.calibrated_values = (0.0, 0.0, 0.0)
+                self.corrected = [0,0,0]
+                self.x_out = 0
+                self.y_out = 0
+                self.z_out = 0
 
 		rate = rospy.Rate(75)
 
 		while not rospy.is_shutdown():
 
-		    mag = MagneticField(header = 
-                        Header(stamp = rospy.get_rostime(),
-	                frame_id = 'magnetometer_corrected'),
-	                magnetic_field = Vector3(self.x_simple_cal, self.y_simple_cal, self.z_simple_cal)
-	                #magnetic_field = Vector3(self.calibrated_values[0],self.calibrated_values[1],self.calibrated_values[2])
-	                )
-	            self.dynamic_pub.publish(mag)
-	            rate.sleep()
+			mag = MagneticField(header = 
+          	        Header(stamp = rospy.get_rostime(),
+                	frame_id = 'base_link'),
+	                magnetic_field = Vector3(self.corrected[0], self.corrected[1], self.corrected[2]),
+	                magnetic_field_covariance = [ 0.01, 0.0, 0.0,
+                                                  0.0, 0.01, 0.0,
+                                                  0.0, 0.0, 0.01])
+
+		        self.dynamic_pub.publish(mag)
+	       	        rate.sleep()
 
 def main(args):
 	rospy.init_node('mag_calibrator', anonymous=False)
