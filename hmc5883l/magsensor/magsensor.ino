@@ -36,6 +36,8 @@
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
+bool led = 0;
+
 void displaySensorDetails(void)
 {
   sensor_t sensor;
@@ -78,6 +80,8 @@ void setup(void)
     while(1);
   }
 
+  pinMode(13, OUTPUT);
+
   write8(HMC5883_ADDRESS_MAG, HMC5883_REGISTER_MAG_CRA_REG_M, 0x18);  //0001 1000
   
 }
@@ -87,10 +91,20 @@ void loop(void)
   /* Get a new sensor event */ 
   sensors_event_t event; 
   mag.getEvent(&event);
+
+  digitalWrite(13, led);
  
   /* Display the results (magnetic vector values are in micro-Tesla (uT)) */
   Serial.print("XYZ,"); Serial.print(event.magnetic.x); Serial.print(",");Serial.print(event.magnetic.y); Serial.print(",");
   Serial.println(event.magnetic.z);
 
-  delay(20);
+  if (led == 0)
+  {
+    led = 1;
+  }
+  else
+  {
+    led = 0;
+  }
+  delay(18);
 }
