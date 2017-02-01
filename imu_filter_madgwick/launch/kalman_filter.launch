@@ -14,7 +14,7 @@
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
-    <param name="world_frame" value="enu"/>
+    <param name="world_frame" value="wnu"/>
     <param name="use_mag" value="true"/>
     <param name="use_magnetic_field_msg" value="true"/>
     <param name="gain" value=".5"/>

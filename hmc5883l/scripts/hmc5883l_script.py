@@ -37,6 +37,10 @@ class measure_headings():
 		self.y_out = (self.read_word_2c(7) * self.scale)/10000
 		self.z_out = (self.read_word_2c(5) * self.scale)/10000
 
+                heading  = math.atan2(self.y_out,self.x_out)
+                if (heading < 0):
+			heading += 2*math.pi
+                rospy.loginfo(math.degrees(heading))
 
 		#print self.x_out
 
@@ -48,7 +52,7 @@ class measure_headings():
 	    self.mag_pub = rospy.Publisher("/imu/mag_raw", MagneticField, queue_size=1)
 	    #self.rpy_pub = rospy.Publisher("/mag_raw_rpy", mag_raw, queue_size=1)
 
-	    self.write_byte(0x00, 0b01011000) # Set to 4 samples @ 75Hz
+	    self.write_byte(0x00, 0b01010100) # Set to 4 samples @ 75Hz
 	    self.write_byte(0x01, 0b00100000) # 1.3 gain LSb / Gauss 1090 (default)
 	    self.write_byte(0x02, 0b00000000) # Continuous sampling
 
@@ -64,7 +68,7 @@ class measure_headings():
 
             rpy = mag_raw()
 
-            rate = rospy.Rate(75) #Hz
+            rate = rospy.Rate(25) #Hz
 
             while not rospy.is_shutdown():
                 self.get_reading()
@@ -72,7 +76,7 @@ class measure_headings():
 
                 mag = MagneticField(
                 header = Header(
-                    stamp = rospy.get_rostime(),
+                    stamp = rospy.Time.now(),
                     frame_id = 'base_link'
                 ),
                 magnetic_field = Vector3(self.x_out, self.y_out, self.z_out),

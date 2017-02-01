@@ -28,6 +28,8 @@ class calibrate_mag():
 		self.corrected = np.dot([self.x_out, self.y_out, self.z_out],scale) + np.array([0.00610837387568588, 
 			                                                                           0.0066839069662578705,
 			                                                                            0.011252580642419059])
+                #heading  = math.atan2(self.corrected[1],self.corrected[0])
+                #rospy.loginfo(heading)
 
 	def __init__(self):
 		self.dynamic_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
@@ -42,17 +44,17 @@ class calibrate_mag():
                 self.y_out = 0
                 self.z_out = 0
 
-		rate = rospy.Rate(75)
+		rate = rospy.Rate(60)
 
 		while not rospy.is_shutdown():
 
 			mag = MagneticField(header = 
-          	        Header(stamp = rospy.get_rostime(),
+          	        Header(stamp = rospy.Time.now(),
                 	frame_id = 'base_link'),
 	                magnetic_field = Vector3(self.corrected[0], self.corrected[1], self.corrected[2]),
-	                magnetic_field_covariance = [ 0.01, 0.0, 0.0,
-                                                  0.0, 0.01, 0.0,
-                                                  0.0, 0.0, 0.01])
+	                magnetic_field_covariance = [ 0.000, 0.0, 0.0,
+                                                  0.0, 0.000, 0.0,
+                                                  0.0, 0.0, 0.000])
 
 		        self.dynamic_pub.publish(mag)
 	       	        rate.sleep()
