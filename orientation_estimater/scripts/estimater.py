@@ -157,7 +157,7 @@ class Interface(object):
 		t = geometry_msgs.msg.TransformStamped()
 
 		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "base_link"
+		t.header.frame_id = "odom"
 		t.child_frame_id = "down_camera"
 		t.transform.translation.x = 0.0
 		t.transform.translation.y = 0.1
