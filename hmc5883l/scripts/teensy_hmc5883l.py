@@ -23,7 +23,7 @@ class track_camera:
 
 		magn = [0.0,0.0,0.0,0.0]
 
-		rate = rospy.Rate(60)
+		rate = rospy.Rate(50)
 
 		while not rospy.is_shutdown():
 			ser.write('r')
@@ -33,14 +33,16 @@ class track_camera:
 			if magn[0] == 'XYZ':
     				mag.header.stamp = rospy.Time.now()
 				mag.header.frame_id = '/base_link' # i.e. '/odom'
-				mag.magnetic_field.x = float(magn[1]) #/100.0
-				mag.magnetic_field.y = float(magn[2]) #/100.0
-				mag.magnetic_field.z = float(magn[3]) #/100.0
-				mag.magnetic_field_covariance=[.1, 0.0, 0.0,
-                                	        	      0.0, .1, 0.0,
-                                        	  	      0.0, 0.0, .1]                                                                                        
+				mag.magnetic_field.x = float(magn[1]) /1000000.0
+				mag.magnetic_field.y = float(magn[2]) /1000000.0
+				mag.magnetic_field.z = float(magn[3]) /1000000.0
+				mag.magnetic_field_covariance=[.01, 0.0, 0.0,
+                                	        	      0.0, .01, 0.0,
+                                        	  	      0.0, 0.0, .01]                                                                                        
 			self.mag_pub.publish(mag)
 
+			heading = math.atan2(mag.magnetic_field.y,mag.magnetic_field.x)
+			rospy.loginfo(heading)
 			rate.sleep()
 
 
