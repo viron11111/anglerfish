@@ -91,7 +91,7 @@
                                       false, false, false,
                                       false, false, false]</rosparam>                                      
 
-      <rosparam param="pose1_config">[true,  true, false,
+      <rosparam param="pose1_config">[false,  false, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false,
