@@ -14,9 +14,9 @@
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
-    <!-- <param name="mag_bias_x" value="0.00610837387568588"/> -->
-    <!-- <param name="mag_bias_y" value="0.0066839069662578705"/> -->
-    <!-- <param name="mag_bias_z" value="0.011252580642419059"/> -->
+    <param name="mag_bias_x" value="0"/> 
+    <param name="mag_bias_y" value="0"/> 
+    <param name="mag_bias_z" value="0"/> 
     <!-- <param name="world_frame" value="wnu"/> -->
     <param name="use_mag" value="true"/>
     <param name="use_magnetic_field_msg" value="true"/>
