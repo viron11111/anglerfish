@@ -33,7 +33,7 @@ class Interface(object):
 
 		self.pose_pub = rospy.Publisher("/static_point", PoseWithCovarianceStamped, queue_size = 0)
 		rospy.Subscriber("imu/data", Imu, self.stim300)
-		rospy.Subscriber("imu/razor", Imu, self.razor)
+		#rospy.Subscriber("imu/razor", Imu, self.razor)
 		rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		#rospy.Subscriber("imu/camera_tilt", Imu, self.camera_imu)
 		rospy.Subscriber("odometry/filtered", Odometry, self.base_link)
