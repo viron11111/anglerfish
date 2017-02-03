@@ -6,7 +6,7 @@ from geometry_msgs.msg import Point, PoseWithCovarianceStamped
 from sensor_msgs.msg import Joy
 import tf, tf2_ros
 from nav_msgs.msg import Odometry
-from anglerfish_joy.msg import rpy
+from anglerfish_joy.msg import rpy, move
 
 '''
 axes:
@@ -68,6 +68,28 @@ class joystick(object):
 		self.subrotz = 0
 		self.subrotw = 1.0
 
+	def move_rov(self, data):
+		rc = PoseWithCovarianceStamped()
+
+		rc.header.stamp = rospy.Time.now()
+		rc.header.frame_id = 'desired_position' # i.e. '/odom'
+
+		self.subposx = data.X
+		self.subposy = data.Y
+		self.subposz = data.Z
+
+		rc.pose.pose.position.x = self.subposx
+		rc.pose.pose.position.y = self.subposy
+		rc.pose.pose.position.z = self.subposz
+		rc.pose.pose.orientation.x = self.subrotx
+		rc.pose.pose.orientation.y = self.subroty
+		rc.pose.pose.orientation.z = self.subrotz
+		rc.pose.pose.orientation.w = self.subrotw
+		#rc.pose.covariance=(np.eye(6)*.001).flatten()
+
+		self.pose_pub.publish(rc)
+		#rospy.logwarn(rc)
+
 	def rpy(self, data):
 
 		quat = (
@@ -89,6 +111,23 @@ class joystick(object):
 		self.subroty = quat[1]
 		self.subrotz = quat[2]
 		self.subrotw = quat[3]
+
+		rc = PoseWithCovarianceStamped()
+
+		rc.header.stamp = rospy.Time.now()
+		rc.header.frame_id = 'desired_position' # i.e. '/odom'
+
+		rc.pose.pose.position.x = self.subposx
+		rc.pose.pose.position.y = self.subposy
+		rc.pose.pose.position.z = self.subposz
+		rc.pose.pose.orientation.x = self.subrotx
+		rc.pose.pose.orientation.y = self.subroty
+		rc.pose.pose.orientation.z = self.subrotz
+		rc.pose.pose.orientation.w = self.subrotw
+		#rc.pose.covariance=(np.eye(6)*.001).flatten()
+
+		self.pose_pub.publish(rc)
+		#rospy.logwarn(rc)
 
 
 	def action(self, data):
@@ -171,6 +210,7 @@ class joystick(object):
 
 		rospy.Subscriber("/odometry/filtered", Odometry, self.odom_location)
 		rospy.Subscriber("/rpy", rpy, self.rpy)
+		rospy.Subscriber("/move_rov", move, self.move_rov)
 		
 		#desire TF
 		self.pose_pub = rospy.Publisher("RC_position", PoseWithCovarianceStamped, queue_size = 1)
