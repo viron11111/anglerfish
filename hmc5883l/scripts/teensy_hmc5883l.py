@@ -12,7 +12,14 @@ import serial
 
 class track_camera:
 
+	def checkEqual(self, lst):
+		return lst[1:] == lst[:-1]
+
 	def __init__(self):
+
+		magx = [1,2,3,4]
+		magy = [1,2,3,4]
+		magz = [1,2,3,4]
 
 		self.DEVICE_ID = rospy.get_param('~device_id','/dev/serial/by-id/usb-Teensyduino_USB_Serial_1577200-if00')
 		self.mag_pub = rospy.Publisher('imu/mag', MagneticField, queue_size = 1)
@@ -41,8 +48,26 @@ class track_camera:
                                         	  	      0.0, 0.0, .01]                                                                                        
 			self.mag_pub.publish(mag)
 
-			heading = math.atan2(mag.magnetic_field.y,mag.magnetic_field.x)
-			rospy.loginfo(heading)
+			#heading = math.atan2(mag.magnetic_field.y,mag.magnetic_field.x)
+			for i in range(3,0,-1):
+				magx[i] = magx[i-1]
+			magx[0] = mag.magnetic_field.x
+
+                        for i in range(3,0,-1):
+                                magy[i] = magy[i-1]
+                        magy[0] = mag.magnetic_field.y
+
+                        for i in range(3,0,-1):
+                                magz[i] = magz[i-1]
+                        magz[0] = mag.magnetic_field.z
+
+			if self.checkEqual(magx) == True:
+				rospy.logerr("MAGX value is static: %f" % magx[0])
+                        if self.checkEqual(magy) == True:
+                                rospy.logerr("MAGY value is static: %f" % magy[0])
+                        if self.checkEqual(magz) == True:
+                                rospy.logerr("MAGZ value is static: %f" % magz[0])
+
 			rate.sleep()
 
 
