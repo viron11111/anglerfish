@@ -1,5 +1,5 @@
 <launch>
-  <!-- <include file="$(find anglerfish_launch)/launch/camera.launch"/> -->
+  <include file="$(find anglerfish_launch)/launch/camera.launch"/>
 
   <node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
   </node>
@@ -20,6 +20,6 @@
   <node pkg="anglerfish_joy" type="joystick.py" name="joystick_tf" respawn="true">
   </node>
 
-  <!-- <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/> -->
+  <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/>
 
 </launch>
