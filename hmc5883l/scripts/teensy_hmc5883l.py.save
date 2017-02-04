@@ -38,23 +38,30 @@ class track_camera:
 			magn = line.split("," , 4)
 			#rospy.loginfo(magn)
 			if magn[0] == 'XYZ':
-				x_raw = float(magn[1]) /100.0
-				y_raw = float(magn[2]) /100.0
-				z_raw = float(magn[3]) /100.0
-
 				raw = np.array([x_raw, y_raw, z_raw])
-				scale = np.array([[1.0020497985386805, -0.06914522912368153, 0.11962132522309941],
-			        		[-0.06914522912368157, 1.0741014035679903, 0.22518913831628748], 
-			              		[0.11962132522309966, 0.22518913831628748, 0.9984945224678732]])
-				bias = np.array([-0.16542780063806176, -0.04899507311891892, -0.10150383298877998])
 
-				corrected = np.dot(raw-bias, scale) 
+				x_raw = float(magn[1]) #/1000000.0
+				y_raw = float(magn[2]) #/1000000.0
+				z_raw = float(magn[3]) #/1000000.0
+				raw = np.array([x_raw, y_raw, z_raw])
+				scale = np.array([[0.9125386954331788, -0.06460651497504674, 0.14014286127056252],
+			        		[-0.06460651497504663, 1.025662748141156, 0.10841683674776847], 
+			              		[0.14014286127056247, 0.10841683674776834, 1.1084485496164735]])
+				bias = np.array([34.20866412071904, 
+                                                 16.862900585898604,
+                                                -13.3731583848895])
+
+				diff = [x_raw, y_raw, z_raw] - np.array([np.array([34.20866412071904, 
+                                                                                  34.20866412071904,
+                                                                                 -13.3731583848895])
+
+				corrected = np.dot(diff, scale) 
 
     				mag.header.stamp = rospy.Time.now()
 				mag.header.frame_id = '/base_link' # i.e. '/odom'
-				mag.magnetic_field.x = corrected[0] 
-				mag.magnetic_field.y = corrected[1]
-				mag.magnetic_field.z = corrected[2]
+				mag.magnetic_field.x = x_raw  #corrected[0] 
+				mag.magnetic_field.y = y_raw  #corrected[1]
+				mag.magnetic_field.z = z_raw  #corrected[2]
 				mag.magnetic_field_covariance=[.01, 0.0, 0.0,
                                 	        	      0.0, .01, 0.0,
                                         	  	      0.0, 0.0, .01]                                                                                        
