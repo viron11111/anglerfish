@@ -55,11 +55,11 @@ class control_sub():
 
 		self.p_err = np.dot(self.qT, (self.p_desW - self.pW))  #position error
 
-		self.q_err = np.dot(ori.error(self.qW, self.q_desW),self.qT)
+		self.q_err = np.dot(,self.qT, ori.error(self.qW, self.q_desW))
 
 		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
 
-		self.i_err = np.array(self.i_err + torque_amnt)  #integrator error
+		self.i_err = np.array(self.i_err + self.q_err)  #integrator error
 
 		np.clip(self.i_err, -5, 5, self.i_err) #clipping integrat error to -5 or to 5 (prevent "run-off")
 
