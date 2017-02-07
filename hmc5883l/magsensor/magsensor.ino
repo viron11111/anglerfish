@@ -94,7 +94,7 @@ void loop(void)
   if (Serial.available() > 0){        
     incomingByte = Serial.read();
   }
-  
+
   if (incomingByte == 'r'){
 
     /* Get a new sensor event */ 
@@ -104,7 +104,8 @@ void loop(void)
     digitalWrite(13, led);
    
     /* Display the results (magnetic vector values are in micro-Tesla (uT)) */
-    Serial.print("XYZ,"); Serial.print(event.magnetic.x); Serial.print(",");Serial.print(event.magnetic.y); Serial.print(",");
+    //Serial.print("XYZ,"); 
+    Serial.print(event.magnetic.x); Serial.print(",");Serial.print(event.magnetic.y); Serial.print(",");
     Serial.println(event.magnetic.z);
   
     if (led == 0)
