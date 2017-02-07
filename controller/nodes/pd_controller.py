@@ -19,7 +19,6 @@ class control_sub():
 
 	def rc_pos(self, data):
 
-		#rospy.logwarn(data.pose.pose.orientation)
 		self.p_desW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z])
 		self.q_desW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z])
 
@@ -37,7 +36,6 @@ class control_sub():
 		t.transform.rotation.y = self.q_desW[2]
 		t.transform.rotation.z = self.q_desW[3]
 		br.sendTransform(t)
-
 
 	def PD(self, data):
 		self.qW = np.array([data.pose.pose.orientation.w, data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z]) 
@@ -61,14 +59,9 @@ class control_sub():
 
 		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
 
-		#rospy.logwarn(torque_amnt)
-
 		self.i_err = np.array(self.i_err + torque_amnt)  #integrator error
 
 		np.clip(self.i_err, -5, 5, self.i_err) #clipping integrat error to -5 or to 5 (prevent "run-off")
-
-		#rospy.logwarn(torque_amnt)
-
 
 		force_amnt = (self.f_kp *  self.p_err)  #P equation for force (position)
 
@@ -83,28 +76,7 @@ class control_sub():
 		wrench.wrench.force.y = force_amnt[1]
 		wrench.wrench.force.z = force_amnt[2]
 
-
-		#print wrench.wrench.torque.x
-
 		self.thruster.publish(wrench)
-
-		'''br = tf2_ros.TransformBroadcaster()
-		t = geometry_msgs.msg.TransformStamped()
-
-		#odom = Odometry()
-
-		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = "map"
-		t.child_frame_id = "desired_position"
-		t.transform.translation.x = self.p_desW[0]
-		t.transform.translation.y = self.p_desW[1]
-		t.transform.translation.z = self.p_desW[2]
-		t.transform.rotation.x = self.q_desW[3]
-		t.transform.rotation.y = self.q_desW[2]
-		t.transform.rotation.z = self.q_desW[1]
-		t.transform.rotation.w = self.q_desW[0]
-
-		br.sendTransform(t)'''
 
 	def callback_gains(self, config, level):
 		self.t_kp[0] = "{t_kp_x}".format(**config)
@@ -159,8 +131,6 @@ def main(args):
         except rospy.ROSInterruptException:
 		print "Shutting down"
                 pass
-	
-
 
 if __name__ == '__main__':
 	main(sys.argv)
