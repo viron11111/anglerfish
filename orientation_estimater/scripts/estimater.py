@@ -34,6 +34,7 @@ class Interface(object):
 		self.pose_pub = rospy.Publisher("/static_point", PoseWithCovarianceStamped, queue_size = 0)
 		rospy.Subscriber("imu/data", Imu, self.stim300)
 		rospy.Subscriber("imu/razor", Imu, self.razor)
+		rospy.Subscriber("imu/imu_hmc6343", Imu, self.hmc6343)
 		rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		#rospy.Subscriber("imu/camera_tilt", Imu, self.camera_imu)
 		rospy.Subscriber("odometry/filtered", Odometry, self.base_link)
@@ -133,6 +134,30 @@ class Interface(object):
 		t.header.stamp = rospy.Time.now()
 		t.header.frame_id = "base_link"
 		t.child_frame_id = "stim300"
+		t.transform.translation.x = -0.085
+		t.transform.translation.y = 0
+		t.transform.translation.z = -0.031
+		t.transform.rotation.x = 0
+		t.transform.rotation.y = 0
+		t.transform.rotation.z = 0
+		t.transform.rotation.w = 1.0
+
+		br.sendTransform(t)
+
+		'''quaternion = (
+			data.orientation.x,
+			data.orientation.y,
+			data.orientation.z,
+			data.orientation.w)'''
+
+	def hmc6343(self, data):		
+
+		br = tf2_ros.TransformBroadcaster()
+		t = geometry_msgs.msg.TransformStamped()
+
+		t.header.stamp = rospy.Time.now()
+		t.header.frame_id = "base_link"
+		t.child_frame_id = "hmc6343"
 		t.transform.translation.x = -0.085
 		t.transform.translation.y = 0
 		t.transform.translation.z = -0.031
