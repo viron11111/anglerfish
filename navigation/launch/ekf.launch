@@ -68,9 +68,10 @@
            TwistStamped, Imu). To add a new one, simply append the next number in the sequence to its base name,
            e.g., odom0, odom1, twist0, twist1, imu0, imu1, imu2, etc. The value should be the topic name. These
            parameters obviously have no default values, and must be specified. -->
-      <param name="imu0" value="imu/data"/>
-      <param name="pose0" value="depth"/>
-      <param name="pose1" value="xy_position"/>
+      <param name="imu0" value="/imu/data"/>
+      <param name="imu1" value="/imu/imu_hmc6343"/>
+      <param name="pose0" value="/depth"/>
+      <param name="pose1" value="/xy_position"/>
 
       <!-- Each sensor reading updates some or all of the filter's state. These options give you greater control over
            which values from each measurement are fed to the filter. For example, if you have an odometry message as input,
@@ -83,6 +84,12 @@
                                       true, true, true,
                                       false, false, false,
                                       true, true, true,
+                                      true, true, true]</rosparam>
+
+      <rosparam param="imu1_config">[false,  false,  false,
+                                      false, false, false,
+                                      false, false, false,
+                                      false, false, false,
                                       true, true, true]</rosparam>
 
       <rosparam param="pose0_config">[false,  false, true,
@@ -115,6 +122,7 @@
            this is acceptable. For orientation variables, it can lead to trouble. Users should make sure that all orientation
            variables have at least one source of absolute measurement. -->
       <param name="imu0_differential" value="false"/>
+      <param name="imu1_differential" value="false"/>
       <param name="pose0_differential" value="false"/>
       <param name="pose1_differential" value="false"/>
 
@@ -123,12 +131,14 @@
            that the relative parameter doesn't cause the measurement to be converted to a velocity before integrating it. If
            you simply want your measurements to start at 0 for a given sensor, set this to true. -->
       <param name="imu0_relative" value="false"/>
+      <param name="imu1_relative" value="false"/>
       <param name="pose0_relative" value="true"/>
       <param name="pose1_relative" value="false"/>
 
       <!-- If we're including accelerations in our state estimate, then we'll probably want to remove any acceleration that
            is due to gravity for each IMU. If you don't want to, then set this to false. Defaults to false if unspecified. -->
       <param name="imu0_remove_gravitational_acceleration" value="true"/>
+      <param name="imu1_remove_gravitational_acceleration" value="true"/>
 
       <!-- If you're having trouble, try setting this to true, and then echo the /diagnostics_agg topic to see
            if the node is unhappy with any settings or data. -->
@@ -143,6 +153,7 @@
       <!-- By default, the subscription queue size for each message type is 1. If you wish to increase that so as not
            miss any messages (even if your frequency is set to a relatively small value), increase these. -->
       <param name="imu0_queue_size" value="3"/>
+      <param name="imu1_queue_size" value="3"/>
 
       <!-- If your data is subject to outliers, use these threshold settings, expressed as Mahalanobis distances, to control
            how far away from the current vehicle state a sensor measurement is permitted to be. Each defaults to

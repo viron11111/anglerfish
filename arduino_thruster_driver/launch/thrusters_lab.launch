@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="rosserial_python" type="serial_node.py" name="serial_node">
+  <node pkg="rosserial_python" type="serial_node.py" name="thrusters">
     <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_1962610-if00"/>
     <param name="baud" value="57600"/>
   </node>
