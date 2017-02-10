@@ -43,4 +43,9 @@
   <node pkg="controller" type="pd_controller.py" name="pd_controller" respawn="true">
   </node>
 
+  <node pkg="rosserial_python" type="serial_node.py" name="hmc6343">
+    <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_2484740-if00"/>
+    <param name="baud" value="115200"/>
+  </node>
+
 </launch>
