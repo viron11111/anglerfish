@@ -34,7 +34,7 @@ class mission(object):
 
 			if mission_counter == 0 and self.yaw < math.pi:
 				self.yaw += 0.01745
-				self.Z = -0.5
+				self.Z = -0.0
 				counter += 1
 				if self.yaw >= math.pi:			
 					self.yaw = -math.pi		
