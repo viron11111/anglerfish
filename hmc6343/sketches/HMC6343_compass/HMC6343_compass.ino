@@ -67,9 +67,39 @@ void loop()
   compass.readAccel();
   compass.readMag();
 
-  float Yaw = (((float) compass.heading/10.0)*3.14159)/180.0;
-  float Pitch = (((float) compass.pitch/10.0)*3.14159)/180.0;
-  float Roll = (((float) compass.roll/10.0)*3.14159)/180.0;
+  float Yaw =   (((float) compass.heading/10.0));//*3.14159)/180.0;
+  float Pitch = (((float) compass.pitch  /10.0));//*3.14159)/180.0;
+  float Roll =  (((float) compass.roll   /10.0));//*3.14159)/180.0;
+
+  if (Yaw > 6000.0){
+    Yaw = Yaw - 6553.6;
+  }
+  else{
+    Yaw = Yaw;
+  }
+  if (Roll > 6000.0){
+    Roll = Roll - 6553.6;
+  }
+  else{
+    Roll = Roll;
+  }
+  if (Pitch > 6000.0){
+    Pitch = Pitch - 6553.6;
+  }
+  else{
+    Pitch = Pitch;
+  }
+
+  Roll = (Roll*3.14159)/180.0;
+  Pitch = (Pitch*3.14159)/180.0;
+  Yaw = (Yaw*3.14159)/180.0;
+
+  Serial.print("RPY,");
+  Serial.print(Roll,5);
+  Serial.print(",");
+  Serial.print(Pitch,5);
+  Serial.print(",");
+  Serial.println(Yaw,5);
 
   float c1 = cos(Yaw/2);
   float c2 = cos(Pitch/2);
@@ -86,7 +116,6 @@ void loop()
   Serial.print(x);Serial.print(",");
   Serial.print(y);Serial.print(",");
   Serial.println(z);*/
-
 
   if (compass.magX > 60000){
     magx = compass.magX - 65536;
@@ -143,13 +172,11 @@ void loop()
   imu_msg.linear_acceleration.x = accelx;
   imu_msg.linear_acceleration.y = accely;
   imu_msg.linear_acceleration.z = accelz;
-  imu_msg.orientation.w = w;
+  /*imu_msg.orientation.w = w;
   imu_msg.orientation.x = x;
   imu_msg.orientation.y = y;
-  imu_msg.orientation.z = z;  
-  pub_imu.publish(&imu_msg);
-
-
+  imu_msg.orientation.z = z;*/
+  pub_imu.publish(&imu_msg);  
   
   nh.spinOnce();
   
