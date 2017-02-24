@@ -137,14 +137,14 @@ class ThrusterDriver:
                 green = rospy.Publisher('Green_led', Bool, queue_size=1)
                 green.publish(False)  #turn off green light
 
-                thrstr1.publish(1500)
-                thrstr2.publish(1500)
-                thrstr3.publish(1500)
-                thrstr4.publish(1500)
-                thrstr5.publish(1500)
-                thrstr6.publish(1500)
-                thrstr7.publish(1500)
-                thrstr8.publish(1500)
+                self.thrstr1.publish(1500)
+                self.thrstr2.publish(1500)
+                self.thrstr3.publish(1500)
+                self.thrstr4.publish(1500)
+                self.thrstr5.publish(1500)
+                self.thrstr6.publish(1500)
+                self.thrstr7.publish(1500)
+                self.thrstr8.publish(1500)
 
     def ROV_kill(self, kill_cmd):
         self.kill = kill_cmd.data
