@@ -9,12 +9,12 @@
             position: [0.041, -0.008, 0.12],
             direction: [0, 1, 0]
           } 
-          <!-- FL: {
+          FL: {
             node_id: 2,
             frame_id: /base_link,
             position: [0.1, 0.248, 0.008],
             direction: [0, 0, -1]
-          } -->
+          }
           ML: {
             node_id: 3,
             frame_id: /base_link,
