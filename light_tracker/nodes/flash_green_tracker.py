@@ -47,13 +47,15 @@ class ThrusterDriver:
 		#cv2.drawContours(image, contours, -1, (0,255,0), 3)
 
 		for cnt in contours:
-			if cnt != None:
-				M = cv2.moments(cnt)
-				cX = int(M["m10"] / M["m00"])
-				cY = int(M["m01"] / M["m00"])
-				cv2.circle(image, (cX, cY), 7, (255, 0, 0), -1)
-				cv2.drawContours(image, contours, -1, (0,0,255), 3)
-				#cv2.drawContours(image, [cnt], 0, (0,255,0), 3)
+			if cnt != None:				
+				area = cv2.contourArea(cnt)
+				if area > 1250 and area < 2000:
+					M = cv2.moments(cnt)
+					cX = int(M["m10"] / M["m00"])
+					cY = int(M["m01"] / M["m00"])
+					cv2.circle(image, (cX, cY), 7, (255, 0, 0), -1)
+					cv2.drawContours(image, contours, -1, (0,0,255), 3)
+					#cv2.drawContours(image, [cnt], 0, (0,255,0), 3)
 		#self.image1 = img
 
 		#equ = cv2.equalizeHist(img)

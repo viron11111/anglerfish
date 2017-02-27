@@ -34,7 +34,7 @@ class mission(object):
 
 			if mission_counter == 0 and counter < time_per_move:
 				self.yaw = -math.pi/2
-				self.Z = -0.0
+				self.Z = -1.0
 				counter += 1
 				if counter > time_per_move-1:
 					counter = 0
