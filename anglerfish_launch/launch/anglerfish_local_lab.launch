@@ -11,14 +11,7 @@
   <node pkg="light_control" type="lights.py" name="LIGHTS" respawn="true">
   </node>
 
-<<<<<<< HEAD
-  <!-- <include file="$(find usb_cam)/launch/usb_cam-test.launch"/> -->
-
-  <!-- <node pkg="servo_control" type="move_servo.py" name="camera_servo" respawn="true">
-  </node> -->
-=======
   <include file="$(find arduino_thruster_driver)/launch/thrusters_lab.launch"/>
->>>>>>> 82816ef8c02ba2bc6141a91474e541b5b6b72850
 
   <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
 
@@ -31,10 +24,5 @@
 
   <node pkg="arduino_thruster_driver" type="thruster_driver_light_only.py" name="T100_driver">
   </node>
-
-  <!-- <node pkg="rosserial_python" type="serial_node.py" name="hmc6343">
-    <param name="port" value="/dev/serial/by-id/usb-Teensyduino_USB_Serial_2484740-if00"/>
-    <param name="baud" value="115200"/>
-  </node> -->
 
 </launch>
