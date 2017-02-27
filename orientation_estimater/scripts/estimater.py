@@ -185,7 +185,7 @@ class Interface(object):
 		t.header.frame_id = "odom"
 		t.child_frame_id = "down_camera"
 		t.transform.translation.x = 0.0
-		t.transform.translation.y = 0.1
+		t.transform.translation.y = 0.0
 		t.transform.translation.z = 0#-0.08
 		
 		t.transform.rotation.x = data.orientation.x
