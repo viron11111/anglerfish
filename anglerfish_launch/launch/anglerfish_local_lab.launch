@@ -11,8 +11,6 @@
   <node pkg="light_control" type="lights.py" name="LIGHTS" respawn="true">
   </node>
 
-  <include file="$(find arduino_thruster_driver)/launch/thrusters_lab.launch"/>
-
   <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
 
   <include file="$(find anglerfish_thruster_mapper)/launch/thruster_mapper.launch"/>
