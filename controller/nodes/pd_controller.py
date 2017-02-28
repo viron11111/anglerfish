@@ -118,7 +118,7 @@ class control_sub():
 		self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
 		self.t_ki = np.array([0.0, 0.0, 0.0])
 		self.f_kp = np.array([0.0, 0.0, 0.0])
-		self.f_ki = np.array([0.0, 0.0, 0.0])
+		self.f_kd = np.array([0.0, 0.0, 0.0])
 
 		self.i_err = np.array([0.0, 0.0, 0.0])
 
