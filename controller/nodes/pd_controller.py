@@ -42,8 +42,11 @@ class control_sub():
 		self.w = np.array([data.twist.twist.angular.x, data.twist.twist.angular.y, data.twist.twist.angular.z])
 
 		self.pW = np.array([data.pose.pose.position.x, data.pose.pose.position.y, data.pose.pose.position.z]) #current position
+		self.linear_acceleration = np.array([data.twist.twist.linear.x, data.twist.twist.linear.y, data.twist.twist.linear.z])
 		
-		self.w_des = np.array([0.0, 0.0, 0.0]) #np.array([])
+		self.w_des = np.array([0.0, 0.0, 0.0]) #dersired angular twist once at desired orientation
+
+		self.p_des = np.array([0.0, 0.0, 0.0]) #desired acceleration once at position 
 
 		self.qtrns = trns.quaternion_matrix(self.qW)
 
@@ -51,19 +54,23 @@ class control_sub():
 
 		self.qT = np.transpose(self.q9)
 
-		self.w_err = self.w_des - self.w
+		self.w_err = self.w_des - self.w   #ORIENTATION angular twist error for derivative part of PID controller
 
-		self.p_err = np.dot(self.qT, (self.p_desW - self.pW))  #position error
+		self.pw_err = self.p_des - self.linear_acceleration #POSITION linear acceleration error for kd (PD controller)
 
-		self.q_err = np.dot(self.qT, ori.error(self.qW, self.q_desW))
+		self.p_err = np.dot(self.qT, (self.p_desW - self.pW))  #POSITION error for proportional part of PD controller
 
-		torque_amnt = (self.t_kd * self.w_err) + (self.t_kp * self.q_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
+		self.q_err = np.dot(self.qT, ori.error(self.qW, self.q_desW))  #ORIENTATION error for proportional part of PID controller
 
-		self.i_err = np.array(self.i_err + self.q_err)  #integrator error
+		#                  Proportional                Derivative                Integral
+		torque_amnt = (self.t_kp * self.q_err) + (self.t_kd * self.w_err) + (self.t_ki * self.i_err) #PID equation for torque (orientation)
 
-		np.clip(self.i_err, -5, 5, self.i_err) #clipping integrat error to -5 or to 5 (prevent "run-off")
+		self.i_err = np.array(self.i_err + self.q_err)  #ORIENTATION integrator error
 
-		force_amnt = (self.f_kp *  self.p_err)  #P equation for force (position)
+		np.clip(self.i_err, -5, 5, self.i_err) #ORIENTATION clipping integrate error to -5 or to 5 (prevent "run-off")
+
+		#                  Proportional                 Derivative
+		force_amnt = (self.f_kp * self.p_err) + (self.f_kd * self.pw_error) #PD equation for force (position)
 
 		wrench = WrenchStamped()
 
@@ -95,6 +102,10 @@ class control_sub():
 		self.f_kp[1] = "{f_kp_y}".format(**config)
 		self.f_kp[2] = "{f_kp_z}".format(**config)
 
+		self.f_kd[0] = "{f_kd_x}".format(**config)
+		self.f_kd[1] = "{f_kd_y}".format(**config)
+		self.f_kd[2] = "{f_kd_z}".format(**config)
+
 		return config           
 
 	def __init__(self):
@@ -107,6 +118,7 @@ class control_sub():
 		self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
 		self.t_ki = np.array([0.0, 0.0, 0.0])
 		self.f_kp = np.array([0.0, 0.0, 0.0])
+		self.f_ki = np.array([0.0, 0.0, 0.0])
 
 		self.i_err = np.array([0.0, 0.0, 0.0])
 
