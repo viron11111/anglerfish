@@ -106,7 +106,7 @@ class ThrusterDriver:
 			if cnt != None:
 				area = cv2.contourArea(cnt)
 
-				if area > 1250 and area < 6000:
+				if area > 500 and area < 6000:
 					M = cv2.moments(cnt)
 					cx = int(M["m10"] / M["m00"])
 					cy = int(M["m01"] / M["m00"])
@@ -149,10 +149,24 @@ class ThrusterDriver:
 
 					#rospy.logwarn(self.camera_heading)
 
+					xmeasfir1 = orig_3d[0]
+					self.xmeasured = xmeasfir1*0.5 + self.xmeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
+					#self.measfir5 = self.measfir4
+					#self.measfir4 = self.measfir3
+					#self.measfir3 = self.measfir2
+					self.xmeasfir2 = xmeasfir1
+
+					ymeasfir1 = orig_3d[1]
+					self.ymeasured = ymeasfir1*0.5 + self.ymeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
+					#self.measfir5 = self.measfir4
+					#self.measfir4 = self.measfir3
+					#self.measfir3 = self.measfir2
+					self.ymeasfir2 = ymeasfir1
+
 					#*****************************************************************************************************
 					#for rotation 90 degrees
-					self.threeD_point[0] = -orig_3d[0] #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
-					self.threeD_point[1] = -orig_3d[1] #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
+					self.threeD_point[0] = -self.xmeasured #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+					self.threeD_point[1] = -self.ymeasured #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
 					self.threeD_point[2] = orig_3d[2]
 
 					#rospy.logwarn(self.threeD_point[0])
@@ -178,6 +192,16 @@ class ThrusterDriver:
 	def __init__(self):
 		
 		#self.create_files()
+
+		self.xmeasfir2 = 0.0
+		self.xmeasfir3 = 0.0
+		self.xmeasfir4 = 0.0
+		self.xmeasfir5 = 0.0
+
+		self.ymeasfir2 = 0.0
+		self.ymeasfir3 = 0.0
+		self.ymeasfir4 = 0.0
+		self.ymeasfir5 = 0.0
 
 		self.depth = 0
 		self.threeD_point = [0,0,0]
