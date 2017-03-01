@@ -135,7 +135,7 @@ class ThrusterDriver:
 
 					#soh cah toa
 					#L = -1.98
-					L = -3 #self.depth
+					L = self.depth
 					actual_distance_from_center = math.tan(vector_angle)*L
 
 					hypotenuse = actual_distance_from_center/math.asin(vector_angle)
