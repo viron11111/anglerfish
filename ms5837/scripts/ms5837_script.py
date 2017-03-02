@@ -133,7 +133,7 @@ class measure_depth:
 		pres = PoseWithCovarianceStamped()
 		rov = ms5837()
 
-		rate = rospy.Rate(20)	
+		rate = rospy.Rate(50)	
 		initialize_sensor()
 
 		self.frame_id = '/pressure'
