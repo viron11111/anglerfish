@@ -27,18 +27,35 @@ class start_lights():
 	        self.pig.write(13, 1)
 	    else:
 	        self.pig.write(13, 0)	
+	
+	def docking_lights(self, power):
+	    if power.data == 1:
+	        self.pig.write(19, 1)
+	    else:
+	        self.pig.write(19, 0)
+	
+	def electromagnets(self, power):
+	    if power.data == 1:
+	        self.pig.write(21, 1)
+	    else:
+	        self.pig.write(21, 0)
 
 	def all_off():
 		pi1 = pigpio.pi()
 		pi1.write(12, 0)
 		pi1.write(13, 0)		
 		pi1.write(16, 0)
+		pi1.write(19, 0)
+		pi1.write(21, 0)
 		pi1.stop()
 
 	def __init__(self):
 		rospy.Subscriber('Green_led', Bool, self.green)
 		rospy.Subscriber('White_led', Bool, self.white)
 		rospy.Subscriber('Pinger', Bool, self.ping)
+		rospy.Subscriber('Docking_lights', Bool, self.docking_lights)
+		rospy.Subscriber('Electromagnets', Bool, self.electromagnets)
+
 		#self.green_pub = rospy.Publisher("green_light", String, queue_size=1)
 		#self.white_pub = rospy.Publisher("white_light", String, queue_size=1)
 
@@ -46,6 +63,8 @@ class start_lights():
 		self.pig.set_mode(12, pigpio.OUTPUT)  #white light
 		self.pig.set_mode(13, pigpio.OUTPUT)  #pinger
 		self.pig.set_mode(16, pigpio.OUTPUT)  #green light
+		self.pig.set_mode(19, pigpio.OUTPUT)  #blue docking lights
+		self.pig.set_mode(21, pigpio.OUTPUT)  #electromagnets
 		self.green_flag = 0
 
 		rate = rospy.Rate(360) #Hz
