@@ -8,7 +8,7 @@
   <node pkg="hmc5883l" type="teensy_hmc5883l.py" name="HMC5883L" respawn="true">
   </node>
 
-  <node pkg="light_control" type="lights.py" name="LIGHTS" respawn="true">
+  <node pkg="external_actuators" type="actuate.py" name="ACTUATORS" respawn="true">
   </node>
 
   <include file="$(find imu_filter_madgwick)/launch/kalman_filter.launch"/>
