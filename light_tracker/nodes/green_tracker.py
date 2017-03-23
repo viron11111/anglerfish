@@ -113,6 +113,11 @@ class ThrusterDriver:
 
 		img = cv2.blur(image,(5,5))
 
+		img[:, 0:self.left_column] = 0
+		img[:, 752-self.right_column:752] = 0 
+		img[0:self.top_row, :] = 0
+		img[480-self.bottom_row:480, :] = 0 
+
 		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 		gray /= 10
 		gray *= gray		
@@ -157,6 +162,11 @@ class ThrusterDriver:
 			M = cv2.moments(biggest_cnt)
 			cx = int(M["m10"] / M["m00"])
 			cy = int(M["m01"] / M["m00"])
+			self.left_column = cx - 50
+			self.right_column = (752 - cx) - 50
+			self.top_row = cy - 50
+			self.bottom_row = (480 - cy) - 50
+
 			cv2.circle(image, (cx, cy), 7, (0, 0, 255), -1)
 			#cv2.drawContours(image, contours, -1, (0,0,255), 3)
 
@@ -221,7 +231,11 @@ class ThrusterDriver:
 			rospy.loginfo("x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff))
 
 			#rospy.logwarn(self.threeD_point[0])
-		#else:
+		else:
+			self.left_column = 0
+			self.right_column = 0
+			self.top_row = 0
+			self.bottom_row = 0
 			#rospy.logwarn ("area: %f aspect_ratio: %f" % (old_area, aspect_ratio))
 
 		heading = self.rov_heading - self.camera_heading
@@ -234,7 +248,7 @@ class ThrusterDriver:
 
 		#cv2.circle(image, (400,200), 1, )
 
-		self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
+		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
 		#self.image_pub.publish(self.bridge.cv2_to_imgmsg(gray, "8UC1"))
 
 		self.camera_turn = rospy.Publisher('camera_heading', Float64, queue_size = 1)
@@ -261,6 +275,10 @@ class ThrusterDriver:
 		self.threeD_point = [0,0,0]
 		self.p_desW = [0,0,0]
 
+		self.left_column = 0
+		self.right_column = 0
+		self.top_row = 0
+		self.bottom_row = 0
 
 		self.roll = 0
 		self.pitch = 0
