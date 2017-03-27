@@ -172,8 +172,8 @@ class ThrusterDriver:
 			#cv2.drawContours(image, contours, -1, (0,0,255), 3)
 
 			#lens calibration numbers
-			#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])
-			K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])
+			K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])
+			#K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])
 
 			target_point = [[cx],[cy],[1]]
 			#ref_point =
@@ -191,8 +191,8 @@ class ThrusterDriver:
 			vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 			#soh cah toa
-			#L = -1.98
-			L = self.depth
+			L = 1
+			#L = self.depth
 			actual_distance_from_center = math.tan(vector_angle)*L
 
 			hypotenuse = actual_distance_from_center/math.asin(vector_angle)
