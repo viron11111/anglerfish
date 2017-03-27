@@ -64,6 +64,7 @@ class Interface(object):
 
 	def pressure(self, data):
 		self.green_led()
+		self.depth = data.pose.pose.position.z
 		br = tf2_ros.TransformBroadcaster()
 		t = geometry_msgs.msg.TransformStamped()
 

@@ -144,9 +144,10 @@ class ThrusterDriver:
 		area = 0
 		old_area= 0
 		biggest_cnt = None
-		smallest_area = 250
+		smallest_area = 1
 		biggest_area = 1500
 		aspect_ratio = 0
+		font = cv2.FONT_HERSHEY_SIMPLEX
 
 		for cnt in contours:
 			if cnt != None:
@@ -171,7 +172,7 @@ class ThrusterDriver:
 			#cv2.drawContours(image, contours, -1, (0,0,255), 3)
 
 			#lens calibration numbers
-			#K = ([[391.230961, 0.000000, 394.789113], [0.000000, 389.820978, 218.309630], [0.000000, 0.000000, 1.000000]])
+			#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])
 			K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])
 
 			target_point = [[cx],[cy],[1]]
@@ -228,7 +229,11 @@ class ThrusterDriver:
 			x_diff = -self.threeD_point[0] - self.p_desW[0]
 			y_diff = -self.threeD_point[1] - self.p_desW[1]
 
-			rospy.loginfo("x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff))
+			#cv2.circle(img, (self.p_desW[0], self.p_desW[1]), 7, (0, 255, 255), -1)
+			#rospy.loginfo(self.p_desW[0])
+
+			#rospy.loginfo("x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff))
+			cv2.putText(img,"x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff),(10,20), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 
 			#rospy.logwarn(self.threeD_point[0])
 		else:
@@ -298,12 +303,12 @@ class ThrusterDriver:
 		self.rov_heading = 0.0
 
 		#self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
-		self.image_sub = rospy.Subscriber("down/down/image_color",Image,self.import_vid)
+		self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.camera_sub = rospy.Subscriber("/imu/razor", Imu, self.camera_imu)
 		self.rov_orientation_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.sub_orientation)
 		rospy.Subscriber("RC_position", PoseWithCovarianceStamped, self.rc_pos)
-		self.pose_pub = rospy.Publisher('xy_position', PoseWithCovarianceStamped, queue_size = 1)
+		self.pose_pub = rospy.Publisher('/xy_position', PoseWithCovarianceStamped, queue_size = 1)
 
 		H_green = 160 #160, 80
 		S_green = 72 #72
