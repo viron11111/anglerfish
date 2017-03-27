@@ -98,8 +98,8 @@
                                       false, false, false,
                                       false, false, false]</rosparam>                                      
 
-      <rosparam param="pose1_config">[true, true, false,
-                                      true, true, false,
+      <rosparam param="pose1_config">[true, true, true,
+                                      false, false, false,
                                       false, false, false,
                                       false, false, false,
                                       false, false, false]</rosparam>
@@ -170,7 +170,7 @@
            vroll, vpitch, vyaw, ax, ay, az. Defaults to the matrix below if unspecified. -->
       <rosparam param="process_noise_covariance">[0.25, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                                                   0,    0.25, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                                                  0,    0,    0.25, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                                  0,    0,    0.001, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                                                   0,    0,    0,    0.01, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                                                   0,    0,    0,    0,    0.01, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                                                   0,    0,    0,    0,    0,    0.01, 0,     0,     0,    0,    0,    0,    0,    0,    0,
