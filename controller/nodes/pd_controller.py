@@ -69,8 +69,12 @@ class control_sub():
 
 		np.clip(self.i_err, -5, 5, self.i_err) #ORIENTATION clipping integrate error to -5 or to 5 (prevent "run-off")
 
-		#                  Proportional                 Derivative
-		force_amnt = (self.f_kp * self.p_err) + (self.f_kd * self.pw_err) #PD equation for force (position)
+		#                  Proportional                 Derivative                 Integral
+		force_amnt = (self.f_kp * self.p_err) + (self.f_kd * self.pw_err) + (self.f_ki * self.fi_err) #PID equation for force (position)
+
+		self.fi_err = np.array(self.fi_err + self.p_err)
+
+		np.clip(self.fi_err, -5, 5, self.fi_err) #POSITION clipping integrate error to -5 or to 5 (prevent "run-off")
 
 		wrench = WrenchStamped()
 
@@ -102,6 +106,10 @@ class control_sub():
 		self.f_kp[1] = "{f_kp_y}".format(**config)
 		self.f_kp[2] = "{f_kp_z}".format(**config)
 
+		self.f_ki[0] = "{f_ki_x}".format(**config)
+		self.f_ki[1] = "{f_ki_y}".format(**config)
+		self.f_ki[2] = "{f_ki_z}".format(**config)		
+
 		self.f_kd[0] = "{f_kd_x}".format(**config)
 		self.f_kd[1] = "{f_kd_y}".format(**config)
 		self.f_kd[2] = "{f_kd_z}".format(**config)
@@ -115,14 +123,17 @@ class control_sub():
 		rospy.Subscriber
 
 		self.t_kp = np.array([0.0, 0.0, 0.0])  # proportional gain (body frame roll, pitch, yaw)
-		self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
 		self.t_ki = np.array([0.0, 0.0, 0.0])
+		self.t_kd = np.array([0.0, 0.0, 0.0])  # derivative gain (body frame rolling, pitching, yawing)
+
 		self.f_kp = np.array([0.0, 0.0, 0.0])
+		self.f_ki = np.array([0.0, 0.0, 0.0])
 		self.f_kd = np.array([0.0, 0.0, 0.0])
 
-		self.i_err = np.array([0.0, 0.0, 0.0])
+		self.i_err = np.array([0.0, 0.0, 0.0])  #integrator error for orientation
+		self.fi_err = np.array([0.0, 0.0, 0.0]) #integrator error for position
 
-		self.p_desW = np.array([0.0, 0.0, 0.0])
+		self.p_desW = np.array([0.0, 0.0, -0.5])
 		self.q_desW = np.array([1.0, 0.0, 0.0, 0.0])
 
 
