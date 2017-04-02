@@ -191,8 +191,8 @@ class ThrusterDriver:
 			vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
 			#soh cah toa
-			L = 1
-			#L = self.depth
+			#L = 1
+			L = self.depth
 			actual_distance_from_center = math.tan(vector_angle)*L
 
 			hypotenuse = actual_distance_from_center/math.asin(vector_angle)

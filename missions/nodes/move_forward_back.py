@@ -15,7 +15,7 @@ class mission(object):
 
 		mission_counter = 0
 		counter = 0
-		time_per_move = 100
+		time_per_move = 200
 
 		self.roll = 0
 		self.pitch = 0
@@ -33,29 +33,31 @@ class mission(object):
 		while not rospy.is_shutdown():
 
 			if mission_counter == 0 and counter < time_per_move:
-				self.X = 0.25
-				self.Z = -1.5
-				counter += 1
+				self.X = .3333
+				self.Y = 0
+				self.Z = -1.75
+				counter += 2
 				if counter > time_per_move-1:
 					counter = 0
 					mission_counter = 1
 			elif mission_counter == 1 and counter < time_per_move:
-				self.yaw = -math.pi
-				self.X = 0.25
-				counter += 1
+				#self.yaw = -math.pi
+				self.X = 0.3333
+				counter += 2
 				if counter > time_per_move-1:
 					counter = 0
 					mission_counter = 2
 			elif mission_counter == 2 and counter < time_per_move:
-				self.X = -0.25
+				self.X = -0.333
+				self.Y = 0.0
 				counter += 1
 				if counter > time_per_move-1:
 					counter = 0
 					mission_counter = 3	
 			elif mission_counter == 3 and counter < time_per_move:
-				self.yaw = 0.0
+				#self.yaw = 0.0
 				self.X = 0.0
-				counter += 1
+				counter += 2
 				if counter > time_per_move-1:
 					counter = 0
 					rospy.signal_shutdown("mission complete")						

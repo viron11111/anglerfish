@@ -70,11 +70,11 @@ class control_sub():
 		np.clip(self.i_err, -5, 5, self.i_err) #ORIENTATION clipping integrate error to -5 or to 5 (prevent "run-off")
 
 		#                  Proportional                 Derivative                 Integral
-		force_amnt = (self.f_kp * self.p_err) + (self.f_kd * self.pw_err) + (self.f_ki * self.fi_err) #PID equation for force (position)
+		force_amnt = (self.f_kp * self.p_err) - (self.f_kd * self.pw_err) + (self.f_ki * self.fi_err) #PID equation for force (position)
 
 		self.fi_err = np.array(self.fi_err + self.p_err)
 
-		np.clip(self.fi_err, -5, 5, self.fi_err) #POSITION clipping integrate error to -5 or to 5 (prevent "run-off")
+		np.clip(self.fi_err, -5, 5, self.fi_err) #POSITIO clipping integrate error to -5 or to 5 (prevent "run-off")
 
 		wrench = WrenchStamped()
 
