@@ -35,6 +35,15 @@ buttons:
 
 class joystick(object):
 
+	def mission_move_rov(self,data):
+		self.subposx_new = data.pose.pose.position.x
+		self.subposy_new = data.pose.pose.position.y
+		self.subposz_new = data.pose.pose.position.z
+		self.subrotx_new = data.pose.pose.orientation.x
+		self.subroty_new = data.pose.pose.orientation.y
+		self.subrotz_new = data.pose.pose.orientation.z
+		self.subrotw_new = data.pose.pose.orientation.w
+
 	def odom_location(self, data):
 		self.base_link_posx = data.pose.pose.position.x
 		self.base_link_posy = data.pose.pose.position.y
@@ -67,6 +76,14 @@ class joystick(object):
 		self.subroty = 0
 		self.subrotz = 0
 		self.subrotw = 1.0
+
+		self.subposx_new = 0
+		self.subposy_new = 0
+		self.subposz_new = 0
+		self.subrotx_new = 0
+		self.subroty_new = 0
+		self.subrotz_new = 0
+		self.subrotw_new = 1.0
 
 	def move_rov(self, data):
 		rc = PoseWithCovarianceStamped()
@@ -115,7 +132,7 @@ class joystick(object):
 		rc = PoseWithCovarianceStamped()
 
 		rc.header.stamp = rospy.Time.now()
-		rc.header.frame_id = 'desired_position' # i.e. '/odom'
+		rc.header.frame_id = 'rc_position' # i.e. '/odom'
 
 		rc.pose.pose.position.x = self.subposx
 		rc.pose.pose.position.y = self.subposy
@@ -162,21 +179,13 @@ class joystick(object):
 		
 		#make desired TF new position (Anglerfish will attempt to reach this position/orientation)
 		elif data.buttons[3] == 1:
-			rc = PoseWithCovarianceStamped()
-
-			rc.header.stamp = rospy.Time.now()
-			rc.header.frame_id = 'desired_position' # i.e. '/odom'
-
-			rc.pose.pose.position.x = self.subposx
-			rc.pose.pose.position.y = self.subposy
-			rc.pose.pose.position.z = self.subposz
-			rc.pose.pose.orientation.x = self.subrotx
-			rc.pose.pose.orientation.y = self.subroty
-			rc.pose.pose.orientation.z = self.subrotz
-			rc.pose.pose.orientation.w = self.subrotw
-			#rc.pose.covariance=(np.eye(6)*.001).flatten()
-
-			self.pose_pub.publish(rc)
+			self.subposx_new = self.subposx
+			self.subposy_new = self.subposy
+			self.subposz_new = self.subposz
+			self.subrotx_new = self.subrotx
+			self.subroty_new = self.subroty
+			self.subrotz_new = self.subrotz
+			self.subrotw_new = self.subrotw
 			#rospy.logwarn(rc)
 
 
@@ -211,9 +220,9 @@ class joystick(object):
 		rospy.Subscriber("/odometry/filtered", Odometry, self.odom_location)
 		rospy.Subscriber("/rpy", rpy, self.rpy)
 		rospy.Subscriber("/move_rov", move, self.move_rov)
-		
+		rospy.Subscriber('/mission_move_rov', PoseWithCovarianceStamped, self.mission_move_rov)
 		#desire TF
-		self.pose_pub = rospy.Publisher("RC_position", PoseWithCovarianceStamped, queue_size = 1)
+		self.pose_pub = rospy.Publisher("/RC_position", PoseWithCovarianceStamped, queue_size = 1)
 
 		rate = rospy.Rate(20)
 		self.start()
@@ -248,6 +257,40 @@ class joystick(object):
 			self.subrotz = quat[2]
 			self.subrotw = quat[3]
 
+			rc = PoseWithCovarianceStamped()
+
+			rc.header.stamp = rospy.Time.now()
+			rc.header.frame_id = 'desired_position' # i.e. '/odom'
+
+			rc.pose.pose.position.x = self.subposx_new
+			rc.pose.pose.position.y = self.subposy_new
+			rc.pose.pose.position.z = self.subposz_new
+			rc.pose.pose.orientation.x = self.subrotx_new
+			rc.pose.pose.orientation.y = self.subroty_new
+			rc.pose.pose.orientation.z = self.subrotz_new
+			rc.pose.pose.orientation.w = self.subrotw_new
+			#rc.pose.covariance=(np.eye(6)*.001).flatten()
+
+			self.pose_pub.publish(rc)
+
+			t.transform.translation.x = self.subposx_new
+			t.transform.translation.y = self.subposy_new
+			t.transform.translation.z = self.subposz_new
+			t.transform.rotation.x = self.subrotx_new
+			t.transform.rotation.y = self.subroty_new
+			t.transform.rotation.z = self.subrotz_new
+			t.transform.rotation.w = self.subrotw_new
+
+			#odom = Odometry()
+
+			t.header.stamp = rospy.Time.now()
+			t.header.frame_id = "odom"
+			t.child_frame_id = "desired_position"
+			br.sendTransform(t)	
+
+
+			#rospy.logwarn(rc)
+
 			#publish updated desired TF POSE
 			t.transform.translation.x = self.subposx
 			t.transform.translation.y = self.subposy
@@ -261,7 +304,7 @@ class joystick(object):
 
 			t.header.stamp = rospy.Time.now()
 			t.header.frame_id = "odom"
-			t.child_frame_id = "desired_position"
+			t.child_frame_id = "rc_position"
 			br.sendTransform(t)	
 
 			rate.sleep()

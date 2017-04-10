@@ -1,7 +1,7 @@
 <launch>
  
-  <node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
-  </node>
+  <!--<node pkg="light_tracker" type="green_tracker.py" name="led_tracker" respawn="true">
+  </node>-->
 
   <node pkg="orientation_estimater" type="estimater.py" name="tf_Anglerfish" respawn="true">
   </node>
