@@ -132,7 +132,7 @@
            you simply want your measurements to start at 0 for a given sensor, set this to true. -->
       <param name="imu0_relative" value="false"/>
       <!-- <param name="imu1_relative" value="false"/> -->
-      <param name="pose0_relative" value="true"/>
+      <param name="pose0_relative" value="false"/>
       <param name="pose1_relative" value="false"/>
 
       <!-- If we're including accelerations in our state estimate, then we'll probably want to remove any acceleration that
