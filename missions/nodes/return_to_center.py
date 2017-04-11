@@ -34,17 +34,17 @@ class mission(object):
 		self.y_pos = 0
 		self.z_pos = 0	
 
-		self.move_rate = 0.02
+		self.move_rate = 0.01
 
-		desired_x = -1
-		desired_y = -1
+		desired_x = 0.55  #-0.8 - 0.65 (-0.65 - 0.55) ~1.2 to the computer
+		desired_y = 0  #-1 - 1  (-0.8 to 0.8)  ~1.6 to the computer
 
 		self.orientation = rospy.Publisher("/rpy", rpy, queue_size = 1)
 
 		self.position = rospy.Publisher("/mission_move_rov", PoseWithCovarianceStamped, queue_size = 1)
 		rospy.Subscriber("/RC_position", PoseWithCovarianceStamped, self.rc_pos)
 		
-		rate = rospy.Rate(10)
+		rate = rospy.Rate(3)
 
 		rospy.wait_for_message('/RC_position', PoseWithCovarianceStamped)
 		rospy.loginfo(self.x_pos)
