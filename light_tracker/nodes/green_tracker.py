@@ -303,7 +303,7 @@ class ThrusterDriver:
 		self.rov_heading = 0.0
 
 		#self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
-		self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
+		self.image_sub = rospy.Subscriber("camera/image_rect_color",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.camera_sub = rospy.Subscriber("/imu/razor", Imu, self.camera_imu)
 		self.rov_orientation_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.sub_orientation)

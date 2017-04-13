@@ -5,6 +5,8 @@
   <arg name="camera_serial" default="0" />
   <arg name="calibrated" default="1" />
 
+  <node name="down_camera_proc" pkg="image_proc" type="image_proc" ns="/camera"/>
+
   <group ns="$(arg camera_name)">
     <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 
@@ -30,8 +32,15 @@
              value="file://$(find anglerfish_launch)/launch/down_camera.yaml" />
     </node>
 
+
+    <!-- mono rectification -->
+    <node pkg="nodelet" type="nodelet" name="down_camera_rect"
+          args="load image_proc/rectify camera_nodelet_manager">
+    </node>
+
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
+
   </group>
 </launch>
