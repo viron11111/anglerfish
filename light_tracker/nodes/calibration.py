@@ -82,11 +82,82 @@ class ThrusterDriver:
 		t.transform.rotation.z = self.q_desW[3]
 		br.sendTransform(t)
 
+	def draw_circle(self, cx_img, cy_img, frame_shape):
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.circle(self.image, (cx_img, cy_img), 2, (0, 0, 255), -1)
+
+		# Pixel coords about image center (in meters)
+		cx = cx_img - frame_shape[1] / 2.0
+		cy = cy_img - frame_shape[0] / 2.0
+		cx *= 6E-6
+		cy *= 6E-6
+
+		#K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
+		#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
+		L = 2.8194  #distance of camera to target in meters
+		L = 4
+		target_point = np.array([cx,cy,0.00234])
+		target_point = (target_point * L) / target_point[2]
+
+		#D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
+		
+		D_vec = target_point
+		print "D_vec: {}",format(D_vec)
+		L_vec = np.array([0,0,L])  #vector from center of camera
+
+		mag_D = np.linalg.norm(D_vec) 
+		mag_L = np.linalg.norm(L_vec)
+		print mag_D, mag_L
+		print mag_D**2 - mag_L**2
+
+		dist  = np.sqrt(mag_D**2 - mag_L**2)
+		print "dist: {}".format(dist)
+		c = np.array([cx, cy, 0])
+		c = c / np.linalg.norm(c[:2]) * dist
+		c[2] = L
+		c[0] -= 0.08
+
+
+
+
+		# #D_vec = D_vec/mag_D_vec
+		# L_vec = L_vec/mag_L_vec
+
+		# vec_dot = np.dot(L_vec, D_vec)
+
+		# vector_angle = np.arccos(vec_dot/(mag_D_vec*mag_L_vec))
+		# print vector_angle
+		# #soh cah toa
+		# #L = 1
+		
+
+		# actual_distance_from_center = np.tan(vector_angle)*L
+
+		# hypotenuse = actual_distance_from_center/np.arcsin(vector_angle)
+
+		self.threeD_point = c
+		print "c: {}".format(c)
+		print "wall_coords {}".format(c*L)
+		print "3d pt: {}".format(self.threeD_point)
+		#orig_3d = D_vec*hypotenuse
+
+
+		# #*****************************************************************************************************
+		# #for rotation 90 degrees
+		# self.threeD_point[0] = -orig_3d[0] #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+		# self.threeD_point[1] = -orig_3d[1] #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
+		# self.threeD_point[2] = orig_3d[2]
+
+
+		#cv2.putText(self.image,"(%.3f, %.3f)" % (self.threeD_point[0], self.threeD_point[1]),(cx-30,cy-5), font, 0.3,(255,255,255),1,cv2.LINE_AA)
+		cv2.putText(self.image,"%.2f %.2f" % (self.threeD_point[0],self.threeD_point[1]),(cx_img+5,cy_img+3), font, 0.2,(255,255,255),1,cv2.LINE_AA)
+
+
 	def import_vid(self,data):
 
 		biggest_area = 0.0
 		biggest_contour = []
-		font = cv2.FONT_HERSHEY_SIMPLEX
+		
 
 		self.image_pub = rospy.Publisher("down_camera_pub",Image, queue_size = 1)
 		#self.green_pub = rospy.Publisher("green",Image, queue_size = 1)
@@ -103,147 +174,119 @@ class ThrusterDriver:
 		#greenLower = (self.H_green_low, self.S_green_low, self.V_green_low)
 		#greenUpper = (self.H_green_high, self.S_green_high, self.V_green_high)
 
-		image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+		self.image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
 		rows = 480
 		cols = 752
-		camera_degrees = -self.camera_heading*(180/3.14157)
-		M = cv2.getRotationMatrix2D((cols/2,rows/2),camera_degrees,1)
-		image = cv2.warpAffine(image,M,(cols,rows))
 
-		img = cv2.blur(image,(5,5))
+		cx = 376
+		cy = 240
+		self.draw_circle(cx,cy, (rows,cols))
 
-		img[:, 0:self.left_column] = 0
-		img[:, 752-self.right_column:752] = 0 
-		img[0:self.top_row, :] = 0
-		img[480-self.bottom_row:480, :] = 0 
+		cxref = 384
+		cyref = 230
+		self.draw_circle(cxref,cyref, (rows,cols))
 
-		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-		gray /= 10
-		gray *= gray		
+		cx_half_right = 435
+		cy_half_right = 230
+		self.draw_circle(cx_half_right,cy_half_right, (rows,cols))
 
-		gray = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
-		gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, kernel)	
+		cx_full_right = 485
+		cy_full_right = 230
+		self.draw_circle(cx_full_right,cy_full_right, (rows,cols))
 
-		'''cimg = image
+		cx_full_right = 535
+		cy_full_right = 230
+		self.draw_circle(cx_full_right,cy_full_right, (rows,cols))
 
-		circles = cv2.HoughCircles(gray,cv2.HOUGH_GRADIENT,1,20, param1=100,param2=30,minRadius=5,maxRadius=50)
+		cx_full_right = 535
+		cy_full_right = 169
+		self.draw_circle(cx_full_right,cy_full_right, (rows,cols))
 
-		circles = np.uint16(np.around(circles))
+		cx_half_left = 334
+		cy_half_left = 230
+		self.draw_circle(cx_half_left,cy_half_left, (rows,cols))
 
-		for i in circles[0,:]:
-			# draw the outer circle
-			cv2.circle(cimg,(i[0],i[1]),i[2],(0,255,0),2)'''
+		cx_full_left = 284
+		cy_full_left = 230
+		self.draw_circle(cx_full_left,cy_full_left, (rows,cols))
 
-		ret,thresh = cv2.threshold(gray,130,255,0)  #100
+		cx_half_up = 384
+		cy_half_up = 172
+		self.draw_circle(cx_half_up,cy_half_up, (rows,cols))		
 
-		#self.image_pub.publish(self.bridge.cv2_to_imgmsg(thresh, "8UC1")) #"8UC1"))
+		cv2.circle(self.image, (cx, cy), 2, (0, 255, 0), -1)
 
-		im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+		#cv2.circle(self.image, (cxref, cyref), 2, (0, 0, 255), -1)
+		#cv2.drawContours(image, contours, -1, (0,0,255), 3)
 
-		area = 0
-		old_area= 0
-		biggest_cnt = None
-		smallest_area = 1
-		biggest_area = 1500
-		aspect_ratio = 0
-		font = cv2.FONT_HERSHEY_SIMPLEX
+		#lens calibration numbers
+		K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
+		#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
+		#K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])  #Old lens (first one)
 
-		for cnt in contours:
-			if cnt != None:
-				x,y,w,h = cv2.boundingRect(cnt)
-				aspect_ratio = float(w)/h
-				area = cv2.contourArea(cnt)
-				if area >= old_area and area < biggest_area and area > smallest_area and aspect_ratio > 0.65 and aspect_ratio < 1.35:
-					biggest_cnt = cnt
-					old_area = area
+		target_point = [[cxref],[cyref],[1]]
+		#ref_point =
 
-		if biggest_cnt != None and old_area < biggest_area and old_area > smallest_area:
-			#rospy.loginfo ("area: %f aspect_ratio: %f" % (old_area, aspect_ratio))
-			M = cv2.moments(biggest_cnt)
-			cx = int(M["m10"] / M["m00"])
-			cy = int(M["m01"] / M["m00"])
-			self.left_column = cx - 50
-			self.right_column = (752 - cx) - 50
-			self.top_row = cy - 50
-			self.bottom_row = (480 - cy) - 50
+		D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
+		L_vec = [0,0,1]  #vector from center of camera
 
-			cv2.circle(image, (cx, cy), 7, (0, 0, 255), -1)
-			#cv2.drawContours(image, contours, -1, (0,0,255), 3)
+		mag_D_vec = np.linalg.norm(D_vec) 
+		mag_L_vec = np.linalg.norm(L_vec)
 
-			#lens calibration numbers
-			K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
-			#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
-			#K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])  #Old lens (first one)
+		D_vec = D_vec/mag_D_vec
 
-			target_point = [[cx],[cy],[1]]
-			#ref_point =
+		vec_dot = np.dot(L_vec, D_vec)
 
-			D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
-			L_vec = [0,0,1]  #vector from center of camera
+		vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
-			mag_D_vec = np.linalg.norm(D_vec) 
-			mag_L_vec = np.linalg.norm(L_vec)
+		#soh cah toa
+		#L = 1
+		L = 2.8194
+		#rospy.logwarn(self.depth)
+		actual_distance_from_center = math.tan(vector_angle)*L
 
-			D_vec = D_vec/mag_D_vec
+		hypotenuse = actual_distance_from_center/math.asin(vector_angle)
 
-			vec_dot = np.dot(L_vec, D_vec)
+		self.threeD_point = D_vec*hypotenuse
+		orig_3d = D_vec*hypotenuse
 
-			vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
+		#rotate_matrix = trns.rotation_matrix(self.camera_heading, orig_3d)
 
-			#soh cah toa
-			#L = 1
-			L = self.depth
-			#rospy.logwarn(self.depth)
-			actual_distance_from_center = math.tan(vector_angle)*L
+		#rospy.logwarn("initial: %s rotate: %s" % (orig_3d, rotate_matrix))
 
-			hypotenuse = actual_distance_from_center/math.asin(vector_angle)
+		#rospy.logwarn(self.camera_heading)
 
-			self.threeD_point = D_vec*hypotenuse
-			orig_3d = D_vec*hypotenuse
+		xmeasfir1 = orig_3d[0]
+		self.xmeasured = xmeasfir1*0.5 + self.xmeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
+		#self.measfir5 = self.measfir4
+		#self.measfir4 = self.measfir3
+		#self.measfir3 = self.measfir2
+		self.xmeasfir2 = xmeasfir1
 
-			#rotate_matrix = trns.rotation_matrix(self.camera_heading, orig_3d)
+		ymeasfir1 = orig_3d[1]
+		self.ymeasured = ymeasfir1*0.5 + self.ymeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
+		#self.measfir5 = self.measfir4
+		#self.measfir4 = self.measfir3
+		#self.measfir3 = self.measfir2
+		self.ymeasfir2 = ymeasfir1
 
-			#rospy.logwarn("initial: %s rotate: %s" % (orig_3d, rotate_matrix))
+		#*****************************************************************************************************
+		#for rotation 90 degrees
+		self.threeD_point[0] = -self.xmeasured #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+		self.threeD_point[1] = -self.ymeasured #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
+		self.threeD_point[2] = orig_3d[2]
 
-			#rospy.logwarn(self.camera_heading)
+		x_diff = -self.threeD_point[0] - self.p_desW[0]
+		y_diff = -self.threeD_point[1] - self.p_desW[1]
 
-			xmeasfir1 = orig_3d[0]
-			self.xmeasured = xmeasfir1*0.5 + self.xmeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
-			#self.measfir5 = self.measfir4
-			#self.measfir4 = self.measfir3
-			#self.measfir3 = self.measfir2
-			self.xmeasfir2 = xmeasfir1
+		#cv2.circle(img, (self.p_desW[0], self.p_desW[1]), 7, (0, 255, 255), -1)
+		#rospy.loginfo(self.p_desW[0])
 
-			ymeasfir1 = orig_3d[1]
-			self.ymeasured = ymeasfir1*0.5 + self.ymeasfir2*0.5 # +self.measfir3*0.25 + self.measfir4*0.25# + self.measfir5*0.2
-			#self.measfir5 = self.measfir4
-			#self.measfir4 = self.measfir3
-			#self.measfir3 = self.measfir2
-			self.ymeasfir2 = ymeasfir1
+		#rospy.loginfo("x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff))
+		#cv2.putText(image,"x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff),(10,20), font, 0.5,(255,255,255),1,cv2.LINE_AA)
 
-			#*****************************************************************************************************
-			#for rotation 90 degrees
-			self.threeD_point[0] = -self.xmeasured #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
-			self.threeD_point[1] = -self.ymeasured #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
-			self.threeD_point[2] = orig_3d[2]
-
-			x_diff = -self.threeD_point[0] - self.p_desW[0]
-			y_diff = -self.threeD_point[1] - self.p_desW[1]
-
-			#cv2.circle(img, (self.p_desW[0], self.p_desW[1]), 7, (0, 255, 255), -1)
-			#rospy.loginfo(self.p_desW[0])
-
-			#rospy.loginfo("x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff))
-			cv2.putText(img,"x_pos_diff: %f y_pos_diff: %f" % (x_diff, y_diff),(10,20), font, 0.5,(255,255,255),1,cv2.LINE_AA)
-
-			#rospy.logwarn(self.threeD_point[0])
-		else:
-			self.left_column = 0
-			self.right_column = 0
-			self.top_row = 0
-			self.bottom_row = 0
-			#rospy.logwarn ("area: %f aspect_ratio: %f" % (old_area, aspect_ratio))
+		#rospy.logwarn(self.threeD_point[0])
 
 		heading = self.rov_heading - self.camera_heading
 		#rospy.logwarn("cam: %f rov: %f" % (self.camera_heading, self.rov_heading))
@@ -255,7 +298,7 @@ class ThrusterDriver:
 
 		#cv2.circle(image, (400,200), 1, )
 
-		self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "bgr8"))
+		self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.image, "bgr8"))
 		#self.image_pub.publish(self.bridge.cv2_to_imgmsg(gray, "8UC1"))
 
 		self.camera_turn = rospy.Publisher('camera_heading', Float64, queue_size = 1)

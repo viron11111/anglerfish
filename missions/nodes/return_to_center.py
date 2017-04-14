@@ -36,8 +36,8 @@ class mission(object):
 
 		self.move_rate = 0.01
 
-		desired_x = 0.55  #-0.8 - 0.65 (-0.65 - 0.55) ~1.2 to the computer
-		desired_y = 0  #-1 - 1  (-0.8 to 0.8)  ~1.6 to the computer
+		desired_x = 0.0  #-0.6 to 0.5 (-0.65 - 0.55) ~1.2 to the computer
+		desired_y = -0.9  #-0.75 to 0.75)  ~1.6 to the computer
 
 		self.orientation = rospy.Publisher("/rpy", rpy, queue_size = 1)
 
