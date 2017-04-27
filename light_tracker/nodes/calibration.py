@@ -95,7 +95,7 @@ class ThrusterDriver:
 		#K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
 		#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
 		L = 2.8194  #distance of camera to target in meters
-		L = 4
+		L = 4		
 		target_point = np.array([cx,cy,0.00234])
 		target_point = (target_point * L) / target_point[2]
 
@@ -115,7 +115,7 @@ class ThrusterDriver:
 		c = np.array([cx, cy, 0])
 		c = c / np.linalg.norm(c[:2]) * dist
 		c[2] = L
-		c[0] -= 0.08
+		#c[0] -= 0.08
 
 
 
