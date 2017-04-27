@@ -171,49 +171,49 @@ class ThrusterDriver:
 			cv2.circle(img, (cx, cy), 7, (0, 0, 255), -1)
 			#cv2.drawContours(image, contours, -1, (0,0,255), 3)
 
-			#lens calibration numbers
-			K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
+			frame_shape = (480,752)
+
+			# Pixel coords about image center (in meters)
+			cx_img = cx - frame_shape[1] / 2.0
+			cy_img = cy - frame_shape[0] / 2.0
+			cx_img *= 6E-6
+			cy_img *= 6E-6
+
+			#K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
 			#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
-			#K = ([[520.022034, 0.000000, 373.627100], [0.000000, 569.056519, 203.777917], [0.000000, 0.000000, 1.000000]])  #Old lens (first one)
+			#L = 2.8194  #distance of camera to target in meters
+			L = self.depth*1.41874157622	
+			target_point = np.array([cx_img,cy_img,0.00234])
+			target_point = (target_point * L) / target_point[2]
 
-			target_point = [[cx],[cy],[1]]
-			#ref_point =
+			#D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
+			
+			D_vec = target_point
+			print "D_vec: {}",format(D_vec)
+			L_vec = np.array([0,0,L])  #vector from center of camera
 
-			D_vec = np.dot(inv(K), target_point) #hypotenuse vector, no length
-			L_vec = [0,0,1]  #vector from center of camera
+			mag_D = np.linalg.norm(D_vec) 
+			mag_L = np.linalg.norm(L_vec)
+			print mag_D, mag_L
+			print mag_D**2 - mag_L**2
 
-			mag_D_vec = np.linalg.norm(D_vec) 
-			mag_L_vec = np.linalg.norm(L_vec)
+			dist  = np.sqrt(mag_D**2 - mag_L**2)
+			print "dist: {}".format(dist)
+			c = np.array([cx_img, cy_img, 0])
+			c = c / np.linalg.norm(c[:2]) * dist
+			c[2] = L
+			#c[0] -= 0.08
 
-			D_vec = D_vec/mag_D_vec
+			self.threeD_point = c
 
-			vec_dot = np.dot(L_vec, D_vec)
 
-			vector_angle = math.acos(vec_dot/(mag_D_vec*mag_L_vec))
 
-			#soh cah toa
-			#L = 1
-			#L = self.depth
-			L = self.depth*1.41874157622
-			#rospy.logwarn(self.depth)
-			actual_distance_from_center = math.tan(vector_angle)*L
-
-			hypotenuse = actual_distance_from_center/math.asin(vector_angle)
-
-			self.threeD_point = D_vec*hypotenuse
-			orig_3d = D_vec*hypotenuse
-
-			#rotate_matrix = trns.rotation_matrix(self.camera_heading, orig_3d)
-
-			#rospy.logwarn("initial: %s rotate: %s" % (orig_3d, rotate_matrix))
-
-			#rospy.logwarn(self.camera_heading)
 
 			#*****************************************************************************************************
 			#for rotation 90 degrees
-			self.threeD_point[0] = -orig_3d[0] #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
-			self.threeD_point[1] = -orig_3d[1] #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
-			self.threeD_point[2] = orig_3d[2]
+			#self.threeD_point[0] = -orig_3d[0] #orig_3d[0]*math.cos(1.571 + self.camera_heading) - orig_3d[1]*math.sin(1.571 + self.camera_heading)#orig_3d[0]*math.cos(1.571) - orig_3d[1]*math.sin(1.571)
+			#self.threeD_point[1] = -orig_3d[1] #orig_3d[0]*math.sin(1.571 + self.camera_heading) + orig_3d[1]*math.cos(1.571 + self.camera_heading) 
+			#self.threeD_point[2] = orig_3d[2]
 
 			x_diff = -self.threeD_point[0] - self.p_desW[0]
 			y_diff = -self.threeD_point[1] - self.p_desW[1]
@@ -292,7 +292,7 @@ class ThrusterDriver:
 		self.rov_heading = 0.0
 
 		#self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
-		self.image_sub = rospy.Subscriber("camera/image_color",Image,self.import_vid)
+		self.image_sub = rospy.Subscriber("camera/image_rect_color",Image,self.import_vid)
 		self.depth_sub = rospy.Subscriber("depth", PoseWithCovarianceStamped, self.pressure)
 		self.camera_sub = rospy.Subscriber("/imu/razor", Imu, self.camera_imu)
 		self.rov_orientation_sub = rospy.Subscriber("/odometry/filtered", Odometry, self.sub_orientation)
