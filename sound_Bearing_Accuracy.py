@@ -18,15 +18,15 @@ time_signal_below_threshold = wave_detection_threshold*(1/signal_frequency)
 
 travel_time = distance_between_hydrophones / speed_of_sound
 
-x = np.linspace(-9, 9, 400)
-y = np.linspace(-5, 5, 400)
+x = np.linspace(-9, 9, 40)
+y = np.linspace(-5, 5, 40)
 x, y = np.meshgrid(x, y)
 
 def axes():
     plt.axhline(0, alpha=.1)
     plt.axvline(0, alpha=.1)
 
-a = .3
+a = 1
 axes()
-plt.contour(x, y, (y**2 + 4*a*x), [0], colors='k')
+plt.contour(x, y, (y**2 + 0.5*a*x), [0], colors='k')
 plt.show()
