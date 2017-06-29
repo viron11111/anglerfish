@@ -154,7 +154,7 @@ class ThrusterDriver:
 				x,y,w,h = cv2.boundingRect(cnt)
 				aspect_ratio = float(w)/h
 				area = cv2.contourArea(cnt)
-				if area >= old_area and area < biggest_area and area > smallest_area and aspect_ratio > 0.65 and aspect_ratio < 1.35:
+				if area >= old_area and area < biggest_area and area > smallest_area: # and aspect_ratio > 0.25 and aspect_ratio < 1.75:
 					biggest_cnt = cnt
 					old_area = area
 
@@ -182,7 +182,7 @@ class ThrusterDriver:
 			#K = ([[390.160508, 0.000000, 388.917091], [0.000000, 390.160508, 218.490820], [0.000000, 0.000000, 1.000000]])   #wide angle lens, cap on, fixed-aspect-ratio
 			#K = ([[391.091019, 0.000000, 384.715490], [0.000000, 389.648800, 219.939006], [0.000000, 0.000000, 1.000000]])  #calibrated with wide angle lens, cap off
 			#L = 2.8194  #distance of camera to target in meters
-			L = self.depth*1.41874157622	
+			L = self.depth*2.000541874157622	
 			target_point = np.array([cx_img,cy_img,0.00234])
 			target_point = (target_point * L) / target_point[2]
 
