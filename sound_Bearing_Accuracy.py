@@ -3,9 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import sympy
-from sympy import nsolve,Symbol
-import mpmath
+#import sympy
+#from sympy import nsolve,Symbol
+#import mpmath
 from itertools import combinations
 import numpy.linalg as la
 
@@ -52,18 +52,20 @@ class mission(object):
 		self.speed_of_sound = 1484000.0 #milimeters per second
 		self.pinger_loc = (20000, 1000, -3000)  #milimeters
 
-		self.hydrophone_ref = (0,0,0) #milimeters
-		self.hydrophone_b = (-100, 0,0)  #milimeters
-		self.hydrophone_c = (0,100,0)  #milimeters
-		self.hydrophone_d = (100,0.0,0)  #milimeters
-
+		self.hydrophone_locations = []
 		#<!-- millimeters for greater accuracy -->
-		#{   hydro0: {x:       0, y:       0, z:      0},
-		#hydro1: {x:   -25.4, y:       0, z:   25.4},
-		#hydro2: {x:    25.4, y:       0, z:      0},
-		#hydro3: {x:       0, y:   -25.4, z:      0} }
+		hydrophone_locations = {   
+		'hydro0': {'x':       0, 'y':       0, 'z':      0},
+		'hydro1': {'x':   -25.4, 'y':       0, 'z':   25.4},
+		'hydro2': {'x':    25.4, 'y':       0, 'z':      0},
+		'hydro3': {'x':       0, 'y':   -25.4, 'z':      0}}
 
-		self.timestamps = self.time_difference(self.hydrophone_ref,self.hydrophone_b,self.hydrophone_c,self.hydrophone_d)
+		for key in hydrophone_locations:
+			sensor_location = np.array(
+				[hydrophone_locations[key]['x'], hydrophone_locations[key]['y'], hydrophone_locations[key]['z']])
+			self.hydrophone_locations += [sensor_location]
+
+		#self.timestamps = self.time_difference(self.hydrophone_ref,self.hydrophone_b,self.hydrophone_c,self.hydrophone_d)
 		
 		#print self.time_diffs
 		#print fsolve(self.find_position, (1))
@@ -71,7 +73,8 @@ class mission(object):
 		#y = Symbol('y')
 		#ans1,ans2 = nsolve([x+y**2-4, x*y-3], [x, y], [1, 1])
 		#self.find_position()
-		print self.timestamps
+		#print self.timestamps
+		print self.hydrophone_locations
 
 def main():
 
@@ -79,3 +82,8 @@ def main():
 
 if __name__ == '__main__':
 	main() #sys.argv
+
+#self.hydrophone_ref = (0,0,0) #milimeters
+		#self.hydrophone_b = (-100, 0,0)  #milimeters
+		#self.hydrophone_c = (0,100,0)  #milimeters
+		#self.hydrophone_d = (100,0.0,0)  #milimeters
