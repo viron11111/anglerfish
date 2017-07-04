@@ -50,7 +50,6 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Ping.msg
-   ProcessedPing.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -68,7 +67,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
+ generate_messages(
   DEPENDENCIES
    std_msgs  # Or other packages containing msgs
 )

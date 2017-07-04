@@ -11,11 +11,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from std_msgs.msg import UInt16
+from pinger_tracker.msg import *
 
 
 print "Waiting for sonar msg"
 rospy.init_node('ping_plotter')
-rospy.Subscriber('/hydrophones/ping/data', UInt16)
+rospy.wait_for_message('/hydrophones/ping', Ping)
+#rospy.Subscriber('/hydrophones/ping/', UInt16)
 
 print "done"
 
