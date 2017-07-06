@@ -11,31 +11,72 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from std_msgs.msg import UInt16
+from pinger_tracker.msg import *
+
+import time
+
+class plotter():
+
+    def signal_plotter(self, data):
+        #print "msg received"
+        values = data.data
+        print "msg"
+
+        self.x = np.arange(len(values[:300:4]))
+        self.a = values[0:300:4]
+        self.b = values[1:300:4]
+        self.c = values[2:300:4]
+        self.d = values[3:300:4]
+
+        self.trigger = True
+        #s = 1 + np.sin(2*np.pi*t)
 
 
-print "Waiting for sonar msg"
-rospy.init_node('ping_plotter')
-rospy.Subscriber('/hydrophones/ping/data', UInt16)
+    def __init__(self):
+        rospy.init_node('ping_plotter')
+        rospy.Subscriber('/hydrophones/ping', Ping, self.signal_plotter)
 
-print "done"
+        rate = rospy.Rate(5)
+
+        self.x = []
+        self.a = []
+        self.b = []
+        self.c = []
+        self.d = []
+        self.trigger = False
+
+        while not rospy.is_shutdown():
+            print self.trigger
+            if self.trigger == True:
+                plt.gcf().clear()
+                plt.plot(self.x, self.a)
+                plt.plot(self.x, self.b)
+                plt.plot(self.x, self.c)
+                plt.plot(self.x, self.d)
+
+                plt.xlabel('time (uS)')
+                plt.ylabel('voltage (mV)')
+                plt.title('X')
+                plt.grid(True)
+                plt.show()
+                self.trigger = False
+
+            rate.sleep()
+
+        plt.close('all')
+
+def main():
+    rospy.init_node('ping_plotter', anonymous=False)
+
+    plotter()
+
+    try:
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        print "Shutting down"
+        pass
+    
 
 
-'''
-sonar = rospy.ServiceProxy('~/sonar/get_pinger_pulse', Sonar)
-print "sonar serv proxy created"
-
-try:
-    while(True):
-        try:
-            pinger_pose = sonar()
-        except Exception:
-            plt.close('all')
-            print "\nSonar driver is down, shutting down plotter"
-            break
-        print "x:", str(pinger_pose.x).rjust(15), "y:", str(pinger_pose.y).rjust(15), "z:", str(pinger_pose.z).rjust(15)
-        ax.scatter(pinger_pose.x, pinger_pose.y, pinger_pose.z)
-        plt.draw()
-        plt.pause(0.1)
-except KeyboardInterrupt:
-    plt.close('all')
-    print "\nshutting down plotter"'''
+if __name__ == '__main__':
+    main()
