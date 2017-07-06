@@ -61,17 +61,17 @@ class plotter():
         self.trigger = False
 
         plt.ion()
+        fig, ax = plt.subplots(2, 1)
 
         while not rospy.is_shutdown():
             #print self.trigger
             if self.trigger == True:
                 #freq = np.fft.fft(self.x, self.a)
                 #freq = np.abs(freq)
-                #print freq
+                #print freq                
 
                 Fs = 300000
-                Ts = 1.0/Fs
-                
+                Ts = 1.0/Fs                
 
                 y = self.a
                 n = len(y)
@@ -79,23 +79,41 @@ class plotter():
                 t = np.arange(0,n*Ts,Ts)
 
                 k = np.arange(n)
-                T = n/Fs
+                T = float(n)/float(Fs)            
                 frq = k/T # two sides frequency range
-                frq = frq[range(n/2)] # one side frequency range
 
+                frq = frq[range(n/2)] # one side frequency range
                 Y = np.fft.fft(y)/n # fft computing and normalization
                 Y = Y[range(n/2)]
 
-                fig, ax = plt.subplots(2, 1)
+                for i in range(10,n/2):
+                    
+                    if abs(Y[i]) > 80:
+                        print "ping detected"
+                        left_line = np.arange(0,300,300)
+                        
+
+                ax[0].cla()
+                ax[0].set_title("Four Hydrophone Channels")
                 ax[0].plot(t,y)
+                ax[0].plot(t,self.b)
+                ax[0].plot(t,self.c)
+                ax[0].plot(t,self.d)
                 ax[0].set_xlabel('Time')
                 ax[0].set_ylabel('Amplitude')
+
+                ax[1].axvline(30000)
+                ax[1].cla()
+                ax[1].set_title("FFT On Channel One")
                 ax[1].plot(frq,abs(Y),'r') # plotting the spectrum
+                ax[1].set_xlim(0,50000)
+                ax[1].set_ylim(0,300)
                 ax[1].set_xlabel('Freq (Hz)')
                 ax[1].set_ylabel('|Y(freq)|')
 
                 #plot_url = py.plot_mpl(fig, filename='mpl-basic-fft')
-
+                plt.pause(0.05)
+                self.trigger = False
 
 
 
