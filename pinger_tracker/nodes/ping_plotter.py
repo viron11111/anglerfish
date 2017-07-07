@@ -61,7 +61,7 @@ class plotter():
         self.trigger = False
 
         plt.ion()
-        fig, ax = plt.subplots(2, 1)
+        fig, ax = plt.subplots(3, 1)
 
         while not rospy.is_shutdown():
             #print self.trigger
@@ -91,31 +91,40 @@ class plotter():
                     if abs(Y[i]) > 80:
                         print "ping detected"
                         left_line = np.arange(0,300,300)
-                        
 
                 ax[0].cla()
-                ax[0].set_title("Four Hydrophone Channels")
+                ax[0].set_title("Four Hydrophone Channels Full Scale")
                 ax[0].plot(t,y)
                 ax[0].plot(t,self.b)
                 ax[0].plot(t,self.c)
                 ax[0].plot(t,self.d)
+                ax[0].set_ylim(0,65536)
                 ax[0].set_xlabel('Time')
                 ax[0].set_ylabel('Amplitude')
 
-                ax[1].axvline(30000)
                 ax[1].cla()
-                ax[1].set_title("FFT On Channel One")
-                ax[1].plot(frq,abs(Y),'r') # plotting the spectrum
-                ax[1].set_xlim(0,50000)
-                ax[1].set_ylim(0,300)
-                ax[1].set_xlabel('Freq (Hz)')
-                ax[1].set_ylabel('|Y(freq)|')
+                ax[1].set_title("Four Hydrophone Channels Autosized")
+                ax[1].plot(t,y)
+                ax[1].plot(t,self.b)
+                ax[1].plot(t,self.c)
+                ax[1].plot(t,self.d)
+                ax[1].set_xlabel('Time')
+                ax[1].set_ylabel('Amplitude')
+
+                ax[2].axvline(30000)
+                ax[2].cla()
+                ax[2].set_title("FFT On Channel One")
+                ax[2].plot(frq,abs(Y),'r') # plotting the spectrum
+                ax[2].set_xlim(0,50000)
+                ax[2].set_ylim(0,300)
+                ax[2].set_xlabel('Freq (Hz)')
+                ax[2].set_ylabel('|Y(freq)|')
 
                 #plot_url = py.plot_mpl(fig, filename='mpl-basic-fft')
                 plt.pause(0.05)
                 self.trigger = False
 
-
+                #802.3af 48V
 
                 '''plt.gcf().clear()
                 plt.plot(self.x, self.a)
