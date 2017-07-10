@@ -15,35 +15,58 @@ from std_msgs.msg import UInt16
 from pinger_tracker.msg import *
 
 import time
+from multilateration import Multilaterator, ReceiverArraySim, Pulse
 
 class simulator():
+
+    def create_time_stamps(self, position):           
+
+        hydrophone_locations = {   
+        'hydro0': {'x':       0, 'y':       0, 'z':      0},
+        'hydro1': {'x':   -25.4, 'y':       0, 'z':      0},
+        'hydro2': {'x':    25.4, 'y':       0, 'z':      0},
+        'hydro3': {'x':       0, 'y':   -25.4, 'z':      0}}
+
+        c = 1.484  # millimeters/microsecond
+        hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
+        sonar = Multilaterator(hydrophone_locations, c, 'LS')
+
+        pulse = Pulse(position[0], position[1], position[2], 0)
+        #print pulse
+        tstamps = hydrophone_array.listen(pulse)
+        tstamps = tstamps - tstamps[0]
+        return tstamps
 
     def create_wave(self, offset):
         self.Fs = self.sample_rate  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
 
-        self.samples = (0.0004+offset+self.jitter)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        self.samples = (0.0004-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        #print self.samples
 
         pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
 
-        t = np.arange(0,0.0004-offset-self.jitter,self.Ts) # time vector for signal waves
+        t = np.arange(0,0.0004+offset,self.Ts) # time vector for signal waves
+        print len(t)-int(self.samples)
 
         ff = self.signal_freq   # frequency of the signal
-        y = np.sin(2*np.pi*ff*t)*self.amplitude + 1
+        y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) + 1
 
         y = (y/2) * 2**self.resolution
 
         #print y
 
         y = np.array(y,dtype=int)
-        
+     
 
         #pre_signal = np.array(pre_signal,dtype=int)
 
         wave = np.append(pre_signal,y)  #append silence before signal to actual signal
 
         return wave
+
+
 
     def __init__(self):
         rospy.init_node('signal_simulator')
@@ -56,6 +79,7 @@ class simulator():
         self.resolution = rospy.get_param('resolution', 16)
         self.signal_freq = rospy.get_param('signal_freq', 43e3)
         self.amplitude = rospy.get_param('amplitude', 1.0)
+        self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
 
@@ -66,39 +90,34 @@ class simulator():
         
         #print jitter
 
+        shift = random.uniform(-0.00001,0.00001)
+
+        position = (10000, 1000, -1000)
+        shift = self.create_time_stamps(position)
+        tstamps = shift*10**-6
+
+        
 
         plt.ion()
         fig, ax = plt.subplots(2, 1)
-
-
-
-        #print self.samples
-
-
-
-
-
-
-
-
-        '''for i in range(len(y-1)):
-            y[i] = int(y[i])
-            #print ("%i" % y[i])
-
-        print y'''
 
         rate = rospy.Rate(2)
 
         while not rospy.is_shutdown():
 
-            self.jitter = random.uniform(-self.Ts/2,self.Ts/2)         
+            phase_jitter = ((1/self.sample_rate)/(1/self.signal_freq))*np.pi
+            self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)         
+            
 
             ax[0].cla()
             ax[0].set_title("Four Hydrophone Channels Full Scale")
 
-            for i in range(4):
-
-                wave= self.create_wave(self.jitter)
+            for i in range(0,4):
+                
+                self.amplitude_jitter = random.uniform(0.8,1.0)
+                for i in range(0,4):
+                    #print tstamps[i]
+                    wave = self.create_wave(tstamps[i])
 
                 n = len(wave)
                 t = np.arange(0,n*self.Ts,self.Ts)
