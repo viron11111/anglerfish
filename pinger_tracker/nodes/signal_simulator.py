@@ -22,12 +22,12 @@ class simulator():
         self.Fs = self.sample_rate  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
 
-        self.samples = (0.0004+offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        self.samples = (0.0004+offset+self.jitter)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
 
         pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
 
-        t = np.arange(0,0.0004-offset,self.Ts) # time vector for signal waves
+        t = np.arange(0,0.0004-offset-self.jitter,self.Ts) # time vector for signal waves
 
         ff = self.signal_freq   # frequency of the signal
         y = np.sin(2*np.pi*ff*t)*self.amplitude + 1
@@ -55,7 +55,7 @@ class simulator():
         #self.samples = rospy.get_param('sample_number', 1024)
         self.resolution = rospy.get_param('resolution', 16)
         self.signal_freq = rospy.get_param('signal_freq', 43e3)
-        self.amplitude = rospy.get_param('amplitude', 0.08)
+        self.amplitude = rospy.get_param('amplitude', 1.0)
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
 
