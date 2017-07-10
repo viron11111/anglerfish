@@ -37,18 +37,30 @@ class simulator():
         tstamps = tstamps - tstamps[0]
         return tstamps
 
-    def create_wave(self, offset):
-        self.Fs = self.sample_rate  # sampling rate
-        self.Ts = 1.0/self.Fs # sampling interval
+    def create_silence(self, offset):
 
-        self.samples = (0.0004-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        self.samples = ((self.signal_length/2)-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
         #print self.samples
 
         pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
+        pre_signal = pre_signal + self.noise[0:len(pre_signal)]
 
-        t = np.arange(0,0.0004+offset,self.Ts) # time vector for signal waves
-        print len(t)-int(self.samples)
+        return pre_signal
+
+
+    def create_wave(self, offset):
+        self.Fs = self.sample_rate  # sampling rate
+        self.Ts = 1.0/self.Fs # sampling interval
+
+        self.samples = ((self.signal_length/2)-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        #print self.samples
+
+        pre_signal = self.create_silence(offset) #[(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
+
+
+        t = np.arange(0,(self.signal_length/2)+offset,self.Ts) # time vector for signal waves
+        #print len(t)+int(self.samples)
 
         ff = self.signal_freq   # frequency of the signal
         y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) + 1
@@ -77,9 +89,10 @@ class simulator():
         #permute_str = rospy.get_param('~permute', '1 2 3 4')
         #self.samples = rospy.get_param('sample_number', 1024)
         self.resolution = rospy.get_param('resolution', 16)
-        self.signal_freq = rospy.get_param('signal_freq', 43e3)
-        self.amplitude = rospy.get_param('amplitude', 1.0)
+        self.signal_freq = rospy.get_param('signal_freq', 27e3)
+        self.amplitude = rospy.get_param('amplitude', 0.8)
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)
+        self.signal_length = rospy.get_param('signal_length', 0.0008)
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
 
@@ -92,32 +105,32 @@ class simulator():
 
         shift = random.uniform(-0.00001,0.00001)
 
-        position = (10000, 1000, -1000)
-        shift = self.create_time_stamps(position)
-        tstamps = shift*10**-6
-
-        
+        position = (0, 10000, -1000)
+        tstamps = self.create_time_stamps(position)
+        for i in range(0,4):
+            tstamps[i] = tstamps[i]*10**-6
 
         plt.ion()
         fig, ax = plt.subplots(2, 1)
 
-        rate = rospy.Rate(2)
+        rate = rospy.Rate(1)
 
         while not rospy.is_shutdown():
 
             phase_jitter = ((1/self.sample_rate)/(1/self.signal_freq))*np.pi
-            self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)         
+            self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
             
-
             ax[0].cla()
-            ax[0].set_title("Four Hydrophone Channels Full Scale")
 
+            self.noise = np.random.normal(-((2**self.resolution)*0.005)/2,((2**self.resolution)*0.005)/2,(int(self.signal_length/self.Ts)))
+            
+            for i in range(0,len(self.noise)):
+                self.noise[i] = int(self.noise[i])
+                        
             for i in range(0,4):
-                
-                self.amplitude_jitter = random.uniform(0.8,1.0)
-                for i in range(0,4):
-                    #print tstamps[i]
-                    wave = self.create_wave(tstamps[i])
+            
+                self.amplitude_jitter = random.uniform(0.5,1.0)
+                wave = self.create_wave(tstamps[i])
 
                 n = len(wave)
                 t = np.arange(0,n*self.Ts,self.Ts)
@@ -132,7 +145,8 @@ class simulator():
                 
                 ax[0].plot(t,wave)
 
-
+            
+            ax[0].set_title("Four Hydrophone Channels Full Scale")
             ax[0].set_ylim(0,2**self.resolution)
             ax[0].set_xlabel('Time')
             ax[0].set_ylabel('Amplitude')
