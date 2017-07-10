@@ -2,20 +2,16 @@
 import rospy
 import rosparam
 import random
-
 import numpy as np
-from scipy import optimize
-
-from sub8_msgs.srv import Sonar, SonarResponse
-
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-from std_msgs.msg import UInt16
+from std_msgs.msg import Header
 from pinger_tracker.msg import *
-
-import time
 from multilateration import Multilaterator, ReceiverArraySim, Pulse
+
+#*********************************************************************
+#  Using mix of uSec and sec, pay attention to units
+#  Hydrophone locations are in mm, along with speed of sound
 
 class simulator():
 
@@ -39,12 +35,12 @@ class simulator():
 
     def create_silence(self, offset):
 
-        self.samples = ((self.signal_length/2)-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        self.samples = ((self.signal_length/2)-offset)*self.sample_rate  #Number of samples during half the signal, for pre_signal
         #print self.samples
 
         pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
-        pre_signal = pre_signal + self.noise[0:len(pre_signal)]
+        pre_signal = pre_signal + self.noise[0:len(pre_signal)]*random.uniform(1.0,2) #add noise with noise multiplier
 
         return pre_signal
 
@@ -62,105 +58,132 @@ class simulator():
         t = np.arange(0,(self.signal_length/2)+offset,self.Ts) # time vector for signal waves
         #print len(t)+int(self.samples)
 
-        ff = self.signal_freq   # frequency of the signal
-        y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) + 1
+        ff = self.signal_freq   # frequency of the signal, 43 kHz for Anglerfish
 
-        y = (y/2) * 2**self.resolution
+        #self.phase_jitter randomly places phase within on sampling time
+        #amplitude jitter for realism
+        y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) + 1  #create sine wave
 
-        #print y
+        y = (y/2) * 2**self.resolution  #turn sine wave into an int
 
-        y = np.array(y,dtype=int)
-     
+        y = np.array(y,dtype=int) #Help from Kevin, turn Floats in y to Int
 
-        #pre_signal = np.array(pre_signal,dtype=int)
+        wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
 
-        wave = np.append(pre_signal,y)  #append silence before signal to actual signal
-
-        return wave
+        return wave_func
 
 
 
     def __init__(self):
         rospy.init_node('signal_simulator')
 
-        self.sample_rate = rospy.get_param('~sample_rate', 300e3)
+        self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
+
+        self.sample_rate = rospy.get_param('~sample_rate', 300e3)  #ADC sampling rate
         #self.thresh = rospy.get_param('~thresh', 500)
         self.frame = rospy.get_param('~frame', '/hydrophones')
         #permute_str = rospy.get_param('~permute', '1 2 3 4')
         #self.samples = rospy.get_param('sample_number', 1024)
-        self.resolution = rospy.get_param('resolution', 16)
-        self.signal_freq = rospy.get_param('signal_freq', 27e3)
-        self.amplitude = rospy.get_param('amplitude', 0.8)
-        self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)
-        self.signal_length = rospy.get_param('signal_length', 0.0008)
+        self.resolution = rospy.get_param('resolution', 16)  #ADC bits
+        self.signal_freq = rospy.get_param('signal_freq', 27e3)  #pinger freq
+        self.amplitude = rospy.get_param('amplitude', 0.03)      #received signal amplitude 0.0-1.0
+        self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
+        self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
-
 
         self.Fs = self.sample_rate  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
 
+        #count the number of published data point for assignment of empty self.data list
+        self.data_points = int(self.signal_length/self.Ts)*self.number_of_hydrophones
+        self.data = [None]*self.data_points
         
-        #print jitter
-
-        shift = random.uniform(-0.00001,0.00001)
-
-        position = (0, 10000, -1000)
+        #***********************************
+        # position of ping, used in generation of time stamps
+        # in (mm)s        
+        position = (0, 10000, -1000)  # in mm
+        
         tstamps = self.create_time_stamps(position)
+        
+        #converts timestamps to Sec because create_time_stamps uses uSec
         for i in range(0,4):
             tstamps[i] = tstamps[i]*10**-6
 
         plt.ion()
-        fig, ax = plt.subplots(2, 1)
+        fig, ax = plt.subplots(3, 1)  #3x1 plot
 
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         while not rospy.is_shutdown():
 
+            #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1/self.sample_rate)/(1/self.signal_freq))*np.pi
             self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
             
             ax[0].cla()
+            ax[1].cla()
 
-            self.noise = np.random.normal(-((2**self.resolution)*0.005)/2,((2**self.resolution)*0.005)/2,(int(self.signal_length/self.Ts)))
+            #self.noise is used to add noise to the silent portion of the signal            
+            self.noise = np.random.normal(-((2**self.resolution)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length/self.Ts)))
             
+            #turn Float noise into Int noise
             for i in range(0,len(self.noise)):
                 self.noise[i] = int(self.noise[i])
                         
-            for i in range(0,4):
+            for i in range(0,4):  #for loop that creates and plots the four waves
             
-                self.amplitude_jitter = random.uniform(0.5,1.0)
+                self.amplitude_jitter = random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
                 wave = self.create_wave(tstamps[i])
+
+                self.data[i::self.number_of_hydrophones] = wave  #storage variable to send data through ROS
 
                 n = len(wave)
                 t = np.arange(0,n*self.Ts,self.Ts)
-
-                k = np.arange(n)
-                T = float(n)/float(self.Fs)            
-                frq = k/T # two sides frequency range
-
-                frq = frq[range(n/2)] # one side frequency range
-                Y = np.fft.fft(wave)/n # fft computing and normalization
-                Y = Y[range(n/2)]/2**self.resolution
                 
                 ax[0].plot(t,wave)
+                ax[1].plot(t,wave)
 
-            
+            wave = wave[n/2:n]  #cut out first half of signal (silence) to enhance FFT
+            n = len(wave) # wave with half the number of data points
+
+            k = np.arange(n)
+            T = float(n)/float(self.Fs)            
+            frq = k/T # two sides frequency range
+
+            frq = frq[range(n/2)] # one side frequency range
+            Y = np.fft.fft(wave)/n # fft computing and normalization
+            Y = Y[range(n/2)]/2**self.resolution #linearize amplitude based on resolution of ADC
+            Y = Y*(1/self.amplitude) #Compensate for FFT, multiply by inverse of amplitude
+           
+            #scale decided by ADC bits (resolution)           
             ax[0].set_title("Four Hydrophone Channels Full Scale")
             ax[0].set_ylim(0,2**self.resolution)
             ax[0].set_xlabel('Time')
             ax[0].set_ylabel('Amplitude')
 
-            ax[1].axvline(30000)
-            ax[1].cla()
-            ax[1].set_title("FFT On Channel One")
-            ax[1].plot(frq,abs(Y),'r') # plotting the spectrum
-            ax[1].set_xlim(5000,50000)
-            #ax[1].set_ylim(0,500)
-            ax[1].set_xlabel('Freq (Hz)')
-            ax[1].set_ylabel('|Y(freq)|')
+            #zoomed in version of signal
+            ax[1].set_title("Autosize on Hydrophone channels")
+            ax[1].set_xlabel('Time')
+            ax[1].set_ylabel('Amplitude')
+
+            ax[2].cla()
+            ax[2].set_title("FFT On Channel One")
+            ax[2].plot(frq,abs(Y),'r') # plotting the FFT spectrum
+            ax[2].set_xlim(5000,50000)
+            ax[2].set_ylim(0,1)
+            ax[2].set_xlabel('Freq (Hz)')
+            ax[2].set_ylabel('|Y(freq)|')
 
             plt.pause(0.05)
+
+            self.simulate_pub.publish(Ping(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id=self.frame),
+                channels=self.number_of_hydrophones,
+                samples=self.data_points,
+                data=self.data,
+                sample_rate=self.sample_rate))
             
             rate.sleep()
 
@@ -181,33 +204,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-'''        def signal_plotter(self, data):
-        #print "msg received"
-        values = data.data
-        samples = float(data.samples/4)
-        sample_rate = float(data.sample_rate)
-        time = (samples/sample_rate)*10**6
-        #print time
-
-        #print "msg"
-
-        length = 256
-        starting_sample = 0
-        distance = (length/samples)*time
-        print time
-        print distance
-        print time/samples
-        print time/(time/samples)
-
-        self.x = np.arange(starting_sample*(time/samples),distance, time/samples)
-        #print self.x
-        self.a = values[starting_sample*4 + 0:length*4:4]
-        #print self.a
-        self.b = values[starting_sample*4 + 1:length*4:4]
-        self.c = values[starting_sample*4 + 2:length*4:4]
-        self.d = values[starting_sample*4 + 3:length*4:4]
-
-        self.trigger = True
-        #s = 1 + np.sin(2*np.pi*t)
-'''

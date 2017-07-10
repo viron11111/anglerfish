@@ -84,7 +84,7 @@ class plotter():
 
                 frq = frq[range(n/2)] # one side frequency range
                 Y = np.fft.fft(y)/n # fft computing and normalization
-                Y = Y[range(n/2)]
+                Y = Y[range(n/2)]/2**16
 
                 for i in range(10,n/2):
                     
@@ -115,8 +115,8 @@ class plotter():
                 ax[2].cla()
                 ax[2].set_title("FFT On Channel One")
                 ax[2].plot(frq,abs(Y),'r') # plotting the spectrum
-                ax[2].set_xlim(0,50000)
-                ax[2].set_ylim(0,300)
+                ax[2].set_xlim(5000,50000)
+                #ax[2].set_ylim(0,300)
                 ax[2].set_xlabel('Freq (Hz)')
                 ax[2].set_ylabel('|Y(freq)|')
 
