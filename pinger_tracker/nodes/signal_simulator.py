@@ -46,16 +46,31 @@ class simulator():
 
 
     def create_wave(self, offset):
+        #print ('%0.10f' % offset)
         self.Fs = self.sample_rate  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
 
         self.samples = ((self.signal_length/2)-offset)*self.sample_rate  #Number of samples during a 400 uSec period, for pre_signal
+        int_sample = self.samples
+        int_sample = int(int_sample)
         #print self.samples
 
         pre_signal = self.create_silence(offset) #[(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
 
-        t = np.arange(0,(self.signal_length/2)+offset,self.Ts) # time vector for signal waves
+        t = np.arange(0.0,(self.signal_length/2)+offset,self.Ts) # time vector for signal waves
+        #print ("self.signal_length: %f" % self.signal_length)
+        #print ("len(t): %f" % len(t))
+        #print ("self.samples: %f" % int_sample)
+        total = len(t)+int_sample
+        #print ("total: %f" % total)
+        if total > self.signal_length/self.Ts:
+            #print("too long")
+            t = t[:len(t)-1]
+
+        #print ("len(t) after: %f" % len(t))
+        #print ('%0.8f' % offset)
+        #print (self.signal_length/2)+offset
         #print len(t)+int(self.samples)
 
         ff = self.signal_freq   # frequency of the signal, 43 kHz for Anglerfish
@@ -68,14 +83,19 @@ class simulator():
 
         y = np.array(y,dtype=int) #Help from Kevin, turn Floats in y to Int
 
+
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
+        #print len(wave_func)
 
         return wave_func
 
-
+    def get_pos(self, data):
+        self.position = (data.x_pos, data.y_pos, data.z_pos)
 
     def __init__(self):
         rospy.init_node('signal_simulator')
+
+        rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
 
@@ -102,13 +122,9 @@ class simulator():
         #***********************************
         # position of ping, used in generation of time stamps
         # in (mm)s        
-        position = (0, 10000, -1000)  # in mm
+        self.position = (1000, 10000, -1000)  # in mm, default position        
         
-        tstamps = self.create_time_stamps(position)
-        
-        #converts timestamps to Sec because create_time_stamps uses uSec
-        for i in range(0,4):
-            tstamps[i] = tstamps[i]*10**-6
+
 
         plt.ion()
         fig, ax = plt.subplots(3, 1)  #3x1 plot
@@ -116,6 +132,13 @@ class simulator():
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         while not rospy.is_shutdown():
+
+            tstamps = self.create_time_stamps(self.position)
+
+            #converts timestamps to Sec because create_time_stamps uses uSec
+            for i in range(0,4):
+                tstamps[i] = tstamps[i]*10**-6
+            #print tstamps
 
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1/self.sample_rate)/(1/self.signal_freq))*np.pi
@@ -135,6 +158,7 @@ class simulator():
             
                 self.amplitude_jitter = random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
                 wave = self.create_wave(tstamps[i])
+                #print len(wave)
 
                 self.data[i::self.number_of_hydrophones] = wave  #storage variable to send data through ROS
 

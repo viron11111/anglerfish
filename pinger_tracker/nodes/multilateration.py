@@ -28,7 +28,7 @@ class Multilaterator(object):
         self.pairs = list(combinations(range(len(hydrophone_locations)), 2))
         self.c = c
         self.method = method
-        print "\x1b[32mSpeed of Sound (c):", self.c, "millimeter/microsecond\x1b[0m"
+        #print "\x1b[32mSpeed of Sound (c):", self.c, "millimeter/microsecond\x1b[0m"
 
     def getPulseLocation(self, timestamps, method=None):
         '''
