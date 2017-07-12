@@ -99,7 +99,7 @@ class simulator():
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
 
-        self.sample_rate = rospy.get_param('~sample_rate', 300e3)  #ADC sampling rate
+        self.sample_rate = rospy.get_param('~sample_rate', 1000e3)  #ADC sampling rate
         #self.thresh = rospy.get_param('~thresh', 500)
         self.frame = rospy.get_param('~frame', '/hydrophones')
         #permute_str = rospy.get_param('~permute', '1 2 3 4')
@@ -138,7 +138,8 @@ class simulator():
             #converts timestamps to Sec because create_time_stamps uses uSec
             for i in range(0,4):
                 tstamps[i] = tstamps[i]*10**-6
-            #print tstamps
+            #print self.Ts
+            print tstamps
 
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1/self.sample_rate)/(1/self.signal_freq))*np.pi
