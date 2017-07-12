@@ -71,12 +71,22 @@ class plotter():
                 #print freq                
 
                 Fs = 300000
-                Ts = 1.0/Fs                
+                Ts = 1.0/Fs        
+
+                wave = [None]*len(self.a)
+
+                if len(self.a) != 0:
+                    for i in range(len(self.a)):
+                        wave[i] = self.a[i]        
 
                 y = self.a
+                #print wave
                 n = len(y)
 
                 t = np.arange(0,n*Ts,Ts)
+
+                y = wave[n/2:n]
+                n = len(y)
 
                 k = np.arange(n)
                 T = float(n)/float(Fs)            
@@ -86,15 +96,15 @@ class plotter():
                 Y = np.fft.fft(y)/n # fft computing and normalization
                 Y = Y[range(n/2)]/2**16
 
-                for i in range(10,n/2):
+                '''for i in range(5,n/2):
                     
                     if abs(Y[i]) > 80:
                         print "ping detected"
-                        left_line = np.arange(0,300,300)
+                        left_line = np.arange(0,300,300)'''
 
                 ax[0].cla()
                 ax[0].set_title("Four Hydrophone Channels Full Scale")
-                ax[0].plot(t,y)
+                ax[0].plot(t,self.a)
                 ax[0].plot(t,self.b)
                 ax[0].plot(t,self.c)
                 ax[0].plot(t,self.d)
@@ -104,14 +114,14 @@ class plotter():
 
                 ax[1].cla()
                 ax[1].set_title("Four Hydrophone Channels Autosized")
-                ax[1].plot(t,y)
+                ax[1].plot(t,self.a)
                 ax[1].plot(t,self.b)
                 ax[1].plot(t,self.c)
                 ax[1].plot(t,self.d)
                 ax[1].set_xlabel('Time')
                 ax[1].set_ylabel('Amplitude')
 
-                ax[2].axvline(30000)
+                #ax[2].axvline(30000)
                 ax[2].cla()
                 ax[2].set_title("FFT On Channel One")
                 ax[2].plot(frq,abs(Y),'r') # plotting the spectrum

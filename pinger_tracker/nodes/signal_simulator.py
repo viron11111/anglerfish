@@ -207,7 +207,8 @@ class simulator():
                 channels=self.number_of_hydrophones,
                 samples=self.data_points,
                 data=self.data,
-                sample_rate=self.sample_rate))
+                sample_rate=self.sample_rate,
+                adc_bit=self.resolution))
             
             rate.sleep()
 
