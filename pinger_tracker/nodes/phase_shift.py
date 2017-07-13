@@ -13,7 +13,28 @@ from multilateration import Multilaterator, ReceiverArraySim, Pulse
 import time
 import sys
 
-class phaser():
+class phaser(Multilaterator):
+
+    def hydrophone_locations(self, data):
+        self.hydro0 = [data.hydro0_xyz[0],data.hydro0_xyz[1],data.hydro0_xyz[2]]
+        self.hydro1 = [data.hydro1_xyz[0],data.hydro1_xyz[1],data.hydro1_xyz[2]]
+        self.hydro2 = [data.hydro2_xyz[0],data.hydro2_xyz[1],data.hydro2_xyz[2]]
+        self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]
+
+    def pinger_position(self, tstamps):
+        hydrophone_locations = {   
+        'hydro0': {'x':  self.hydro0[0], 'y':   self.hydro0[1], 'z':  self.hydro0[2]},
+        'hydro1': {'x':  self.hydro1[0], 'y':   self.hydro1[1], 'z':  self.hydro1[2]},
+        'hydro2': {'x':  self.hydro2[0], 'y':   self.hydro2[1], 'z':  self.hydro2[2]},
+        'hydro3': {'x':  self.hydro3[0], 'y':   self.hydro3[1], 'z':  self.hydro3[2]}}
+
+        c = 1.484  # millimeters/microsecond
+        hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
+        sonar = Multilaterator(hydrophone_locations, c, 'LS')
+
+        res_msg = sonar.getPulseLocation(np.array(tstamps))
+        
+        res = np.array([res_msg[0], res_msg[1], res_msg[2]])
 
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
@@ -78,17 +99,17 @@ class phaser():
         #print float(channel_length/2-phase_holder)
         return (channel_length/2-phase_holder)*(1.0/self.sample_rate)
 
-
     def parse_ping(self, data):
         self.actual_stamps = data.actual_time_stamps
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
+        self.actual_position = data.actual_position
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0
         channel_length = len(data.data)/data.channels
 
         self.signal = []
-        timestamps = []
+        self.timestamps = []
 
         for i in range(data.channels):
             self.signal.append([])
@@ -104,13 +125,11 @@ class phaser():
         #self.a_signal = data.data[1::4]
         
         #print "***"
-        start = time.clock()
+        self.start = time.clock()
         for i in range(data.channels):
-            timestamps.append(self.determine_phase(self.signal[0], self.signal[i]))
+            self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i]))
 
-        end = time.clock()
-
-        #difference = self.actual_stamps - timestamps
+        self.end = time.clock()
 
         sys.stderr.write("\x1b[2J\x1b[H")
         #print type(self.actual_stamps)
@@ -118,37 +137,64 @@ class phaser():
         #difference = list(self.actual_stamps) - timestamps
         microseconds = [1e6,1e6,1e6,1e6]
         
-        print ("seconds to perform timestamps: {}%0.3f".format(self.O) % (end-start))
+        print ("{}time to perform timestamps (Sec): {}%0.3f{}\n".format(self.W,self.O,self.W) % (self.end-self.start))
         #[0.0, 3.3333333333333333e-06, 0.0, 1.9999999999999998e-05]
-        print "{}calculated timestamps:".format(self.W)
-        print [x * y for x, y in zip(timestamps,microseconds)]
-        print "actual timestamps:"
-        print [x * y for x, y in zip(self.actual_stamps,microseconds)]
-        print "difference:"
-        difference = [x - y for x, y in zip(list(self.actual_stamps), timestamps)]
-        difference = [x * y for x, y in zip(difference,microseconds)]
-        print difference
-        print "Absolute sum of errors (uSec)"
-        errors = sum(map(abs, difference))
-        print errors
+        calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
+        #mult = Multilaterator()
+        #******************** figure out how to transfer variables from Multilateration ********************
+        self.pinger_position(calculated)
+        #*****************************************************************************************************
+        #print 
 
+        print "Actual position:\n\t" + "x: " + str(self.actual_position[0]) + " y: " + str(self.actual_position[1]) \
+                + " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)
+
+        print "{}calculated timestamps (uSec):".format(self.W)
+
+        print "\t" + str(calculated)
+        print "actual timestamps (uSec):"
+        print "\t" + str([x * y for x, y in zip(self.actual_stamps,microseconds)])
+        print "difference (uSec):"
+        difference = [x - y for x, y in zip(list(self.actual_stamps), self.timestamps)]
+        difference = [x * y for x, y in zip(difference,microseconds)]
+        print "\t" + str(difference)
+        errors = sum(map(abs, difference))
+        print "Absolute sum of errors (uSec): {}%0.3f\n{}".format('\033[43m',self.W) % errors
+     
+
+        #difference = self.actual_stamps - timestamps
 
     def __init__(self):
+
+        self.start = time.clock()
+        self.end = time.clock()
+        self.timestamps = []
+        self.actual_stamps = []
+        self.actual_position = [0,0,0]
+
+        self.hydro0 = [0,     0,     0]
+        self.hydro1 = [-50.4, 0,     0]
+        self.hydro2 = [25.4,  0,     0]
+        self.hydro3 = [0,     -25.4, 0]
+
+        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+
         self.W  = '\033[0m'  # white (normal)
         self.R  = '\033[31m' # red
         self.G  = '\033[32m' # green
         self.O  = '\033[43m' # orange
         self.B  = '\033[34m' # blue
-        self.P  = '\033[35m' # purple
+        self.P  = '\033[35m' # purple        
+        
         rospy.init_node('phase_shift')
 
         rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
 
-        rate = rospy.Rate(100)  #rate of signals, 5 Hz for Anglerfish
+        rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         while not rospy.is_shutdown():
 
-        	rate.sleep()
+            rate.sleep()
 
 
 def main():

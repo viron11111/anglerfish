@@ -21,21 +21,27 @@ from pinger_tracker.cfg import SignalConfig
 #  Hydrophone locations are in mm, along with speed of sound
 
 class simulator():
+    def hydrophone_locations(self, data):
+        self.hydro0 = [data.hydro0_xyz[0],data.hydro0_xyz[1],data.hydro0_xyz[2]]
+        self.hydro1 = [data.hydro1_xyz[0],data.hydro1_xyz[1],data.hydro1_xyz[2]]
+        self.hydro2 = [data.hydro2_xyz[0],data.hydro2_xyz[1],data.hydro2_xyz[2]]
+        self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]
 
     def callback_signal(self, config, level):
         self.resolution = int("{ADC_bits}".format(**config))
         self.sample_rate = int("{sample_rate}".format(**config))
         self.tx_rate = float("{signal_rate}".format(**config))
         self.amplitude = float("{amplitude}".format(**config))
+        self.signal_freq = int("{signal_freq}".format(**config))
         return config
 
     def create_time_stamps(self, position):           
 
         hydrophone_locations = {   
-        'hydro0': {'x':       0, 'y':       0, 'z':      0},
-        'hydro1': {'x':   -25.4, 'y':       0, 'z':      0},
-        'hydro2': {'x':    25.4, 'y':       0, 'z':      0},
-        'hydro3': {'x':       0, 'y':   -25.4, 'z':      0}}
+        'hydro0': {'x':  self.hydro0[0], 'y':   self.hydro0[1], 'z':  self.hydro0[2]},
+        'hydro1': {'x':  self.hydro1[0], 'y':   self.hydro1[1], 'z':  self.hydro1[2]},
+        'hydro2': {'x':  self.hydro2[0], 'y':   self.hydro2[1], 'z':  self.hydro2[2]},
+        'hydro3': {'x':  self.hydro3[0], 'y':   self.hydro3[1], 'z':  self.hydro3[2]}}
 
         c = 1.484  # millimeters/microsecond
         hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
@@ -79,7 +85,7 @@ class simulator():
 
             t = t[:len(t)-1]
 
-        ff = self.signal_freq   # frequency of the signal, 43 kHz for Anglerfish
+        ff = self.signal_freq*1000.0   # frequency of the signal, 43 kHz for Anglerfish
 
         #self.phase_jitter randomly places phase within on sampling time
         #amplitude jitter for realism
@@ -103,16 +109,24 @@ class simulator():
         srv = Server(SignalConfig, self.callback_signal)
 
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
+        
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
 
-        self.sample_rate = rospy.get_param('~sample_rate', 600e3)  #ADC sampling rate
+        self.hydro0 = [0,     0,     0]
+        self.hydro1 = [-25.4, 0,     0]
+        self.hydro2 = [25.4,  0,     0]
+        self.hydro3 = [0,     -25.4, 0]
+
+        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+
+        self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         #self.thresh = rospy.get_param('~thresh', 500)
         self.frame = rospy.get_param('~frame', '/hydrophones')
         #permute_str = rospy.get_param('~permute', '1 2 3 4')
         #self.samples = rospy.get_param('sample_number', 1024)
         self.resolution = rospy.get_param('resolution', 16)  #ADC bits
-        self.signal_freq = rospy.get_param('signal_freq', 27e3)  #pinger freq
+        self.signal_freq = rospy.get_param('signal_freq', 27)  #pinger freq
         self.amplitude = rospy.get_param('amplitude', 0.1)      #received signal amplitude 0.0-1.0
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
@@ -127,7 +141,10 @@ class simulator():
         #***********************************
         # position of ping, used in generation of time stamps
         # in (mm)s        
-        self.position = (1000, 10000, -1000)  # in mm, default position        
+        #Pulse:  x: -90 y: 162 z: 786 (mm)
+        #[ 0.         -1.6408321   2.17237021  3.69021986]
+        #self.position = (1000, 10000, -1000)  # in mm, default position        
+        self.position = (-1000, 162, 786)  # in mm, default position        
         
 
 
@@ -147,9 +164,8 @@ class simulator():
 
             self.tstamps=tstamps
 
-
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
-            phase_jitter = ((1/float(self.sample_rate*1000))/(1/self.signal_freq))*np.pi
+            phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
             self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
             
             ax[0].cla()
@@ -231,7 +247,8 @@ class simulator():
                     data=self.data,
                     sample_rate=self.sample_rate*1000,
                     adc_bit=self.resolution,
-                    actual_time_stamps=self.tstamps))
+                    actual_time_stamps=self.tstamps,
+                    actual_position=self.position))
             
             rate.sleep()
 

@@ -4,6 +4,7 @@ import numpy as np
 import numpy.linalg as la
 from scipy import optimize
 from itertools import combinations
+import math
 
 #from sub8_msgs.srv import Sonar, SonarResponse
 
@@ -49,8 +50,9 @@ class Multilaterator(object):
                 return
             response = (source[0],source[1],source[2])
 
-            print "Reconstructed Pulse:\n\t" + "x: " + str(response[0]) + " y: " + str(response[1]) \
+            print "Calculated position:\n\t" + "x: " + str(response[0]) + " y: " + str(response[1]) \
                 + " z: " + str(response[2]) + " (mm)"
+
             return response
         except KeyboardInterrupt:
             print "Source localization interupted, returning all zeroes."

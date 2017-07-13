@@ -168,8 +168,7 @@ class mission(object):
                     tstamps = hydrophone_array.listen(pulse)
                     tstamps = tstamps - tstamps[0]
                     print tstamps
-                    
-                    #print "Perfect timestamps: (microseconds)\n\t", tstamps
+
                     res_msg = sonar.getPulseLocation(np.array(tstamps))
                     #delete_last_lines(4)  # more concise output
                     res = np.array([res_msg[0], res_msg[1], res_msg[2]])

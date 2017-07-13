@@ -4,4 +4,5 @@ int32 samples
 int32 sample_rate
 int16 adc_bit
 float32[] actual_time_stamps
+float32[] actual_position
 uint32[] data # C1 C2 C3 C4 C1 C2 C3 C4 ...
