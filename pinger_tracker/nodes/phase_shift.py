@@ -33,6 +33,8 @@ class phaser(Multilaterator):
         sonar = Multilaterator(hydrophone_locations, c, 'LS')
 
         res_msg = sonar.getPulseLocation(np.array(tstamps))
+        #print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+        #print res_msg
         
         res = np.array([res_msg[0], res_msg[1], res_msg[2]])
 
