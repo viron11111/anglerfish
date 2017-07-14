@@ -144,7 +144,7 @@ class simulator():
         #Pulse:  x: -90 y: 162 z: 786 (mm)
         #[ 0.         -1.6408321   2.17237021  3.69021986]
         #self.position = (1000, 10000, -1000)  # in mm, default position        
-        self.position = (-1000, 162, 786)  # in mm, default position        
+        self.position = (5000, 5000, -700)  # in mm, default position        
         
 
 

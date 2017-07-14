@@ -131,23 +131,15 @@ class phaser(Multilaterator):
 
         self.end = time.clock()
 
-        sys.stderr.write("\x1b[2J\x1b[H")
+        #sys.stderr.write("\x1b[2J\x1b[H")
         #print type(self.actual_stamps)
         #print type(timestamps)
         #difference = list(self.actual_stamps) - timestamps
         microseconds = [1e6,1e6,1e6,1e6]
-        
+        print "*********************************"
         print ("{}time to perform timestamps (Sec): {}%0.3f{}\n".format(self.W,self.O,self.W) % (self.end-self.start))
         #[0.0, 3.3333333333333333e-06, 0.0, 1.9999999999999998e-05]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
-        #mult = Multilaterator()
-        #******************** figure out how to transfer variables from Multilateration ********************
-        self.pinger_position(calculated)
-        #*****************************************************************************************************
-        #print 
-
-        print "Actual position:\n\t" + "x: " + str(self.actual_position[0]) + " y: " + str(self.actual_position[1]) \
-                + " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)
 
         print "{}calculated timestamps (uSec):".format(self.W)
 
@@ -159,7 +151,21 @@ class phaser(Multilaterator):
         difference = [x * y for x, y in zip(difference,microseconds)]
         print "\t" + str(difference)
         errors = sum(map(abs, difference))
-        print "Absolute sum of errors (uSec): {}%0.3f\n{}".format('\033[43m',self.W) % errors
+        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors
+       #mult = Multilaterator()
+        #******************** figure out how to transfer variables from Multilateration ********************
+        self.pinger_position(calculated)
+        #*****************************************************************************************************
+        #print 
+
+        print "Actual position:\n\t" + "x: " + str(self.actual_position[0]) + " y: " + str(self.actual_position[1]) \
+                + " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)        
+        print "*********************************"
+
+
+ 
+
+
      
 
         #difference = self.actual_stamps - timestamps
