@@ -9,9 +9,9 @@ from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, PoseWithCovarianceStamped, Pose, Vector3, Point
 
-import visualization_msgs.msg as visualization_msgs
+#import visualization_msgs.msg as visualization_msgs
 from visualization_msgs.msg import Marker
-from visualization_msgs.msg import MarkerArray
+#from visualization_msgs.msg import MarkerArray
 
 import binascii
 import struct
@@ -38,41 +38,56 @@ class visualizer(object):
 
         br.sendTransform(t)
 
-        self.draw_sphere()
+        
 
-    def draw_sphere(self, scaling=(0.11, 0.11, 0.11), _id=4, frame='/front_stereo'): 
-
-        markerArray = MarkerArray()
+    def draw_sphere(self): 
 
         marker = Marker()
-        marker.header.frame_id = "/neck"
+        marker.header.frame_id = "/SONAR"
+        marker.header.stamp = rospy.Time.now()
         marker.type = marker.SPHERE
         marker.action = marker.ADD
-        marker.scale.x = 0.2
-        marker.scale.y = 0.2
-        marker.scale.z = 0.2
+        marker.ns = "hydrophone"
+        marker.id = 0
+
+        marker.scale.x = 1.0
+        marker.scale.y = 1.0
+        marker.scale.z = 1.0
+
         marker.color.a = 1.0
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+
+        marker.lifetime = rospy.Duration()
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
         marker.pose.position.x = 0
         marker.pose.position.y = 0
         marker.pose.position.z = 0
 
-        self.rviz_pub.publish(marker)        
+        #print marker
+
+        self.publisher.publish(marker)        
 
     def __init__(self):      
         
         rospy.init_node('pinger_visualizer')
-        topic="visualization/markers"
-        
-        self.rviz_pub = rospy.Publisher(topic, visualization_msgs.Marker, queue_size=3)
 
-        #rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
+        topic = 'visualization_marker'
+        self.publisher = rospy.Publisher(topic, Marker, queue_size=100)
+        #rospy.sleep(1)
 
-        rate = rospy.Rate(2)  #rate of signals, 5 Hz for Anglerfish
+        self.rates = 1
+
+        rate = rospy.Rate(self.rates)  #rate of signals, 5 Hz for Anglerfish
 
         while not rospy.is_shutdown():
 
-            self.base_link()
+            #self.base_link()
+            self.draw_sphere()
 
             rate.sleep()
 
