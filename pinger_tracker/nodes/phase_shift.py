@@ -8,7 +8,7 @@ import time
 
 from std_msgs.msg import Header
 from pinger_tracker.msg import *
-from multilateration import Multilaterator, ReceiverArraySim, Pulse
+from multilateration import Multilaterator
 
 import time
 import sys
@@ -22,19 +22,23 @@ class phaser(Multilaterator):
         self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]
 
     def pinger_position(self, tstamps):
-        hydrophone_locations = {   
-        'hydro0': {'x':  self.hydro0[0], 'y':   self.hydro0[1], 'z':  self.hydro0[2]},
-        'hydro1': {'x':  self.hydro1[0], 'y':   self.hydro1[1], 'z':  self.hydro1[2]},
-        'hydro2': {'x':  self.hydro2[0], 'y':   self.hydro2[1], 'z':  self.hydro2[2]},
-        'hydro3': {'x':  self.hydro3[0], 'y':   self.hydro3[1], 'z':  self.hydro3[2]}}
+        hydrophone_locations = np.array([self.hydro0, self.hydro1, self.hydro2, self.hydro3])
 
         c = 1.484  # millimeters/microsecond
-        hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
-        sonar = Multilaterator(hydrophone_locations, c, 'LS')
+        #hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
+        sonar = Multilaterator(hydrophone_locations, c, 'bancroft')
 
-        res_msg = sonar.getPulseLocation(np.array(tstamps))
+        res_msg = sonar.get_pulse_location(np.array(tstamps))
         #print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-        #print res_msg
+        print res_msg
+
+        self.ls_pub.publish(LS_pos(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='LS_pos'),
+            x_pos=res_msg[0],
+            y_pos=res_msg[1],
+            z_pos=res_msg[2]))
+
         
         res = np.array([res_msg[0], res_msg[1], res_msg[2]])
 
@@ -181,11 +185,12 @@ class phaser(Multilaterator):
         self.actual_position = [0,0,0]
 
         self.hydro0 = [0,     0,     0]
-        self.hydro1 = [-50.4, 0,     0]
+        self.hydro1 = [-25.4, 0,     0]
         self.hydro2 = [25.4,  0,     0]
         self.hydro3 = [0,     -25.4, 0]
 
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+        self.ls_pub = rospy.Publisher('hydrophones/LS_pos', LS_pos, queue_size = 1)
 
         self.W  = '\033[0m'  # white (normal)
         self.R  = '\033[31m' # red

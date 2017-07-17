@@ -33,6 +33,10 @@ class simulator():
         self.tx_rate = float("{signal_rate}".format(**config))
         self.amplitude = float("{amplitude}".format(**config))
         self.signal_freq = int("{signal_freq}".format(**config))
+
+        self.position[0] = float("{pinger_x_pos}".format(**config))
+        self.position[1] = float("{pinger_y_pos}".format(**config))
+        self.position[2] = float("{pinger_z_pos}".format(**config))
         return config
 
     def create_time_stamps(self, position):           
@@ -45,7 +49,7 @@ class simulator():
 
         c = 1.484  # millimeters/microsecond
         hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
-        sonar = Multilaterator(hydrophone_locations, c, 'LS')
+        #sonar = Multilaterator(hydrophone_locations, c, 'LS')
 
         pulse = Pulse(position[0], position[1], position[2], 0)
         tstamps = hydrophone_array.listen(pulse)
@@ -105,6 +109,7 @@ class simulator():
 
     def __init__(self):
         rospy.init_node('signal_simulator')
+        self.position = [3000, 5000, -2000]  # in mm, default position 
 
         srv = Server(SignalConfig, self.callback_signal)
 
@@ -144,7 +149,7 @@ class simulator():
         #Pulse:  x: -90 y: 162 z: 786 (mm)
         #[ 0.         -1.6408321   2.17237021  3.69021986]
         #self.position = (1000, 10000, -1000)  # in mm, default position        
-        self.position = (5000, 5000, -700)  # in mm, default position        
+               
         
 
 
