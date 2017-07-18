@@ -5,6 +5,9 @@ from scipy import optimize
 from itertools import combinations
 import multilateration as mlat
 import math
+from pinger_tracker.msg import *
+import rospy
+from std_msgs.msg import Header
 
 class Multilaterator(object):
     '''
@@ -106,6 +109,16 @@ class Multilaterator(object):
                 source = source[0]
         else:
             source = [0, 0, 0]
+        
+        self.bancroft_pub = rospy.Publisher('hydrophones/bancroft_pos', Bancroft_pos, queue_size = 1)            
+        
+        self.bancroft_pub.publish(Bancroft_pos(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='Bancroft_pos'),
+            x_pos=source[0],
+            y_pos=source[1],
+            z_pos=source[2]))
+
         return source
 
     def estimate_pos_LS(self, dtoa, cost_func):

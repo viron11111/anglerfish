@@ -137,6 +137,7 @@ class simulator():
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
+        self.tstamps_pub = rospy.Publisher('/hydrophones/actual_time_stamps', Actual_time_stamps, queue_size = 1)
 
         self.tx_rate = 1.0
 
@@ -168,6 +169,12 @@ class simulator():
                 tstamps[i] = tstamps[i]*10**-6
 
             self.tstamps=tstamps
+            self.tstamps = list(self.tstamps)
+
+            self.tstamps_pub.publish(Actual_time_stamps(
+                    header=Header(stamp=rospy.Time.now(),
+                                  frame_id='signal_sim'),
+                    actual_time_stamps=self.tstamps))
 
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
@@ -237,9 +244,7 @@ class simulator():
                 ax[2].set_xlabel('Freq (Hz)')
                 ax[2].set_ylabel('|Y(freq)|')
 
-                plt.pause(0.05)
-
-                self.tstamps = list(self.tstamps)
+                plt.pause(0.05)                
 
                 self.data = list(map(int, self.data))
                 #print self.data
@@ -252,7 +257,6 @@ class simulator():
                     data=self.data,
                     sample_rate=self.sample_rate*1000,
                     adc_bit=self.resolution,
-                    actual_time_stamps=self.tstamps,
                     actual_position=self.position))
             
             rate.sleep()

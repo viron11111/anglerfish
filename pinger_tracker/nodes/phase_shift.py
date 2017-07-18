@@ -31,16 +31,8 @@ class phaser(Multilaterator):
         res_msg = sonar.get_pulse_location(np.array(tstamps))
         #print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
         print res_msg
-
-        self.ls_pub.publish(LS_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='LS_pos'),
-            x_pos=res_msg[0],
-            y_pos=res_msg[1],
-            z_pos=res_msg[2]))
-
         
-        res = np.array([res_msg[0], res_msg[1], res_msg[2]])
+        #res = np.array([res_msg[0], res_msg[1], res_msg[2]])
 
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
@@ -105,8 +97,10 @@ class phaser(Multilaterator):
         #print float(channel_length/2-phase_holder)
         return (channel_length/2-phase_holder)*(1.0/self.sample_rate)
 
-    def parse_ping(self, data):
+    def actual(self, data):
         self.actual_stamps = data.actual_time_stamps
+
+    def parse_ping(self, data):        
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
         self.actual_position = data.actual_position
@@ -147,6 +141,11 @@ class phaser(Multilaterator):
         #[0.0, 3.3333333333333333e-06, 0.0, 1.9999999999999998e-05]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
+        self.calc_stamps_pub.publish(Calculated_time_stamps(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='phase_shift'),
+            calculated_time_stamps=calculated))
+
         print "{}calculated timestamps (uSec):".format(self.W)
 
         print "\t" + str(calculated)
@@ -168,14 +167,6 @@ class phaser(Multilaterator):
                 + " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)        
         print "*********************************"
 
-
- 
-
-
-     
-
-        #difference = self.actual_stamps - timestamps
-
     def __init__(self):
 
         self.start = time.clock()
@@ -190,7 +181,9 @@ class phaser(Multilaterator):
         self.hydro3 = [0,     -25.4, 0]
 
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
-        self.ls_pub = rospy.Publisher('hydrophones/LS_pos', LS_pos, queue_size = 1)
+        rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actual)
+        self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+        #self.ls_pub = rospy.Publisher('hydrophones/Ls_pos', LS_pos, queue_size = 1)
 
         self.W  = '\033[0m'  # white (normal)
         self.R  = '\033[31m' # red

@@ -40,7 +40,60 @@ class visualizer(object):
 
         br.sendTransform(t)
 
-    def ls_pos(self,data):
+    def crane(self,data):
+        marker1 = Marker()
+        marker1.header.frame_id = "/map"
+        marker1.header.stamp = rospy.Time.now()
+        marker1.type = marker1.SPHERE
+        marker1.action = marker1.ADD
+        marker1.ns = "ls_position"
+        marker1.id = 7
+
+        marker1.scale.x = 0.05
+        marker1.scale.y = 0.05
+        marker1.scale.z = 0.05
+
+        marker1.color.a = 0.5
+        marker1.color.r = 1.0
+        marker1.color.g = 0.0
+        marker1.color.b = 0.0
+
+        marker1.lifetime = rospy.Duration()
+        marker1.pose.orientation.x = 0.0
+        marker1.pose.orientation.y = 0.0
+        marker1.pose.orientation.z = 0.0
+        marker1.pose.orientation.w = 1.0
+        marker1.pose.position.x = (data.x_pos)/1000.0
+        marker1.pose.position.y = (data.y_pos)/1000.0
+        marker1.pose.position.z = (data.z_pos)/1000.0
+
+        #print marker1
+
+        self.publisher.publish(marker1)
+
+        vector = Point(data.x_pos/1000.0, data.y_pos/1000.0, data.z_pos/1000.0)
+        tail = Point(0,0,0)
+
+        marker = Marker()
+        marker.ns = "pinger_heading"
+        marker.header.stamp = rospy.Time(0)
+        marker.header.frame_id = '/map'
+        marker.id = 8
+
+        marker.type = marker.ARROW
+        marker.action = marker.ADD
+        marker.lifetime = rospy.Duration()
+        marker.points.append(tail)
+        marker.points.append(vector)
+        marker.scale.x = 0.05
+        marker.scale.y = 0.1
+        marker.scale.z = 0.1
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 0.5
+        self.publisher.publish(marker)        
+
+    def bancroft(self,data):
         marker1 = Marker()
         marker1.header.frame_id = "/map"
         marker1.header.stamp = rospy.Time.now()
@@ -49,13 +102,13 @@ class visualizer(object):
         marker1.ns = "ls_position"
         marker1.id = 5
 
-        marker1.scale.x = 0.1
-        marker1.scale.y = 0.1
-        marker1.scale.z = 0.1
+        marker1.scale.x = 0.05
+        marker1.scale.y = 0.05
+        marker1.scale.z = 0.05
 
         marker1.color.a = 1.0
-        marker1.color.r = 1.0
-        marker1.color.g = 0.0
+        marker1.color.r = 0.5
+        marker1.color.g = 0.5
         marker1.color.b = 0.0
 
         marker1.lifetime = rospy.Duration()
@@ -85,11 +138,11 @@ class visualizer(object):
         marker.lifetime = rospy.Duration()
         marker.points.append(tail)
         marker.points.append(vector)
-        marker.scale.x = 0.1
-        marker.scale.y = 0.2
-        marker.scale.z = 0.2
-        marker.color.g = 1.0
-        marker.color.b = 1.0
+        marker.scale.x = 0.05
+        marker.scale.y = 0.1
+        marker.scale.z = 0.1
+        marker.color.g = 0.5
+        marker.color.b = 0.5
         marker.color.a = 0.5
         self.publisher.publish(marker)
 
@@ -194,7 +247,8 @@ class visualizer(object):
 
         topic = 'visualization_marker'
         self.publisher = rospy.Publisher(topic, Marker, queue_size=100)
-        rospy.Subscriber('hydrophones/LS_pos', LS_pos, self.ls_pos)
+        rospy.Subscriber('hydrophones/bancroft_pos', Bancroft_pos, self.bancroft)
+        rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
         rospy.Subscriber('hydrophones/ping', Ping, self.actual_pos)
         #rospy.sleep(1)
 

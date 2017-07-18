@@ -54,7 +54,11 @@ find_package(catkin REQUIRED COMPONENTS
    Ping.msg
    Transmitter_position.msg
    Hydrophone_locations.msg
-   LS_pos.msg
+   Ls_pos.msg
+   Bancroft_pos.msg
+   Crane_pos.msg
+   Calculated_time_stamps.msg
+   Actual_time_stamps.msg
  )
 
 ## Generate services in the 'srv' folder
