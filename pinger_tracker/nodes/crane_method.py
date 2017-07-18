@@ -38,40 +38,31 @@ class solver():
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
         del3 = (data.calculated_time_stamps[3])*c #mm/uSec
 
-        if del2 == 0:
-            left = 0
-            B1 = 0
-        else:
-            left = x2/del2
-            B1 = -y2/del2
-
-        if del1 == 0:
-            right = 0
-        else:
-            right = x1/del1
-
+        left = x2/del2 if del2 != 0 else 0
+        B1 = -y2/del2 if del2 != 0 else 0
+        right = x1/del1 if del1 != 0 else 0
 
         A1 = left - right    # eqn (12)
-         
-
-        if del1 == 0:
-            catch = 0
-        else:
-            catch = (x1*x1-del1*del1)/(2*del1)
-
-        if del2 == 0:
-            zero = 0
-        else:
-            zero = (x2*x2 + y2*y2-del2*del2)/(2*del2)
+        
+        catch = (x1*x1-del1*del1)/(2*del1) if del1 != 0 else 0
+        zero = (x2*x2 + y2*y2-del2*del2)/(2*del2) if del2 != 0 else 0
 
         D1 = zero - catch
 
-        A2 = x1/del1 - x3/del3    # eqn (14)
-        B2 = -y3/del3 
-        D2 = (x3*x3 + y3*y3-del3*del3)/(2.0*del3) - (x1*x1-del1*del1)/catch 
+        z = (x3/del3) if del3 != 0 else 0
+        zz = (x3/del1) if del1 != 0 else 0
 
-        x =  (B1*D2-B2*D1)/(A1*B2-A2*B1)   # eqn (15)
-        y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) 
+        A2 = zz - z   # eqn (14)
+
+        B2 = -y3/del3 if del3 != 0 else 0
+
+        holder = (x3*x3 + y3*y3-del3*del3)/(2.0*del3) if del3 != 0 else 0
+        holder2 = (x1*x1-del1*del1)/(2*del1) if del1 != 0 else 0
+
+        D2 = holder - holder2 
+
+        x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
+        y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
 
         myx = x 
         myy = y        
@@ -79,9 +70,21 @@ class solver():
         T1 = -4*del1*del1
         T2 =  4*(x1*x1-del1*del1)*myx*myx + 4*x1*(del1*del1-x1*x1)*myx + del1*del1*del1*del1 -2*del1*del1*x1*x1 -4*del1*del1*myy*myy + x1*x1*x1*x1
 
-        zsquared = -T2/T1
-        #print zsquared
-        z = -math.sqrt(abs(zsquared))
+        zsquared = -T2/T1 if T1 != 0 else 0
+
+        z = -math.sqrt(zsquared)
+
+        Pz = z
+        Px = x
+        Py = y
+
+        check_d0 = math.sqrt(Px*Px+Py*Py+Pz*Pz) 
+        check_d1 = math.sqrt((Px-x1)*(Px-x1)+Py*Py+Pz*Pz) 
+        check_d2 = math.sqrt((Px-x2)*(Px-x2)+(Py-y2)*(Py-y2)+Pz*Pz) 
+        check_d3 = math.sqrt((Px-x3)*(Px-x3)+(Py-y3)*(Py-y3)+Pz*Pz) 
+
+        print "del1 = %0.5f del2 = %0.5f del3 = %0.5f" % (check_d1-check_d0, check_d2-check_d0, check_d3-check_d0)
+
 
         self.crane_pub.publish(Crane_pos(
             header=Header(stamp=rospy.Time.now(),
