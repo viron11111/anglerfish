@@ -169,6 +169,10 @@ class simulator():
                 tstamps[i] = tstamps[i]*10**-6
 
             self.tstamps=tstamps
+
+
+            microseconds = [1e6,1e6,1e6,1e6]
+            self.tstamps = [x * y for x, y in zip(self.tstamps,microseconds)]
             self.tstamps = list(self.tstamps)
 
             self.tstamps_pub.publish(Actual_time_stamps(

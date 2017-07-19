@@ -5,7 +5,7 @@ import rosparam
 import numpy as np
 from scipy import optimize
 
-from sub8_msgs.srv import Sonar, SonarResponse
+#from sub8_msgs.srv import Sonar, SonarResponse
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D

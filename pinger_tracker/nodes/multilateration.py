@@ -25,7 +25,7 @@ class Multilaterator(object):
     unreliable range. Otherwise, it may be possible to fully estimate the relative position of the
     pinger.
     '''
-    def __init__(self, receiver_locations, c, method):  # speed in millimeters/microsecond
+    def __init__(self, receiver_locations, c, method, init_guess):  # speed in millimeters/microsecond
         '''
         receiver_locations - N x 3 numpy array with the locations of receivers in units of millimeters.
             The location of the reference hydrophone is considered the origin of the receiver array's
@@ -33,6 +33,10 @@ class Multilaterator(object):
         c - speed at which the pulse propagates through the medium (millimeters / microsecond)
         method - kind of solver used to estimate the position or heading to the pulse
         '''
+
+        #self.init_guess = np.random.normal(0,100,3)
+
+        self.init_guess = init_guess
         self.receiver_locations = receiver_locations
         self.receiver_locations[1, 0]
         self.n = len(receiver_locations)
@@ -49,7 +53,7 @@ class Multilaterator(object):
         transmitter in the frame of the receiver array.
 
         timestamps - list of n-1 time dtoas, all with respect to a reference receiver
-        '''
+        '''        
         if method == None:
             method = self.method
         if not len(self.receiver_locations) == len(dtoa):
@@ -109,15 +113,6 @@ class Multilaterator(object):
                 source = source[0]
         else:
             source = [0, 0, 0]
-        
-        self.bancroft_pub = rospy.Publisher('hydrophones/bancroft_pos', Bancroft_pos, queue_size = 1)            
-        
-        self.bancroft_pub.publish(Bancroft_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='Bancroft_pos'),
-            x_pos=source[0],
-            y_pos=source[1],
-            z_pos=source[2]))
 
         return source
 
@@ -125,11 +120,12 @@ class Multilaterator(object):
         '''
         Uses the a minimization routine to solve for the position of a source base on dtoa measurements
         '''
-        self.dtoa = dtoa
-        init_guess = np.random.normal(0,100,3)
+        self.dtoa = dtoa 
+        #rospy.logwarn(init_guess)
         opt = {'disp': 0}
         opt_method = 'Powell'
-        result = optimize.minimize(cost_func, init_guess, method=opt_method, options=opt, tol=1e-15)
+        #rospy.logwarn(self.init_guess)
+        result = optimize.minimize(cost_func, self.init_guess, method=opt_method, options=opt, tol=1e-15)
         if(result.success):
             source = [result.x[0], result.x[1], result.x[2]]
         else:

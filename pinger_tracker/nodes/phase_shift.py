@@ -126,6 +126,11 @@ class phaser(Multilaterator):
         
         #print "***"
         self.start = time.clock()
+        #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% David's Code %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        #reg_signal = mlat.TimeSignal1d(samples=self.signal[0])
+        #non_ref_signals = [mlat.TimeSignal1d(samples=signal, sampling_freq) for signal in self.signal[1:]]
+        #dtoa = mlat.get_dtoas(ref_signal, non_ref_signals)
+        #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for i in range(data.channels):
             self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i]))
 
@@ -159,13 +164,13 @@ class phaser(Multilaterator):
         print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors
        #mult = Multilaterator()
         #******************** figure out how to transfer variables from Multilateration ********************
-        self.pinger_position(calculated)
+        #self.pinger_position(calculated)
         #*****************************************************************************************************
         #print 
 
-        print "Actual position:\n\t" + "x: " + str(self.actual_position[0]) + " y: " + str(self.actual_position[1]) \
-                + " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)        
-        print "*********************************"
+        #print "Actual position:\n\t" + "x: " + str(self.actual_position[0]) + " y: " + str(self.actual_position[1]) \
+                #+ " z: " + str(self.actual_position[2]) + " (mm){}\n".format(self.W)        
+        #print "*********************************"
 
     def __init__(self):
 
