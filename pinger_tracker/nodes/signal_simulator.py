@@ -5,7 +5,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Bool
 from pinger_tracker.msg import *
 from multilateration import Multilaterator, ReceiverArraySim, Pulse
 
@@ -13,6 +13,10 @@ import sys
 
 from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
+
+import signal
+
+import os
 
 
 
@@ -33,10 +37,15 @@ class simulator():
         self.tx_rate = float("{signal_rate}".format(**config))
         self.amplitude = float("{amplitude}".format(**config))
         self.signal_freq = int("{signal_freq}".format(**config))
+        self.signal_trigger = "{signal_gen_trigger}".format(**config)
 
         self.position[0] = float("{pinger_x_pos}".format(**config))
         self.position[1] = float("{pinger_y_pos}".format(**config))
         self.position[2] = float("{pinger_z_pos}".format(**config))
+
+        self.noise_sync = "{synced_signal_noise}".format(**config)
+        self.signal_noise = float("{signal_noise}".format(**config))
+        
         return config
 
     def create_time_stamps(self, position):           
@@ -99,6 +108,22 @@ class simulator():
 
         y = np.array(y,dtype=int) #Help from Kevin, turn Floats in y to Int
 
+        if self.noise_sync == 'True':
+            x = self.noise*int(100*self.signal_noise)
+
+            y = [q + r for q, r in zip(y, x)]
+
+        elif self.noise_sync == 'False':
+            self.noise = np.random.normal(-((2**self.resolution)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length/self.Ts)))
+
+            #turn Float noise into Int noise
+            for i in range(0,len(self.noise)):
+                self.noise[i] = int(self.noise[i])
+            
+            x = self.noise*int(100*self.signal_noise)
+
+            y = [q + r for q, r in zip(y, x)]                
+
 
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
 
@@ -107,14 +132,23 @@ class simulator():
     def get_pos(self, data):
         self.position = (data.x_pos, data.y_pos, data.z_pos)
 
+    def trigger_func(self,data):
+        self.trigger = data.data      
+    
+    def signal_handler(self, signal, frame):
+        os.system("rosnode kill signal_simulator")   
+
     def __init__(self):
+        signal.signal(signal.SIGINT, self.signal_handler)
         rospy.init_node('signal_simulator')
         self.position = [3000, 5000, -2000]  # in mm, default position 
 
         srv = Server(SignalConfig, self.callback_signal)
 
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
-        
+        rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)
+
+        self.trigger = 'False'
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
 
@@ -143,24 +177,35 @@ class simulator():
 
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
-        
-        #***********************************
-        # position of ping, used in generation of time stamps
-        # in (mm)s        
-        #Pulse:  x: -90 y: 162 z: 786 (mm)
-        #[ 0.         -1.6408321   2.17237021  3.69021986]
-        #self.position = (1000, 10000, -1000)  # in mm, default position        
-               
-        
-
 
         plt.ion()
-        fig, ax = plt.subplots(3, 1)  #3x1 plot
+        fig, ax = plt.subplots(3, 1)  #3x1 plot 
 
-        
+        rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
+        catch = 0  
+        self.trigger = 0
+        self.signal_trigger = 'False'
+        interrupted = False
 
         while not rospy.is_shutdown():
-            rate = rospy.Rate(self.tx_rate)  #rate of signals, 5 Hz for Anglerfish
+
+            #if self.trigger == 0 and catch == 1:
+            #    catch = 0
+
+            if self.signal_trigger == 'False':
+                catch = 0
+                rate = rospy.Rate(self.tx_rate)  #rate of signals, 5 Hz for Anglerfish
+            
+            elif self.signal_trigger == 'True' and catch == 0:
+                while(self.trigger == 0 and self.signal_trigger == 'True'):
+                    if interrupted:
+                        break                        
+                catch = 1
+            elif self.trigger == 1 and self.signal_trigger =='True':
+                while(self.trigger == 1 and self.signal_trigger == 'True'):
+                    if interrupted:
+                        break                   
+                catch = 0           
 
             tstamps = self.create_time_stamps(self.position)
 
@@ -263,7 +308,10 @@ class simulator():
                     adc_bit=self.resolution,
                     actual_position=self.position))
             
-            rate.sleep()
+            if self.signal_trigger == 'False':
+                rate.sleep()
+            if interrupted:
+                break                
 
         plt.close('all')
 

@@ -9,7 +9,7 @@
   <node pkg="pinger_tracker" type="pinger_visualizer.py" name="ping_viz" respawn="true">
   </node>  
 
-  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_recon" respawn="true">
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_recon" respawn="false">
   </node>
 
   <node pkg="pinger_tracker" type="crane_method.py" name="crane_method" respawn="true">
