@@ -1,6 +1,6 @@
 <launch>
  
-  <node pkg="pinger_tracker" type="signal_simulator.py" name="signal_sim" respawn="true">
+  <node pkg="pinger_tracker" type="signal_simulator.py" name="signal_simulator" respawn="true">
   </node>
 
   <node pkg="pinger_tracker" type="phase_shift.py" name="phaseshift" respawn="true">
