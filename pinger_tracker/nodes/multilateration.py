@@ -8,6 +8,7 @@ import math
 from pinger_tracker.msg import *
 import rospy
 from std_msgs.msg import Header
+from time_signal_1d import TimeSignal1D
 
 class Multilaterator(object):
     '''
@@ -180,7 +181,7 @@ def get_time_delta(ref, non_ref):
     cross_corr - cross-correlation of non_ref with ref
     t_corr - time delay values corresponding to the cross-correlation
     '''
-    if not isinstance(ref, mlat.TimeSignal1D) or not isinstance(non_ref, mlat.TimeSignal1D):
+    if not isinstance(ref, TimeSignal1D) or not isinstance(non_ref, TimeSignal1D):
         raise TypeError("signals must be insstances of TimeSignal1D")
     if not np.isclose(ref.sampling_freq, non_ref.sampling_freq):
         raise RuntimeError("signals must have the same sampling frequency")
@@ -192,7 +193,7 @@ def get_time_delta(ref, non_ref):
     signal_start_diff = non_ref.start_time - ref.start_time
     delta_t = t_corr[max_idx] + signal_start_diff
 
-    cross_corr = mlat.TimeSignal1D(cross_corr, sampling_freq=ref.sampling_freq,
+    cross_corr = TimeSignal1D(cross_corr, sampling_freq=ref.sampling_freq,
                               start_time=-ref.duration() + signal_start_diff)
 
     return delta_t, cross_corr

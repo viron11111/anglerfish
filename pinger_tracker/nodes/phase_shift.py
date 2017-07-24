@@ -9,6 +9,8 @@ import time
 from std_msgs.msg import Header
 from pinger_tracker.msg import *
 from multilateration import Multilaterator
+import multilateration as mlat
+from time_signal_1d import TimeSignal1D
 
 import time
 import sys
@@ -127,9 +129,13 @@ class phaser(Multilaterator):
         #print "***"
         self.start = time.clock()
         #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% David's Code %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        #reg_signal = mlat.TimeSignal1d(samples=self.signal[0])
-        #non_ref_signals = [mlat.TimeSignal1d(samples=signal, sampling_freq) for signal in self.signal[1:]]
-        #dtoa = mlat.get_dtoas(ref_signal, non_ref_signals)
+        ref_signal = TimeSignal1D(samples=np.array(self.signal[0]), sampling_freq=self.sample_rate)
+        print ref_signal
+        non_ref_signals = [TimeSignal1D(samples=np.array(signal), sampling_freq=self.sample_rate) for signal in self.signal[1:]]
+        dtoa = mlat.get_dtoas(ref_signal, non_ref_signals)
+        print""
+        print dtoa
+        print ""
         #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for i in range(data.channels):
             self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i]))
