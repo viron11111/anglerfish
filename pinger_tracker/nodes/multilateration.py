@@ -181,16 +181,19 @@ def get_time_delta(ref, non_ref):
     cross_corr - cross-correlation of non_ref with ref
     t_corr - time delay values corresponding to the cross-correlation
     '''
+    #print ref.samples
     if not isinstance(ref, mlat.TimeSignal1D) or not isinstance(non_ref, mlat.TimeSignal1D):
         raise TypeError("signals must be insstances of TimeSignal1D")
     if not np.isclose(ref.sampling_freq, non_ref.sampling_freq):
         raise RuntimeError("signals must have the same sampling frequency")
 
     cross_corr = np.correlate(non_ref.samples, ref.samples, mode='full')
-    t_corr = np.linspace(-ref.duration(), non_ref.duration(), len(cross_corr))
 
+    t_corr = np.linspace(-ref.duration(), non_ref.duration(), len(cross_corr))
+    
     max_idx = cross_corr.argmax()
     signal_start_diff = non_ref.start_time - ref.start_time
+    print signal_start_diff
     delta_t = t_corr[max_idx] + signal_start_diff
 
     cross_corr = mlat.TimeSignal1D(cross_corr, sampling_freq=ref.sampling_freq,
@@ -204,12 +207,16 @@ def get_dtoas(ref_signal, non_ref_signals):
     ref_signal - TimeSignal1D
     non_ref_signals - iterable of TimeSignal1D's
     '''
+    
     dtoas = []
     cross_corrs = []
+
     for delayed in non_ref_signals:
         ret = get_time_delta(ref=ref_signal, non_ref=delayed)
+        
         dtoas.append(ret[0])
         cross_corrs.append(ret[1])
+
     return dtoas, cross_corrs
 
 def quadratic(a, b, c):

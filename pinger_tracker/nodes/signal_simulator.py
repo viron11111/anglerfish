@@ -34,7 +34,7 @@ class simulator():
     def callback_signal(self, config, level):
         self.resolution = int("{ADC_bits}".format(**config))
         self.sample_rate = int("{sample_rate}".format(**config))
-        self.tx_rate = float("{signal_rate}".format(**config))
+        self.tx_rate = int("{signal_rate}".format(**config))
         self.amplitude = float("{amplitude}".format(**config))
         self.signal_freq = int("{signal_freq}".format(**config))
         self.signal_trigger = "{signal_gen_trigger}".format(**config)

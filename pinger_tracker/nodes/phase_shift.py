@@ -36,48 +36,78 @@ class phaser(Multilaterator):
         
         #res = np.array([res_msg[0], res_msg[1], res_msg[2]])
 
-    def determine_phase(self, ref_sig, a_sig):
-        channel_length = len(ref_sig)
-        #print len(ref_sig)
-        #print len(a_sig)
-        #print channel_length
-        '''if channel_length % 2 != 0:
-            #print "odd"
-            ref_sig = ref_sig[1:channel_length+1]
-            #print len(a_sig)
-            a_sig = ref_sig[0:channel_length]
-            #print len(a_sig)
-            channel_length = len(ref_sig)'''
+    def a_add_zeros(self, a_sig):
+        channel_length = len(a_sig)
 
         if channel_length % 2 != 0:
             zeros = [0]*(channel_length+1)
-            #print "odd"
         else:
-            zeros = [0]*(channel_length)
+            zeros = [0]*(channel_length)      
 
-        '''print"***"
-        print channel_length
-        print len(zeros[channel_length/2:])
-        print len(zeros[:channel_length/2+1])
-        print"***"'''
+        signed = [-(2**self.bit)/2]*channel_length
+
+        a_sig = list(a_sig)
+        a_sig = [x + y for x, y in zip(a_sig, signed)]     
+
+        signal = zeros + a_sig
+
+        return signal        
+
+
+    def ref_add_zeros(self, ref_sig):
+        channel_length = len(ref_sig)
+
+        if channel_length % 2 != 0:
+            zeros = [0]*(channel_length+1)
+        else:
+            zeros = [0]*(channel_length)      
+
         signed = [-(2**self.bit)/2]*channel_length
 
         ref_sig = list(ref_sig)
-        ref_sig = [x + y for x, y in zip(ref_sig, signed)]
+        ref_sig = [x + y for x, y in zip(ref_sig, signed)]   
+        
+        reference = zeros[channel_length/2:] + ref_sig + zeros[:channel_length/2+1]           
 
-        a_sig = list(a_sig)
-        a_sig = [x + y for x, y in zip(a_sig, signed)]        
+        return reference
 
-        #print len(a_sig)
-        signal = zeros + a_sig
-        #print len(signal)
-        reference = zeros[channel_length/2:] + ref_sig + zeros[:channel_length/2+1]        
-        #print len(reference)
+
+    def determine_phase(self, ref_sig, a_sig):
+        channel_length = len(ref_sig)
+
+        '''if channel_length % 2 != 0:
+            zeros = [0]*(channel_length+1)
+        else:
+            zeros = [0]*(channel_length)
+
+        signed = [-(2**self.bit)/2]*channel_length'''
+
+        #ref_sig = list(ref_sig)
+        #ref_sig = [x + y for x, y in zip(ref_sig, signed)]
+
+        #a_sig = list(a_sig)
+        #a_sig = [x + y for x, y in zip(a_sig, signed)]     
+
+        #signal = zeros + a_sig
+        #print signal
+        signal = self.a_add_zeros(a_sig)
+        #print signal
+
+        #reference = zeros[channel_length/2:] + ref_sig + zeros[:channel_length/2+1]        
+        reference = self.ref_add_zeros(ref_sig)
+
+        length = len(reference)
         
         sum_val = 0
         sum_val_max = 0
         phase_holder = 0
         max_list = []
+
+        cross_corr = np.correlate(reference, signal, mode='full')
+        max_idx = cross_corr.argmax()
+        '''print"****cross correlation****"
+        print max_idx
+        print 2*channel_length-1 - max_idx
 
         for z in range(2*channel_length):
             
@@ -89,15 +119,15 @@ class phaser(Multilaterator):
                 phase_holder = z
                 max_list = signal
 
-            signal.insert(2*channel_length-1, signal.pop(0))
+            signal.insert(2*channel_length-1, signal.pop(0))'''
         
-        '''print "***"
-        print channel_length
-        print phase_holder
-        print "***"'''
+        phase_holder = 2*channel_length-1 - max_idx
+        
+        
 
         #print float(channel_length/2-phase_holder)
         return (channel_length/2-phase_holder)*(1.0/self.sample_rate)
+        #return (channel_length/2-max_idx)*(1.0/self.sample_rate)
 
     def actual(self, data):
         self.actual_stamps = data.actual_time_stamps
@@ -128,20 +158,31 @@ class phaser(Multilaterator):
         
         #print "***"
         self.start = time.clock()
-        
+
+
+        '''
         #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% David's Code %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        ref_signal = mlat.TimeSignal1D(samples=np.array(self.signal[0]), sampling_freq=self.sample_rate)
-        non_ref_signals = [mlat.TimeSignal1D(samples=np.array(signal), sampling_freq=self.sample_rate) for signal in self.signal[1:]]
-        #non_ref_signal = mlat.TimeSignal1D(samples=np.array(self.signal[1]), sampling_freq=self.sample_rate)
-        print non_ref_signals
+        signal_zero = self.signal
+
+        signal_zero[0] = self.ref_add_zeros(self.signal[0])
+        signal_zero[1] = self.a_add_zeros(self.signal[1])
+        signal_zero[2] = self.a_add_zeros(self.signal[2])
+        signal_zero[3] = self.a_add_zeros(self.signal[3])
+        print signal_zero
+
+        ref_signal = mlat.TimeSignal1D(samples=np.array(signal_zero[0]), sampling_freq=self.sample_rate)
+        non_ref_signals = [mlat.TimeSignal1D(samples=np.array(signal), sampling_freq=self.sample_rate) for signal in signal_zero[1:]]
+        #non_ref_signals = mlat.TimeSignal1D(samples=np.array(self.signal[1]), sampling_freq=self.sample_rate)
+        #print non_ref_signals[0].samples
         dtoa, cross_corrs = mlat.get_dtoas(ref_signal, non_ref_signals)
 
         print""
-        print dtoa
+        #print dtoa
         print ""
-        #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        for i in range(data.channels):
-            self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i]))
+        #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+        self.timestamps = [0.0]
+        for i in range(3):
+            self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i+1]))
 
         self.end = time.clock()
 

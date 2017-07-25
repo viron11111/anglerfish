@@ -11,6 +11,7 @@ class TimeSignal1D(object):
         sampling_freq - sampling_frequency in Hz
         start_time - start time (in seconds) for the corresponding time values
         '''
+
         if not isinstance(samples, np.ndarray):
             raise TypeError("'samples' argument must be an np.ndarray")
         if samples.ndim != 1:
@@ -28,6 +29,7 @@ class TimeSignal1D(object):
         @param end_t End time in seconds (float)
         @param sampling_freq Sampling frequency in Hz
         '''
+        print sampling_freq
         time_values = np.arange(start_t, end_t, 1 / sampling_freq)
         signal_values = np.empty(time_values.size)
         for i, val in enumerate(time_values):
