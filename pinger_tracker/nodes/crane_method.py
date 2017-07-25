@@ -20,6 +20,12 @@ from pinger_tracker.cfg import SignalConfig
 
 class solver():
 
+    def hydrophone_locations(self, data):
+        self.hydro0 = [data.hydro0_xyz[0],data.hydro0_xyz[1],data.hydro0_xyz[2]]
+        self.hydro1 = [data.hydro1_xyz[0],data.hydro1_xyz[1],data.hydro1_xyz[2]]
+        self.hydro2 = [data.hydro2_xyz[0],data.hydro2_xyz[1],data.hydro2_xyz[2]]
+        self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]    
+
     def calc_vals (self, data):
         x,y,z = self.crane_solver(data)
 
@@ -45,11 +51,11 @@ class solver():
         c = 1.484 # speed of sound in 20 C water per uSec
 
         #position of hydrophones
-        x1 = -25.4  #in mm
-        x2 = 25.4
-        y2 = 0
-        x3 = 0
-        y3 = -25.4
+        x1 = self.hydro1[0]  #in mm
+        x2 = self.hydro2[0]
+        y2 = self.hydro2[1]
+        x3 = self.hydro3[0]
+        y3 = self.hydro3[1]
 
         #convert timestampts to distances
         #print data.calculated_time_stamps
@@ -122,6 +128,7 @@ class solver():
         rospy.init_node('crane_method')
         rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actu_vals)
         rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
+        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
         self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
 
         rate = rospy.Rate(1)

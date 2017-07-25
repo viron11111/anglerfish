@@ -154,10 +154,10 @@ class simulator():
 
         self.hydro0 = [0,     0,     0]
         self.hydro1 = [-25.4, 0,     0]
-        self.hydro2 = [25.4,  0,     0]
+        self.hydro2 = [100,  0,     0]
         self.hydro3 = [0,     -25.4, 0]
 
-        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+        
 
         self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         #self.thresh = rospy.get_param('~thresh', 500)
@@ -172,6 +172,7 @@ class simulator():
 
         self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
         self.tstamps_pub = rospy.Publisher('/hydrophones/actual_time_stamps', Actual_time_stamps, queue_size = 1)
+        self.hydro_lct_pub = rospy.Publisher('hydrophones/hydrophone_locations', Hydrophone_locations, queue_size = 1)
 
         self.tx_rate = 1.0
 
@@ -189,11 +190,21 @@ class simulator():
 
         while not rospy.is_shutdown():
 
+            self.hydro_lct_pub.publish(Hydrophone_locations(
+                header=Header(stamp=rospy.Time.now(),
+                        frame_id='hydrophone_locations'),
+                    hydro0_xyz=self.hydro0,
+                    hydro1_xyz=self.hydro1,
+                    hydro2_xyz=self.hydro2,
+                    hydro3_xyz=self.hydro3))
+
             #if self.trigger == 0 and catch == 1:
             #    catch = 0
 
             if self.signal_trigger == 'False':
                 catch = 0
+                if self.tx_rate == 0:
+                    self.tx_rate = 0.1
                 rate = rospy.Rate(self.tx_rate)  #rate of signals, 5 Hz for Anglerfish
             
             elif self.signal_trigger == 'True' and catch == 0:

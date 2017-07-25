@@ -23,6 +23,12 @@ from pinger_tracker.msg import *
 
 class visualizer(object):
 
+    def hydrophone_locations(self, data):
+        self.hydro0 = [data.hydro0_xyz[0],data.hydro0_xyz[1],data.hydro0_xyz[2]]
+        self.hydro1 = [data.hydro1_xyz[0],data.hydro1_xyz[1],data.hydro1_xyz[2]]
+        self.hydro2 = [data.hydro2_xyz[0],data.hydro2_xyz[1],data.hydro2_xyz[2]]
+        self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]    
+
     def base_link(self):
         br = tf2_ros.TransformBroadcaster()
         t = geometry_msgs.msg.TransformStamped()
@@ -312,15 +318,17 @@ class visualizer(object):
         marker1.pose.orientation.y = 0.0
         marker1.pose.orientation.z = 0.0
         marker1.pose.orientation.w = 1.0
-        marker1.pose.position.x = 0
-        marker1.pose.position.y = 0
-        marker1.pose.position.z = 0
+        marker1.pose.position.x = self.hydro0[0]
+        marker1.pose.position.y = self.hydro0[1]
+        marker1.pose.position.z = self.hydro0[2]
 
         self.publisher.publish(marker1)
 
         marker2 = marker1
 
-        marker2.pose.position.x = -0.0254
+        marker2.pose.position.x = self.hydro1[0]
+        marker2.pose.position.y = self.hydro1[1]
+        marker2.pose.position.z = self.hydro1[2]
         marker2.ns = "hydrophone_1"
         marker2.id = 1
      
@@ -328,7 +336,9 @@ class visualizer(object):
 
         marker3 = marker1
 
-        marker3.pose.position.x = 0.0254
+        marker3.pose.position.x = self.hydro2[0]
+        marker3.pose.position.y = self.hydro2[1]
+        marker3.pose.position.z = self.hydro2[2]
         marker3.ns = "hydrophone_2"
         marker3.id = 2
      
@@ -336,8 +346,9 @@ class visualizer(object):
 
         marker4 = marker1
 
-        marker4.pose.position.y = -0.0254
-        marker4.pose.position.x = 0
+        marker4.pose.position.x = self.hydro3[0]
+        marker4.pose.position.y = self.hydro3[1]
+        marker4.pose.position.z = self.hydro3[2]
         marker4.ns = "hydrophone_3"
         marker4.id = 3
      
@@ -353,7 +364,13 @@ class visualizer(object):
         rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
         rospy.Subscriber('hydrophones/ls_pos', Ls_pos, self.ls)
         rospy.Subscriber('hydrophones/ping', Ping, self.actual_pos)
+        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
         #rospy.sleep(1)
+
+        self.hydro0 = [0,     0,     0]
+        self.hydro1 = [-25.4, 0,     0]
+        self.hydro2 = [25.4,  0,     0]
+        self.hydro3 = [0,     -25.4, 0]
 
         self.rates = 1
 
