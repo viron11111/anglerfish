@@ -128,11 +128,14 @@ class phaser(Multilaterator):
         
         #print "***"
         self.start = time.clock()
+        
         #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% David's Code %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        ref_signal = TimeSignal1D(samples=np.array(self.signal[0]), sampling_freq=self.sample_rate)
-        print ref_signal
-        non_ref_signals = [TimeSignal1D(samples=np.array(signal), sampling_freq=self.sample_rate) for signal in self.signal[1:]]
-        dtoa = mlat.get_dtoas(ref_signal, non_ref_signals)
+        ref_signal = mlat.TimeSignal1D(samples=np.array(self.signal[0]), sampling_freq=self.sample_rate)
+        non_ref_signals = [mlat.TimeSignal1D(samples=np.array(signal), sampling_freq=self.sample_rate) for signal in self.signal[1:]]
+        #non_ref_signal = mlat.TimeSignal1D(samples=np.array(self.signal[1]), sampling_freq=self.sample_rate)
+        print non_ref_signals
+        dtoa, cross_corrs = mlat.get_dtoas(ref_signal, non_ref_signals)
+
         print""
         print dtoa
         print ""
@@ -161,10 +164,11 @@ class phaser(Multilaterator):
 
         print "\t" + str(calculated)
         print "actual timestamps (uSec):"
-        print "\t" + str([x * y for x, y in zip(self.actual_stamps,microseconds)])
+        print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
         print "difference (uSec):"
+        self.timestamps = [x * y for x, y in zip(self.timestamps,microseconds)]
         difference = [x - y for x, y in zip(list(self.actual_stamps), self.timestamps)]
-        difference = [x * y for x, y in zip(difference,microseconds)]
+        #difference = [x * y for x, y in zip(difference,microseconds)]
         print "\t" + str(difference)
         errors = sum(map(abs, difference))
         print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors

@@ -181,7 +181,7 @@ def get_time_delta(ref, non_ref):
     cross_corr - cross-correlation of non_ref with ref
     t_corr - time delay values corresponding to the cross-correlation
     '''
-    if not isinstance(ref, TimeSignal1D) or not isinstance(non_ref, TimeSignal1D):
+    if not isinstance(ref, mlat.TimeSignal1D) or not isinstance(non_ref, mlat.TimeSignal1D):
         raise TypeError("signals must be insstances of TimeSignal1D")
     if not np.isclose(ref.sampling_freq, non_ref.sampling_freq):
         raise RuntimeError("signals must have the same sampling frequency")
@@ -193,8 +193,8 @@ def get_time_delta(ref, non_ref):
     signal_start_diff = non_ref.start_time - ref.start_time
     delta_t = t_corr[max_idx] + signal_start_diff
 
-    cross_corr = TimeSignal1D(cross_corr, sampling_freq=ref.sampling_freq,
-                              start_time=-ref.duration() + signal_start_diff)
+    cross_corr = mlat.TimeSignal1D(cross_corr, sampling_freq=ref.sampling_freq,
+                                   start_time=-ref.duration() + signal_start_diff)
 
     return delta_t, cross_corr
 
@@ -220,7 +220,7 @@ def quadratic(a, b, c):
     '''
     discriminant = b*b - 4*a*c
     if discriminant >= 0:
-        first_times_a = (-b+math.copysign(math.sqrt(discriminant), -b))/2
+        first_times_a = (-b+np.copysign(np.sqrt(discriminant), -b))/2
         return [first_times_a/a, c/first_times_a]
     else:
         return []
@@ -257,6 +257,7 @@ def generate_dtoa(c, source_position, non_ref_positions, ref_position=[0, 0, 0])
     ref_delta = np.linalg.norm(np.array(source_position) - np.array(ref_position)) / c
     non_ref_deltas = [np.linalg.norm(np.array(source_position) - np.array(p)) / c for p in non_ref_positions]
     return [nrd - ref_delta for nrd in non_ref_deltas]
+
 
 class ReceiverArraySim(object):
     """
