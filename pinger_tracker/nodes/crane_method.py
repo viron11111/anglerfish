@@ -134,7 +134,7 @@ class solver():
 
     def __init__(self):
         rospy.init_node('crane_method')
-        rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actu_vals)
+        rospy.Subscriber('/hydrophones/actualtimestamps', Actual_time_stamps, self.actu_vals)
         rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 

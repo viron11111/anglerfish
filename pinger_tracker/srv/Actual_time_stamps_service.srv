@@ -1,2 +1,6 @@
 ---
 float32[] actual_time_stamps
+#float32 ref_stamp
+#float32 one_stamp
+#float32 two_stamp
+#float32 three_stamp
