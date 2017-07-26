@@ -154,7 +154,7 @@ class simulator():
 
         self.hydro0 = [0,     0,     0]
         self.hydro1 = [-25.4, 0,     0]
-        self.hydro2 = [100,  0,     0]
+        self.hydro2 = [25.4,  0,     0]
         self.hydro3 = [0,     -25.4, 0]
 
         
@@ -170,7 +170,7 @@ class simulator():
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
-        self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
+        #self.signal_pub = rospy.Publisher('/hydrophones/ping', Ping, queue_size = 1)
         self.tstamps_pub = rospy.Publisher('/hydrophones/actual_time_stamps', Actual_time_stamps, queue_size = 1)
         self.hydro_lct_pub = rospy.Publisher('hydrophones/hydrophone_locations', Hydrophone_locations, queue_size = 1)
 

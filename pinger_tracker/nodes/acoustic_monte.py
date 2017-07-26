@@ -19,6 +19,12 @@ class monte(object):
         self.actualpostion = list(data.actual_position)
         print self.actualpostion
 
+    def change_position(self, position):
+
+        client.update_configuration({"pinger_x_pos":rand_num})
+        client.update_configuration({"pinger_y_pos":rand_num})
+        client.update_configuration({"pinger_z_pos":rand_num})
+
     def __init__(self):
 
         client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)#, config_callback=callback)
@@ -33,6 +39,12 @@ class monte(object):
         trigger = 0
 
         while not rospy.is_shutdown():
+
+            for z in range(3):
+                for y in range(3):
+                    for x in range(3):
+                        self.change_position([x,y,z])
+
 
             rand_num = random.uniform(25,50)
             client.update_configuration({"signal_freq":rand_num})

@@ -15,11 +15,11 @@
   <node pkg="pinger_tracker" type="crane_method.py" name="crane_method" respawn="true">
   </node>
 
-  <node pkg="pinger_tracker" type="ls_method.py" name="ls_method" respawn="true">
+  <!--<node pkg="pinger_tracker" type="ls_method.py" name="ls_method" respawn="true">
   </node>  
 
   <node pkg="pinger_tracker" type="bancroft_method.py" name="bancroft_method" respawn="true">
-  </node>   
+  </node>-->   
 
   <node pkg="rviz" type="rviz" name="rviz" respawn="true">
   </node>

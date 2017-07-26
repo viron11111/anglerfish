@@ -318,17 +318,17 @@ class visualizer(object):
         marker1.pose.orientation.y = 0.0
         marker1.pose.orientation.z = 0.0
         marker1.pose.orientation.w = 1.0
-        marker1.pose.position.x = self.hydro0[0]
-        marker1.pose.position.y = self.hydro0[1]
-        marker1.pose.position.z = self.hydro0[2]
+        marker1.pose.position.x = self.hydro0[0]/1000.0
+        marker1.pose.position.y = self.hydro0[1]/1000.0
+        marker1.pose.position.z = self.hydro0[2]/1000.0
 
         self.publisher.publish(marker1)
 
         marker2 = marker1
 
-        marker2.pose.position.x = self.hydro1[0]
-        marker2.pose.position.y = self.hydro1[1]
-        marker2.pose.position.z = self.hydro1[2]
+        marker2.pose.position.x = self.hydro1[0]/1000.0
+        marker2.pose.position.y = self.hydro1[1]/1000.0
+        marker2.pose.position.z = self.hydro1[2]/1000.0
         marker2.ns = "hydrophone_1"
         marker2.id = 1
      
@@ -336,9 +336,9 @@ class visualizer(object):
 
         marker3 = marker1
 
-        marker3.pose.position.x = self.hydro2[0]
-        marker3.pose.position.y = self.hydro2[1]
-        marker3.pose.position.z = self.hydro2[2]
+        marker3.pose.position.x = self.hydro2[0]/1000.0
+        marker3.pose.position.y = self.hydro2[1]/1000.0
+        marker3.pose.position.z = self.hydro2[2]/1000.0
         marker3.ns = "hydrophone_2"
         marker3.id = 2
      
@@ -346,9 +346,9 @@ class visualizer(object):
 
         marker4 = marker1
 
-        marker4.pose.position.x = self.hydro3[0]
-        marker4.pose.position.y = self.hydro3[1]
-        marker4.pose.position.z = self.hydro3[2]
+        marker4.pose.position.x = self.hydro3[0]/1000.0
+        marker4.pose.position.y = self.hydro3[1]/1000.0
+        marker4.pose.position.z = self.hydro3[2]/1000.0
         marker4.ns = "hydrophone_3"
         marker4.id = 3
      
