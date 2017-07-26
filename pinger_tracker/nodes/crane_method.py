@@ -14,6 +14,7 @@ import math
 
 from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
+from pinger_tracker.srv import *
 
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
@@ -45,6 +46,13 @@ class solver():
             x_pos=x,
             y_pos=y,
             z_pos=z))        
+
+    def crane_solutions(self, data):
+        rospy.loginfo("service response crane_srv")
+        x = 3000
+        y = 1000
+        z = 2000
+        return x,y,z
 
     def crane_solver(self, data):
 
@@ -129,6 +137,8 @@ class solver():
         rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actu_vals)
         rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+
+        self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_solution, self.crane_solutions)
         self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
 
         rate = rospy.Rate(1)

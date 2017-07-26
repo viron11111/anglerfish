@@ -64,7 +64,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
-   Crane_solution.srv
+   Ping_service.srv
+   Transmitter_position_service.srv
+   Hydrophone_locations_service.srv
+   Crane_pos_service.srv
+   Calculated_time_stamps_service.srv
+   Actual_time_stamps_service.srv
  )
 
 ## Generate actions in the 'action' folder
