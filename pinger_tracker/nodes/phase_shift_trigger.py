@@ -97,7 +97,7 @@ class phaser(Multilaterator):
     def actual(self, data):
         self.actual_stamps = data.actual_time_stamps
 
-    def parse_ping(self, data):        
+    def parse_ping(self, data):       
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
         self.actual_position = data.actual_position
@@ -149,8 +149,66 @@ class phaser(Multilaterator):
         errors = sum(map(abs, difference))
         print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors
 
-    def calculate_time_stamps(self,data):
+    def calculate_time_stamps_phase(self,input):
+        ping = rospy.ServiceProxy('/hydrophones/ping', Ping_service)
+        data = ping()
 
+        self.bit = data.adc_bit
+        self.sample_rate = data.sample_rate
+        self.actual_position = data.actual_position
+
+        Ts = 1.0/self.sample_rate
+        signal_periods = 1.0/25000.0  #25k is the longest signal expected
+        channel_length = len(data.data)/data.channels
+
+
+        self.signal = []
+        self.timestamps = []
+
+        for i in range(data.channels):
+            self.signal.append([])
+            self.signal[i] = data.data[i::4]
+            left_periods = int((channel_length/2)-signal_periods/Ts)
+            right_periods = int((channel_length/2)+signal_periods/Ts)
+            #print self.signal
+            self.signal[left_periods:right_periods]
+
+        self.start = time.clock()
+
+        self.timestamps = [0.0]
+
+        for i in range(3):
+            self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i+1]))
+
+        self.end = time.clock()
+
+        microseconds = [1e6,1e6,1e6,1e6]
+        print "*********************************"
+        print ("{}time to perform timestamps (Sec): {}%0.3f{}\n".format(self.W,self.O,self.W) % (self.end-self.start))
+        
+        calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
+
+        self.calc_stamps_pub.publish(Calculated_time_stamps(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='phase_shift'),
+            calculated_time_stamps=calculated))
+
+        print "{}calculated timestamps (uSec):".format(self.W)
+
+        print "\t" + str(calculated)
+        astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
+        astamps = astamps()
+        self.actual_stamps = astamps.actual_time_stamps
+
+        print "actual timestamps (uSec):"
+        print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
+        print "difference (uSec):"
+        self.timestamps = [x * y for x, y in zip(self.timestamps,microseconds)]
+        difference = [x - y for x, y in zip(list(self.actual_stamps), self.timestamps)]
+        #difference = [x * y for x, y in zip(difference,microseconds)]
+        print "\t" + str(difference)
+        errors = sum(map(abs, difference))
+        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors        
 
     def __init__(self):
 
@@ -173,7 +231,7 @@ class phaser(Multilaterator):
 
         self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
 
-        rospy.Service('/hydrophones/calculated_time_stamps', calculated_time_stamps_service, self.calculate_time_stamps)
+        #rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
 
         self.W  = '\033[0m'  # white (normal)
         self.R  = '\033[31m' # red
@@ -190,7 +248,7 @@ class phaser(Multilaterator):
 
 
 def main():
-    rospy.init_node('phase_shift', anonymous=False)
+    rospy.init_node('phase_shift_service', anonymous=False)
 
     phaser()
 

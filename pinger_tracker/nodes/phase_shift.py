@@ -75,25 +75,8 @@ class phaser(Multilaterator):
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
 
-        '''if channel_length % 2 != 0:
-            zeros = [0]*(channel_length+1)
-        else:
-            zeros = [0]*(channel_length)
-
-        signed = [-(2**self.bit)/2]*channel_length'''
-
-        #ref_sig = list(ref_sig)
-        #ref_sig = [x + y for x, y in zip(ref_sig, signed)]
-
-        #a_sig = list(a_sig)
-        #a_sig = [x + y for x, y in zip(a_sig, signed)]     
-
-        #signal = zeros + a_sig
-        #print signal
         signal = self.a_add_zeros(a_sig)
-        #print signal
-
-        #reference = zeros[channel_length/2:] + ref_sig + zeros[:channel_length/2+1]        
+       
         reference = self.ref_add_zeros(ref_sig)
 
         length = len(reference)
@@ -105,25 +88,8 @@ class phaser(Multilaterator):
 
         cross_corr = np.correlate(reference, signal, mode='full')
         max_idx = cross_corr.argmax()
-        '''print"****cross correlation****"
-        print max_idx
-        print 2*channel_length-1 - max_idx
-
-        for z in range(2*channel_length):
-            
-            #summing function
-            sum_val = sum([x * y for x, y in zip(reference,signal)])
-
-            if sum_val >=  sum_val_max:
-                sum_val_max = sum_val
-                phase_holder = z
-                max_list = signal
-
-            signal.insert(2*channel_length-1, signal.pop(0))'''
         
-        phase_holder = 2*channel_length-1 - max_idx
-        
-        
+        phase_holder = 2*channel_length-1 - max_idx    
 
         #print float(channel_length/2-phase_holder)
         return (channel_length/2-phase_holder)*(1.0/self.sample_rate)
@@ -139,6 +105,7 @@ class phaser(Multilaterator):
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0
         channel_length = len(data.data)/data.channels
+
 
         self.signal = []
         self.timestamps = []
