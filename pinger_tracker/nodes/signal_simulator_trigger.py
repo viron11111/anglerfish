@@ -251,12 +251,15 @@ class simulator():
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
         rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)        
 
+        self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
+
         rospy.Service('hydrophones/ping', Ping_service, self.ping_service)
-        #self.tstamps_pub = rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
         rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
         rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
         self.tx_rate = 1.0
+
+        self.sample_rate = 8
 
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
@@ -272,33 +275,8 @@ class simulator():
 
         while not rospy.is_shutdown():
 
-            self.hydro_lct_pub.publish(Hydrophone_locations(
-                header=Header(stamp=rospy.Time.now(),
-                        frame_id='hydrophone_locations'),
-                    hydro0_xyz=self.hydro0,
-                    hydro1_xyz=self.hydro1,
-                    hydro2_xyz=self.hydro2,
-                    hydro3_xyz=self.hydro3))
-
             #if self.trigger == 0 and catch == 1:
             #    catch = 0
-
-            if self.signal_trigger == 'False':
-                catch = 0
-                if self.tx_rate == 0:
-                    self.tx_rate = 0.1
-                rate = rospy.Rate(self.tx_rate)  #rate of signals, 5 Hz for Anglerfish
-            
-            elif self.signal_trigger == 'True' and catch == 0:
-                while(self.trigger == 0 and self.signal_trigger == 'True'):
-                    if interrupted:
-                        break                        
-                catch = 1
-            elif self.trigger == 1 and self.signal_trigger =='True':
-                while(self.trigger == 1 and self.signal_trigger == 'True'):
-                    if interrupted:
-                        break                   
-                catch = 0           
 
             tstamps = self.create_time_stamps(self.position)
 
@@ -312,11 +290,6 @@ class simulator():
             microseconds = [1e6,1e6,1e6,1e6]
             self.tstamps = [x * y for x, y in zip(self.tstamps,microseconds)]
             self.tstamps = list(self.tstamps)
-
-            self.tstamps_pub.publish(Actual_time_stamps(
-                    header=Header(stamp=rospy.Time.now(),
-                                  frame_id='signal_sim'),
-                    actual_time_stamps=self.tstamps))
 
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
@@ -391,7 +364,7 @@ class simulator():
                 self.data = list(map(int, self.data))
                 #print self.data
 
-                self.simulate_pub.publish(Ping(
+                '''self.simulate_pub.publish(Ping(
                     header=Header(stamp=rospy.Time.now(),
                                   frame_id=self.frame),
                     channels=self.number_of_hydrophones,
@@ -399,7 +372,7 @@ class simulator():
                     data=self.data,
                     sample_rate=self.sample_rate*1000,
                     adc_bit=self.resolution,
-                    actual_position=self.position))
+                    actual_position=self.position))'''
             
             if self.signal_trigger == 'False':
                 rate.sleep()

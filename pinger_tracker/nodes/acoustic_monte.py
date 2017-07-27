@@ -4,6 +4,7 @@ import rosparam
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 from std_msgs.msg import Header, Bool
 from pinger_tracker.msg import *
@@ -16,38 +17,71 @@ import dynamic_reconfigure.client
 class monte(object):
 
     def actual_position(self, data):
-        self.actualpostion = list(data.actual_position)
-        print self.actualpostion
+        self.actual_x = data.actual_position[0]/1000.0
+        self.actual_y = data.actual_position[1]/1000.0
+        self.actual_z = data.actual_position[2]/1000.0
+
+    def crane(self, data):
+        self.crane_x = data.x_pos/1000.0
+        self.crane_y = data.y_pos/1000.0
+        self.crane_z = data.z_pos/1000.0
 
     def change_position(self, position):
-
         client.update_configuration({"pinger_x_pos":rand_num})
         client.update_configuration({"pinger_y_pos":rand_num})
         client.update_configuration({"pinger_z_pos":rand_num})
 
+    def calculate_error(self):
+        if self.crane_x != 0:
+            crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
+        else:
+            crane_heading = 0.0
+        print "calculated: %f " % crane_heading
+
+        if self.actual_x != 0:
+            actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
+        else:
+            actual_heading = 0.0
+        print "actual: %f " % actual_heading
+
+        heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
+        heading_error_radian = abs(actual_heading - crane_heading)
+        print "heading_error: %f%% %f radians" % (heading_error_percent, heading_error_radian)
+
     def __init__(self):
 
-        client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)#, config_callback=callback)
+        client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)
         
         self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
+        
         rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
-
-        rate = rospy.Rate(0.5)  #rate of signals, 5 Hz for Anglerfish
+        rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
 
         client.update_configuration({"signal_gen_trigger":'True'})
+
+        self.actual_x = 0
+        self.actual_y = 0
+        self.actual_z = 0
+        self.crane_x = 0
+        self.crane_y = 0
+        self.crane_z = 0
+
+        rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         trigger = 0
 
         while not rospy.is_shutdown():
 
-            for z in range(3):
+            self.calculate_error()
+
+            '''for z in range(3):
                 for y in range(3):
                     for x in range(3):
-                        self.change_position([x,y,z])
+                        self.change_position([x,y,z])'''
 
 
             rand_num = random.uniform(25,50)
-            client.update_configuration({"signal_freq":rand_num})
+            #client.update_configuration({"signal_freq":rand_num})
 
             self.toggle.publish(Bool(
                     data=trigger))

@@ -231,7 +231,7 @@ class phaser(Multilaterator):
 
         self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
 
-        #rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
+        rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
 
         self.W  = '\033[0m'  # white (normal)
         self.R  = '\033[31m' # red
