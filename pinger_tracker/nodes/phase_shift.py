@@ -14,6 +14,7 @@ from time_signal_1d import TimeSignal1D
 
 import time
 import sys
+import os
 
 class phaser(Multilaterator):
 
@@ -152,6 +153,7 @@ class phaser(Multilaterator):
             self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i+1]))
 
         self.end = time.clock()
+        os.system('clear')
 
         #sys.stderr.write("\x1b[2J\x1b[H")
         #print type(self.actual_stamps)
