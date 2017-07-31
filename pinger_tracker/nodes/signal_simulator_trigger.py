@@ -18,9 +18,6 @@ from pinger_tracker.srv import *
 import signal
 
 import os
-
-
-
 #*********************************************************************
 #  Using mix of uSec and sec, pay attention to units
 #  Hydrophone locations are in mm, along with speed of sound
@@ -177,10 +174,17 @@ class simulator():
 
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
-    def ping_service(self,data):
-        #rospy.loginfo("waiting on actual_time_stamps service")
-        #rospy.wait_for_service('actual_time_stamps')
-        #rospy.loginfo("actual_time_stamps service started")
+    def ping_service(self, pinger_position):
+        self.position = pinger_position.actual_position
+
+        hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
+        data = hydro()
+
+        self.hydro0 = data.hydro0_xyz
+        self.hydro1 = data.hydro1_xyz
+        self.hydro2 = data.hydro2_xyz
+        self.hydro3 = data.hydro3_xyz
+
         ref = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
@@ -194,10 +198,13 @@ class simulator():
         #turn Float noise into Int noise
         for i in range(0,len(self.noise)):
             self.noise[i] = int(self.noise[i])
+
         
         #count the number of published data point for assignment of empty self.data list
         self.data_points = int(self.signal_length/self.Ts)*self.number_of_hydrophones
         self.data = [None]*self.data_points
+
+
 
         for i in range(0,4):  #for loop that creates and plots the four waves
         
@@ -223,22 +230,27 @@ class simulator():
             self.sample_rate*1000,
             self.resolution,
             self.position,
-            self.data)             
+            self.data)           
 
 
     def __init__(self):
-        signal.signal(signal.SIGINT, self.signal_handler)
+
         rospy.init_node('signal_simulator_trigger')
+
         self.position = [3000, 5000, -2000]  # in mm, default position 
-
-        srv = Server(SignalConfig, self.callback_signal)
-
         self.trigger = 'False'
-
         self.hydro0 = [0,     0,     0]
         self.hydro1 = [-25.4, 0,     0]
         self.hydro2 = [25.4,  0,     0]
-        self.hydro3 = [0,     -25.4, 0]        
+        self.hydro3 = [0,     -25.4, 0] 
+        self.tx_rate = 1.0
+        self.sample_rate = 8
+        self.Fs = self.sample_rate*1000  # sampling rate
+        self.Ts = 1.0/self.Fs # sampling interval
+        catch = 0  
+        self.trigger = 0
+        self.signal_trigger = 'False'
+        #interrupted = False
 
         self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         self.frame = rospy.get_param('~frame', '/hydrophones')
@@ -248,6 +260,9 @@ class simulator():
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
+        #signal.signal(signal.SIGINT, self.signal_handler)
+        srv = Server(SignalConfig, self.callback_signal)
+
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
         rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)        
 
@@ -255,37 +270,19 @@ class simulator():
 
         rospy.Service('hydrophones/ping', Ping_service, self.ping_service)
         rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
-        rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
+        #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
-        self.tx_rate = 1.0
-
-        self.sample_rate = 8
-
-        self.Fs = self.sample_rate*1000  # sampling rate
-        self.Ts = 1.0/self.Fs # sampling interval
-
-        plt.ion()
-        fig, ax = plt.subplots(3, 1)  #3x1 plot 
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
-        catch = 0  
-        self.trigger = 0
-        self.signal_trigger = 'False'
-        interrupted = False
 
         while not rospy.is_shutdown():
 
-            #if self.trigger == 0 and catch == 1:
-            #    catch = 0
+            '''tstamps = self.create_time_stamps(self.position)
 
-            tstamps = self.create_time_stamps(self.position)
-
-            #converts timestamps to Sec because create_time_stamps uses uSec
             for i in range(0,4):
                 tstamps[i] = tstamps[i]*10**-6
 
             self.tstamps=tstamps
-
 
             microseconds = [1e6,1e6,1e6,1e6]
             self.tstamps = [x * y for x, y in zip(self.tstamps,microseconds)]
@@ -294,9 +291,6 @@ class simulator():
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
             phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
             self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
-            
-            ax[0].cla()
-            ax[1].cla()
 
             #self.noise is used to add noise to the silent portion of the signal            
             self.noise = np.random.normal(-((2**self.resolution)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length/self.Ts)))
@@ -320,66 +314,17 @@ class simulator():
 
                     n = len(wave)
                     t = np.arange(0,n*self.Ts,self.Ts)
-                    if len(t) == len(wave):
-                        ax[0].plot(t,wave)
-                        ax[1].plot(t,wave)
                 else:
-                    wave = []
-
-
-            if wave != [] and None not in self.data:
-                wave = wave[n/2:n]  #cut out first half of signal (silence) to enhance FFT
-                n = len(wave) # wave with half the number of data points
-
-                k = np.arange(n)
-                T = float(n)/float(self.Fs)            
-                frq = k/T # two sides frequency range
-
-                frq = frq[range(n/2)] # one side frequency range
-                Y = np.fft.fft(wave)/n # fft computing and normalization
-                Y = Y[range(n/2)]/2**self.resolution #linearize amplitude based on resolution of ADC
-                Y = Y*(1/self.amplitude) #Compensate for FFT, multiply by inverse of amplitude
-               
-                #scale decided by ADC bits (resolution)           
-                ax[0].set_title("Four Hydrophone Channels Full Scale")
-                ax[0].set_ylim(0,2**self.resolution)
-                ax[0].set_xlabel('Time')
-                ax[0].set_ylabel('Amplitude')
-
-                #zoomed in version of signal
-                ax[1].set_title("Autosize on Hydrophone channels")
-                ax[1].set_xlabel('Time')
-                ax[1].set_ylabel('Amplitude')
-
-                ax[2].cla()
-                ax[2].set_title("FFT On Channel One")
-                ax[2].plot(frq,abs(Y),'r') # plotting the FFT spectrum
-                ax[2].set_xlim(5000,50000)
-                ax[2].set_ylim(0,1)
-                ax[2].set_xlabel('Freq (Hz)')
-                ax[2].set_ylabel('|Y(freq)|')
-
-                plt.pause(0.05)                
+                    wave = []             
 
                 self.data = list(map(int, self.data))
-                #print self.data
-
-                '''self.simulate_pub.publish(Ping(
-                    header=Header(stamp=rospy.Time.now(),
-                                  frame_id=self.frame),
-                    channels=self.number_of_hydrophones,
-                    samples=self.data_points,
-                    data=self.data,
-                    sample_rate=self.sample_rate*1000,
-                    adc_bit=self.resolution,
-                    actual_position=self.position))'''
             
             if self.signal_trigger == 'False':
-                rate.sleep()
+                
             if interrupted:
-                break                
+                break          '''
+            rate.sleep()                
 
-        plt.close('all')
 
 def main():
     rospy.init_node('signal_simulator_trigger', anonymous=False)

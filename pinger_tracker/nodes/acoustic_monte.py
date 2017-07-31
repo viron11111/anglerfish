@@ -9,6 +9,7 @@ import os
 
 from std_msgs.msg import Header, Bool
 from pinger_tracker.msg import *
+from pinger_tracker.srv import *
 
 import dynamic_reconfigure.client
 
@@ -31,6 +32,15 @@ class monte(object):
         client.update_configuration({"pinger_x_pos":rand_num})
         client.update_configuration({"pinger_y_pos":rand_num})
         client.update_configuration({"pinger_z_pos":rand_num})
+
+    def location_service(self, data):
+
+        hydro0_xyz = [0,     0,     0]
+        hydro1_xyz = [-25.4, 0,     0]
+        hydro2_xyz = [25.4,  0,     0]
+        hydro3_xyz = [0,     -25.4, 0]
+
+        return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
     def calculate_error(self):
         os.system('clear')
@@ -89,14 +99,15 @@ class monte(object):
 
     def __init__(self):
 
-        client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)
+        #client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)
+        #client.update_configuration({"signal_gen_trigger":'True'})
         
         self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
         
         rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
         rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
 
-        client.update_configuration({"signal_gen_trigger":'True'})
+        rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
 
         self.actual_x = 0
         self.actual_y = 0
@@ -118,21 +129,14 @@ class monte(object):
 
         while not rospy.is_shutdown():
 
-            self.calculate_error()
-
-            '''for z in range(3):
-                for y in range(3):
-                    for x in range(3):
-                        self.change_position([x,y,z])'''
-
+            '''self.calculate_error()
 
             rand_num = random.uniform(25,50)
-            #client.update_configuration({"signal_freq":rand_num})
 
             self.toggle.publish(Bool(
                     data=trigger))
 
-            trigger = not trigger
+            trigger = not trigger'''
 
             rate.sleep()        
 
@@ -141,11 +145,11 @@ class monte(object):
 def main():
     rospy.init_node('acoustic_monte', anonymous=False)
 
-    rospy.loginfo("Waiting for signal_simulator service...")
+    #rospy.loginfo("Waiting for signal_simulator service...")
 
-    rospy.wait_for_service("/signal_simulator/set_parameters")
+    #rospy.wait_for_service("/signal_simulator/set_parameters")
 
-    rospy.loginfo("Beginning Monte")
+   #rospy.loginfo("Beginning Monte")
 
 
 
