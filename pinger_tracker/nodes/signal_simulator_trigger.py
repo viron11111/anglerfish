@@ -80,11 +80,7 @@ class simulator():
 
         offset = offset/10e6
 
-        self.Fs = self.sample_rate*1000  # sampling rate
-        self.Ts = 1.0/self.Fs # sampling interval
-
         self.samples = ((self.signal_length/2)-offset)*self.sample_rate*1000  #Number of samples during a 400 uSec period, for pre_signal
-
         
         int_sample = self.samples
         int_sample = int(int_sample)
@@ -124,8 +120,7 @@ class simulator():
             
             x = self.noise*int(100*self.signal_noise)
 
-            y = [q + r for q, r in zip(y, x)]                
-
+            y = [q + r for q, r in zip(y, x)]              
 
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
 
@@ -175,6 +170,7 @@ class simulator():
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
     def ping_service(self, pinger_position):
+        print "sample_rate2: %i "%self.sample_rate
         self.position = pinger_position.actual_position
 
         hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
@@ -198,38 +194,32 @@ class simulator():
         #turn Float noise into Int noise
         for i in range(0,len(self.noise)):
             self.noise[i] = int(self.noise[i])
-
         
         #count the number of published data point for assignment of empty self.data list
         self.data_points = int(self.signal_length/self.Ts)*self.number_of_hydrophones
-        self.data = [None]*self.data_points
 
+        self.data = [None]*self.data_points
 
 
         for i in range(0,4):  #for loop that creates and plots the four waves
         
             self.amplitude_jitter = random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
             wave = self.create_wave(tstamps[i])
-       
-
+     
             if len(wave) == len(self.data)/4:
 
                 self.data[i::self.number_of_hydrophones] = wave  #storage variable to send data through ROS
-
-                n = len(wave)
-                t = np.arange(0,n*self.Ts,self.Ts)
             else:
                 wave = []     
 
-        if wave != [] and None not in self.data:   
+        #if wave != [] and None not in self.data:   
 
-            self.data = list(map(int, self.data))
+        self.data = list(map(int, self.data))
 
         return Ping_serviceResponse(self.number_of_hydrophones,
             self.data_points,
             self.sample_rate*1000,
             self.resolution,
-            self.position,
             self.data)           
 
 
@@ -244,13 +234,6 @@ class simulator():
         self.hydro2 = [25.4,  0,     0]
         self.hydro3 = [0,     -25.4, 0] 
         self.tx_rate = 1.0
-        self.sample_rate = 8
-        self.Fs = self.sample_rate*1000  # sampling rate
-        self.Ts = 1.0/self.Fs # sampling interval
-        catch = 0  
-        self.trigger = 0
-        self.signal_trigger = 'False'
-        #interrupted = False
 
         self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         self.frame = rospy.get_param('~frame', '/hydrophones')
@@ -272,6 +255,9 @@ class simulator():
         rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
         #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
+        self.sample_rate = 600
+        self.Fs = self.sample_rate*1000  # sampling rate
+        self.Ts = 1.0/self.Fs # sampling interval
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
