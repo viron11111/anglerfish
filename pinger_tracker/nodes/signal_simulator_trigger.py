@@ -170,7 +170,7 @@ class simulator():
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
     def ping_service(self, pinger_position):
-        print "sample_rate2: %i "%self.sample_rate
+        #print "sample_rate2: %i "%self.sample_rate
         self.position = pinger_position.actual_position
 
         hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
