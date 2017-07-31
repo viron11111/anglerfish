@@ -80,6 +80,9 @@ class simulator():
 
     def create_wave(self, offset):
 
+        print offset
+      
+
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
 
@@ -253,6 +256,12 @@ class simulator():
             #count the number of published data point for assignment of empty self.data list
             self.data_points = int(self.signal_length/self.Ts)*self.number_of_hydrophones
             self.data = [None]*self.data_points
+
+            print self.position
+            print self.hydro0
+            print self.hydro1
+            print self.hydro2
+            print self.hydro3
 
             for i in range(0,4):  #for loop that creates and plots the four waves
             

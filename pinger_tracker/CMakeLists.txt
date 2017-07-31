@@ -70,6 +70,7 @@ find_package(catkin REQUIRED COMPONENTS
    Crane_pos_service.srv
    Calculated_time_stamps_service.srv
    Actual_time_stamps_service.srv
+   Actual_position.srv
  )
 
 ## Generate actions in the 'action' folder

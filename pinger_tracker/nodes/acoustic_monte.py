@@ -18,10 +18,9 @@ import dynamic_reconfigure.client
 
 class monte(object):
 
-    def actual_position(self, data):
-        self.actual_x = data.actual_position[0]/1000.0
-        self.actual_y = data.actual_position[1]/1000.0
-        self.actual_z = data.actual_position[2]/1000.0
+    def position_service(self, data):
+        position = [3000.0, 3000.0, -1000.0]
+        return Actual_positionResponse(position)
 
     def crane(self, data):
         self.crane_x = data.x_pos/1000.0
@@ -104,10 +103,11 @@ class monte(object):
         
         self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
         
-        rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
+        #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
         rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
 
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
+        rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
 
         self.actual_x = 0
         self.actual_y = 0

@@ -72,7 +72,6 @@ class phaser(Multilaterator):
 
         return reference
 
-
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
 
@@ -80,8 +79,8 @@ class phaser(Multilaterator):
     
         reference = self.ref_add_zeros(ref_sig)
 
-        length = len(reference)
-        
+        length = len(reference)-1
+      
         sum_val = 0
         sum_val_max = 0
         phase_holder = 0
@@ -155,12 +154,10 @@ class phaser(Multilaterator):
 
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
-        self.actual_position = data.actual_position
 
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0  #25k is the longest signal expected
         channel_length = len(data.data)/data.channels
-
 
         self.signal = []
         self.timestamps = []
@@ -188,14 +185,10 @@ class phaser(Multilaterator):
         
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        self.calc_stamps_pub.publish(Calculated_time_stamps(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='phase_shift'),
-            calculated_time_stamps=calculated))
-
         print "{}calculated timestamps (uSec):".format(self.W)
 
         print "\t" + str(calculated)
+
         astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
         astamps = astamps()
         self.actual_stamps = astamps.actual_time_stamps
@@ -208,28 +201,30 @@ class phaser(Multilaterator):
         #difference = [x * y for x, y in zip(difference,microseconds)]
         print "\t" + str(difference)
         errors = sum(map(abs, difference))
-        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors        
+        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
+
+        return Calculated_time_stamps_serviceResponse(calculated)
 
     def __init__(self):
 
         rospy.init_node('phase_shift_service')
 
-        self.start = time.clock()
-        self.end = time.clock()
-        self.timestamps = []
-        self.actual_stamps = []
-        self.actual_position = [0,0,0]
+        #self.start = time.clock()
+        #self.end = time.clock()
+        #self.timestamps = []
+        #self.actual_stamps = []
+        #self.actual_position = [0,0,0]
 
-        self.hydro0 = [0,     0,     0]
-        self.hydro1 = [-25.4, 0,     0]
-        self.hydro2 = [25.4,  0,     0]
-        self.hydro3 = [0,     -25.4, 0]
+        #self.hydro0 = [0,     0,     0]
+        #self.hydro1 = [-25.4, 0,     0]
+        #self.hydro2 = [25.4,  0,     0]
+        #self.hydro3 = [0,     -25.4, 0]
 
-        rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
-        rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actual)
-        rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
+        #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+        #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actual)
+        #rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
 
-        self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+        #self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
 
         rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
 

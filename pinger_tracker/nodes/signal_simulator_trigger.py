@@ -78,7 +78,7 @@ class simulator():
 
     def create_wave(self, offset):
 
-        offset = offset/10e6
+        offset = offset/10e5
 
         self.samples = ((self.signal_length/2)-offset)*self.sample_rate*1000  #Number of samples during a 400 uSec period, for pre_signal
         
@@ -170,8 +170,15 @@ class simulator():
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
     def ping_service(self, pinger_position):
-        #print "sample_rate2: %i "%self.sample_rate
-        self.position = pinger_position.actual_position
+       
+        self.Fs = self.sample_rate*1000  # sampling rate
+        self.Ts = 1.0/self.Fs # sampling interval
+
+        pos = rospy.ServiceProxy('hydrophones/actual_position', Actual_position)
+        pos = pos()
+        self.position = pos.actual_position
+
+        #print self.position
 
         hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
         data = hydro()
@@ -200,7 +207,6 @@ class simulator():
 
         self.data = [None]*self.data_points
 
-
         for i in range(0,4):  #for loop that creates and plots the four waves
         
             self.amplitude_jitter = random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
@@ -227,13 +233,13 @@ class simulator():
 
         rospy.init_node('signal_simulator_trigger')
 
-        self.position = [3000, 5000, -2000]  # in mm, default position 
-        self.trigger = 'False'
+        self.position = [0, 0, 0]  # in mm, default position 
+        '''self.trigger = 'False'
         self.hydro0 = [0,     0,     0]
         self.hydro1 = [-25.4, 0,     0]
         self.hydro2 = [25.4,  0,     0]
         self.hydro3 = [0,     -25.4, 0] 
-        self.tx_rate = 1.0
+        self.tx_rate = 1.0'''
 
         self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         self.frame = rospy.get_param('~frame', '/hydrophones')
@@ -255,9 +261,7 @@ class simulator():
         rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
         #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
-        self.sample_rate = 600
-        self.Fs = self.sample_rate*1000  # sampling rate
-        self.Ts = 1.0/self.Fs # sampling interval
+        self.sample_rate = 300
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
