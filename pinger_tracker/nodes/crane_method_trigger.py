@@ -112,12 +112,6 @@ class solver():
 
         z = -math.sqrt(abs(zsquared))
 
-        print "Given timestamps:\t"
-        print "del1 = %0.5f del2 = %0.5f del3 = %0.5f" % (data.actual_time_stamps[1:])
-        print "Re-calculated timestamps:\t"
-        print "del1 = %0.5f del2 = %0.5f del3 = %0.5f" % (check_d1-check_d0, check_d2-check_d0, check_d3-check_d0)
-        print "\n"
-
         return Crane_solutionResponse(x, y, z)        
 
     def __init__(self):

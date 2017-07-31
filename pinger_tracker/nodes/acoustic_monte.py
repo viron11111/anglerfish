@@ -19,7 +19,7 @@ import dynamic_reconfigure.client
 class monte(object):
 
     def position_service(self, data):
-        position = [3000.0, 3000.0, -1000.0]
+        position = [4000.0, 3000.0, -1000.0]
         return Actual_positionResponse(position)
 
     def crane(self, data):
@@ -42,6 +42,23 @@ class monte(object):
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
     def calculate_error(self):
+
+        ref = rospy.ServiceProxy('/hydrophones/crane_srv', Crane_solution)
+        ref = ref()
+
+        self.crane_x = ref.x
+        self.crane_y = ref.y
+        self.crane_z = ref.z
+
+        ref2 = rospy.ServiceProxy('/hydrophones/actual_position', Actual_position)
+        ref2 = ref2()
+
+        self.actual_x = ref2.actual_position[0]
+        self.actual_y = ref2.actual_position[1]
+        self.actual_z = ref2.actual_position[2]        
+
+
+
         os.system('clear')
         if self.crane_x != 0:
             crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
@@ -101,10 +118,10 @@ class monte(object):
         #client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)
         #client.update_configuration({"signal_gen_trigger":'True'})
         
-        self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
+        #self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
         
         #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
-        rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
+        #rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
 
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
         rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
@@ -129,9 +146,9 @@ class monte(object):
 
         while not rospy.is_shutdown():
 
-            '''self.calculate_error()
+            self.calculate_error()
 
-            rand_num = random.uniform(25,50)
+            '''rand_num = random.uniform(25,50)
 
             self.toggle.publish(Bool(
                     data=trigger))
