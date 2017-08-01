@@ -19,18 +19,16 @@ import dynamic_reconfigure.client
 class monte(object):
 
     def position_service(self, data):
-        position = [4000.0, 3000.0, -1000.0]
-        return Actual_positionResponse(position)
+        #position = [4000.0, 3000.0, -1000.0]
+        return Actual_positionResponse(self.position)
 
-    def crane(self, data):
-        self.crane_x = data.x_pos/1000.0
-        self.crane_y = data.y_pos/1000.0
-        self.crane_z = data.z_pos/1000.0
-
-    def change_position(self, position):
-        client.update_configuration({"pinger_x_pos":rand_num})
-        client.update_configuration({"pinger_y_pos":rand_num})
-        client.update_configuration({"pinger_z_pos":rand_num})
+    '''def change_position(self, x, y, z):
+        x = x*1.0
+        float(x)
+        print type(x)
+        self.client.update_configuration({"pinger_x_pos":x})
+        self.client.update_configuration({"pinger_y_pos":y})
+        self.client.update_configuration({"pinger_z_pos":z})'''
 
     def location_service(self, data):
 
@@ -41,7 +39,9 @@ class monte(object):
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
-    def calculate_error(self):
+    def calculate_error(self, x, y, z):
+
+        self.position = [x,y,z]
 
         ref = rospy.ServiceProxy('/hydrophones/crane_srv', Crane_solution)
         ref = ref()
@@ -55,11 +55,9 @@ class monte(object):
 
         self.actual_x = ref2.actual_position[0]
         self.actual_y = ref2.actual_position[1]
-        self.actual_z = ref2.actual_position[2]        
+        self.actual_z = ref2.actual_position[2]  
 
-
-
-        os.system('clear')
+        #os.system('clear')
         if self.crane_x != 0:
             crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
         else:
@@ -115,8 +113,8 @@ class monte(object):
 
     def __init__(self):
 
-        #client = dynamic_reconfigure.client.Client("signal_simulator", timeout=30)
-        #client.update_configuration({"signal_gen_trigger":'True'})
+        self.client = dynamic_reconfigure.client.Client("signal_simulator_trigger", timeout=10)
+        
         
         #self.toggle = rospy.Publisher('hydrophones/signal_trigger', Bool, queue_size = 1)
         
@@ -138,15 +136,22 @@ class monte(object):
         self.G  = '\033[32m' # green
         self.O  = '\033[43m' # orange
         self.B  = '\033[34m' # blue
-        self.P  = '\033[35m' # purple          
+        self.P  = '\033[35m' # purple      
+
+        self.position = [4000.0, 3000.0, -1000.0]
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         trigger = 0
 
-        while not rospy.is_shutdown():
+        #while not rospy.is_shutdown():
 
-            self.calculate_error()
+        for x in range(-10000,10000,1000):
+            for y in range(-10000,10000,1000):
+                #x = x*1000
+                #y = y*1000
+                z = -1000
+                self.calculate_error(x,y,z)
 
             '''rand_num = random.uniform(25,50)
 
@@ -155,7 +160,7 @@ class monte(object):
 
             trigger = not trigger'''
 
-            rate.sleep()        
+            #rate.sleep()        
 
 
 
