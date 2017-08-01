@@ -170,6 +170,11 @@ class simulator():
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
     def ping_service(self, pinger_position):
+
+        sr = rospy.ServiceProxy('hydrophones/sample_rate', Sample_rate)
+        sr = sr()
+        self.sample_rate = sr.sample_rate
+        #print self.sample_rate
        
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval

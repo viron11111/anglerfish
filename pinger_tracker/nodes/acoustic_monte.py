@@ -18,17 +18,11 @@ import dynamic_reconfigure.client
 
 class monte(object):
 
-    def position_service(self, data):
-        #position = [4000.0, 3000.0, -1000.0]
-        return Actual_positionResponse(self.position)
+    def sampling_rate(self,data):
+        return Sample_rateResponse(self.sample_rate)
 
-    '''def change_position(self, x, y, z):
-        x = x*1.0
-        float(x)
-        print type(x)
-        self.client.update_configuration({"pinger_x_pos":x})
-        self.client.update_configuration({"pinger_y_pos":y})
-        self.client.update_configuration({"pinger_z_pos":z})'''
+    def position_service(self, data):
+        return Actual_positionResponse(self.position)
 
     def location_service(self, data):
 
@@ -62,17 +56,18 @@ class monte(object):
             crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
         else:
             crane_heading = 0.0
-        print "calculated_heading: %f radians" % crane_heading
+        #print "calculated_heading: %f radians" % crane_heading
 
         if self.actual_x != 0:
             actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
         else:
             actual_heading = 0.0
-        print "actual_heading: %f radians" % actual_heading
+        #print "actual_heading: %f radians" % actual_heading
 
         heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
+
         heading_error_radian = abs(actual_heading - crane_heading)
-        print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+        #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
         actual_horizontal_distance = np.sqrt(self.actual_x**2+self.actual_y**2)
@@ -87,17 +82,17 @@ class monte(object):
         else:
             actual_declination = 0.0
 
-        print "calculated_declination: %f radians" % calculated_declination
-        print "actual_declination: %f radians" % actual_declination
+        #print "calculated_declination: %f radians" % calculated_declination
+        #print "actual_declination: %f radians" % actual_declination
 
         declination_error_percent = abs((actual_declination-calculated_declination)/(2*np.pi)*100)
         declination_error_radian = abs(actual_declination - calculated_declination)
-        print "{}\tdeclination_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (declination_error_radian, declination_error_percent)
+        #print "{}\tdeclination_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (declination_error_radian, declination_error_percent)
 
         crane_distance = np.sqrt(self.crane_x**2+self.crane_y**2+self.crane_z**2)
         actual_distance = np.sqrt(self.actual_x**2+self.actual_y**2+self.actual_z**2)
-        print "calculated_distance %f" % crane_distance
-        print "actual_distance %f" % actual_distance
+        #print "calculated_distance %f" % crane_distance
+        #print "actual_distance %f" % actual_distance
 
         distance_difference = actual_distance-crane_distance
         if actual_distance != 0.0:
@@ -105,9 +100,13 @@ class monte(object):
         else:
             distance_error = 0.0
 
-        print "{}\tdistance_error: %.4f meters {}%.4f%%{}".format(self.W,self.O,self.W) % (distance_difference, distance_error)
+        self.heading_error_sum = self.heading_error_sum + heading_error_radian
+        self.declination_error_sum = self.declination_error_sum + declination_error_radian
+        self.distance_error_sum = self.distance_error_sum + distance_error
 
-        print "***********************************"
+        #print "{}\tdistance_error: %.4f meters {}%.4f%%{}".format(self.W,self.O,self.W) % (distance_difference, distance_error)
+
+        #print "***********************************"
 
 
 
@@ -123,6 +122,7 @@ class monte(object):
 
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
         rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
+        rospy.Service('hydrophones/sample_rate', Sample_rate, self.sampling_rate)
 
         self.actual_x = 0
         self.actual_y = 0
@@ -139,28 +139,35 @@ class monte(object):
         self.P  = '\033[35m' # purple      
 
         self.position = [4000.0, 3000.0, -1000.0]
+        self.sample_rate = 300
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         trigger = 0
 
         #while not rospy.is_shutdown():
+        samples = 0
+        self.heading_error_sum = 0.0
+        self.declination_error_sum = 0.0
+        self.distance_error_sum = 0.0
 
-        for x in range(-10000,10000,1000):
-            for y in range(-10000,10000,1000):
-                #x = x*1000
-                #y = y*1000
-                z = -1000
-                self.calculate_error(x,y,z)
-
-            '''rand_num = random.uniform(25,50)
-
-            self.toggle.publish(Bool(
-                    data=trigger))
-
-            trigger = not trigger'''
-
-            #rate.sleep()        
+        for j in range(100, 1000, 50):
+            for x in range(-40000,40000,5000):
+                for y in range(-40000,40000,5000):
+                    self.sample_rate = j                
+                    #x = x*1000
+                    #y = y*1000
+                    z = -1000
+                    self.calculate_error(x,y,z)
+                    samples += 1
+            heading_error = self.heading_error_sum/samples
+            declination_error = self.declination_error_sum/samples
+            distance_error = self.distance_error_sum/samples
+            print "%i000 sampling rate, heading_error: %.2f rad, declination_error: %.2f rad, distance_error: %0.2f%% with %i samples" %(j,heading_error, declination_error, distance_error, samples)
+            samples = 0
+            self.heading_error_sum = 0.0
+            self.declination_error_sum = 0.0
+            self.distance_error_sum = 0.0
 
 
 
