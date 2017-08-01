@@ -13,6 +13,10 @@ from pinger_tracker.srv import *
 
 import dynamic_reconfigure.client
 
+import csv
+from time import localtime,strftime
+import datetime
+
 #def callback(config):
     #rospy.loginfo("Config changed")
 
@@ -26,10 +30,12 @@ class monte(object):
 
     def location_service(self, data):
 
-        hydro0_xyz = [0,     0,     0]
-        hydro1_xyz = [-25.4, 0,     0]
-        hydro2_xyz = [25.4,  0,     0]
-        hydro3_xyz = [0,     -25.4, 0]
+        #can change x1, x2, x3, y2, y3
+ 
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [25.4,   0,     0]
+        hydro2_xyz = [-25.4,  0,     0]
+        hydro3_xyz = [0,      -25.4, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -145,13 +151,20 @@ class monte(object):
 
         trigger = 0
 
-        #while not rospy.is_shutdown():
+        date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
+        file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
+
+        z = -1000
+
+        self.file = csv.writer(open(file_name,'w'))
+        self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
+
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        for j in range(100, 1000, 50):
+        for j in range(100, 2050, 50):
             for x in range(-40000,40000,5000):
                 for y in range(-40000,40000,5000):
                     self.sample_rate = j                
@@ -164,10 +177,13 @@ class monte(object):
             declination_error = self.declination_error_sum/samples
             distance_error = self.distance_error_sum/samples
             print "%i000 sampling rate, heading_error: %.2f rad, declination_error: %.2f rad, distance_error: %0.2f%% with %i samples" %(j,heading_error, declination_error, distance_error, samples)
+            self.file.writerow(["%i000" % j, "%.2f" % heading_error, "%.2f" % declination_error, "%.2f" % distance_error])            
             samples = 0
             self.heading_error_sum = 0.0
             self.declination_error_sum = 0.0
             self.distance_error_sum = 0.0
+
+        os.system("rosnode kill acoustic_monte")            
 
 
 
