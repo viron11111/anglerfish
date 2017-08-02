@@ -267,6 +267,7 @@ class simulator():
         #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
         self.sample_rate = 300
+        self.signal_length = 0.0016
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 

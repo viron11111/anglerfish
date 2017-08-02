@@ -34,9 +34,9 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-25.4,   0,     0]
-        hydro2_xyz = [25.4,  0,     0]
-        hydro3_xyz = [0,      -25.4, 0]
+        hydro1_xyz = [50.8,   0,     0]
+        hydro2_xyz = [25.4,  50.8,     0]
+        hydro3_xyz = [0, -50.8, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -231,7 +231,7 @@ class monte(object):
         zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
-        CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
+        #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
         CS = plt.contourf(xi, yi, zi, levels, #100,
                           vmax=1.04, vmin=0)
                           #vmax=abs(zi).max(), vmin=-abs(zi).max())
@@ -244,7 +244,9 @@ class monte(object):
         ref = ref()
 
         plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
-            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko')
+            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'wo')
+        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
+            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko', markersize = 3)
 
         plt.xlim(-20, 20)
         plt.ylim(-20, 20)
@@ -257,7 +259,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Tshape_hi_res_%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Diamond_sigsim_update_%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         plt.show()
 
