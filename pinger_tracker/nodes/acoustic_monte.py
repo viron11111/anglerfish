@@ -63,20 +63,25 @@ class monte(object):
             crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
         else:
             crane_heading = 0.0
-        #print "calculated_heading: %f radians" % crane_heading
+        print "calculated_heading: %f radians" % crane_heading
 
         if self.actual_x != 0:
             actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
         else:
             actual_heading = 0.0
-        #print "actual_heading: %f radians" % actual_heading
+        print "actual_heading: %f radians" % actual_heading
 
-        heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
-        heading_error_radian = abs(actual_heading - crane_heading)
+
+        if abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
+            heading_error_radian = abs(actual_heading-(crane_heading + 2*np.pi))
+            heading_error_percent = abs((actual_heading-(crane_heading + 2*np.pi))/(2*np.pi)*100)
+        else:
+            heading_error_radian = abs(actual_heading - crane_heading)
+            heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
         self.head_error = heading_error_radian
-        #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+        print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
         actual_horizontal_distance = np.sqrt(self.actual_x**2+self.actual_y**2)
@@ -94,8 +99,17 @@ class monte(object):
         #print "calculated_declination: %f radians" % calculated_declination
         #print "actual_declination: %f radians" % actual_declination
 
-        declination_error_percent = abs((actual_declination-calculated_declination)/(2*np.pi)*100)
-        declination_error_radian = abs(actual_declination - calculated_declination)
+
+        if abs(actual_declination-(calculated_declination + 2*np.pi)) < abs(actual_declination - calculated_declination):
+            declination_error_radian = abs(actual_declination-(calculated_declination + 2*np.pi))
+            declination_error_percent = abs((actual_declination-(calculated_declination + 2*np.pi))/(2*np.pi)*100)
+        else:
+            declination_error_radian = abs(actual_declination - calculated_declination)
+            declination_error_percent = abs((actual_declination - calculated_declination)/(2*np.pi)*100)
+
+
+        #declination_error_percent = abs((actual_declination-calculated_declination)/(2*np.pi)*100)
+        #declination_error_radian = abs(actual_declination - calculated_declination)
         #print "{}\tdeclination_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (declination_error_radian, declination_error_percent)
 
         crane_distance = np.sqrt(self.crane_x**2+self.crane_y**2+self.crane_z**2)
@@ -109,9 +123,9 @@ class monte(object):
         else:
             distance_error = 0.0
 
-        self.heading_error_sum = self.heading_error_sum + heading_error_radian
-        self.declination_error_sum = self.declination_error_sum + declination_error_radian
-        self.distance_error_sum = self.distance_error_sum + distance_error
+        #self.heading_error_sum = self.heading_error_sum + heading_error_radian
+        #self.declination_error_sum = self.declination_error_sum + declination_error_radian
+        #self.distance_error_sum = self.distance_error_sum + distance_error
 
         #print "{}\tdistance_error: %.4f meters {}%.4f%%{}".format(self.W,self.O,self.W) % (distance_difference, distance_error)
 
@@ -167,24 +181,33 @@ class monte(object):
         #self.file = csv.writer(open(file_name,'w'))
         #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
+        x = 0
+        y = 1000
+        z = -2000
+        self.calculate_error(x,y,z)
+
+        x = 0
+        y = -1000
+        z = -2000
+        self.calculate_error(x,y,z)
+
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 5000
+        '''resolution = 500
         for x in range(-20000,20000+resolution+1,resolution):
             for y in range(-20000,20000+resolution+1,resolution):
-                self.sample_rate = 950                
+                self.sample_rate = 300                
 
                 z = -2000
                 self.calculate_error(x,y,z)
+                print x
 
                 x_list = x_list + [x]
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
-
-
 
         # define grid.
         xi = np.linspace(-20, 20, 40)
@@ -201,7 +224,7 @@ class monte(object):
         CS = plt.contourf(xi, yi, zi, 15,
                           vmax=abs(zi).max(), vmin=-abs(zi).max())
         cb = plt.colorbar()
-        cb.set_label(label='Radians',size=18)
+        cb.set_label(label='Heading Error (Radians)')#,size=18)
         # plot data points.
         #plt.scatter(x, y, marker='o', s=5, zorder=10)
         ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
@@ -213,10 +236,17 @@ class monte(object):
         plt.xlim(-20, 20)
         plt.ylim(-20, 20)
         z = abs(z/1000)
-        plt.ylabel('Meters',size=18)
-        plt.xlabel('Meters',size=18)
-        plt.title('%i k/S/s sample rate (%d points) at depth %i meter(s)' % (self.sample_rate,npts,z),size=20, weight='bold')
-        plt.show()
+        plt.ylabel('Meters')#,size=18)
+        plt.xlabel('Meters')#,size=18)
+        figure_title = 'Pinger Location VS Heading Accuracy'
+        figure_sub_title = '%i k/S/s sample rate (%d points) at depth %i meter(s)' % (self.sample_rate,npts,z)
+        
+
+        plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
+
+        plt.savefig('Tshape%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
+                     orientation = 'landscape', bbox_inches='tight')
+        plt.show()'''
 
         #while not rospy.is_shutdown():
 

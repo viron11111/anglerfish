@@ -30,6 +30,8 @@ class solver():
     def calc_vals (self, data):
         x,y,z = self.crane_solver(data)
 
+        print "calculated x: %0.3f y: %0.3f" % (x,y)
+
         self.crane_pub.publish(Crane_pos(
             header=Header(stamp=rospy.Time.now(),
                           frame_id='Crane_pos_calc'),
@@ -39,6 +41,8 @@ class solver():
 
     def actu_vals (self, data):
         x,y,z = self.crane_solver(data)
+
+        print "actual x: %0.3f y: %0.3f" % (x,y)
 
         self.crane_pub.publish(Crane_pos(
             header=Header(stamp=rospy.Time.now(),
@@ -117,6 +121,8 @@ class solver():
         Px = x
         Py = y
 
+
+
         return (x, y, z)
 
         check_d0 = math.sqrt(Px*Px+Py*Py+Pz*Pz) 
@@ -140,6 +146,11 @@ class solver():
 
         self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_solution, self.crane_solutions)
         self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+
+        self.hydro0 = [0,0,0]
+        self.hydro1 = [0,0,0]
+        self.hydro2 = [0,0,0]
+        self.hydro3 = [0,0,0]         
 
         rate = rospy.Rate(1)
 
