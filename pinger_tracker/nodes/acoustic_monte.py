@@ -59,21 +59,28 @@ class monte(object):
         self.actual_z = ref2.actual_position[2]  
 
         #os.system('clear')
-        if self.crane_x != 0:
+        crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
+
+        '''if self.crane_x != 0:
             crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
         else:
-            crane_heading = 0.0
-        print "calculated_heading: %f radians" % crane_heading
+            crane_heading = 0.0'''
+        #print "calculated_heading: %f radians" % crane_heading
+
+        actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
+        '''print actual_heading
 
         if self.actual_x != 0:
             actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
         else:
-            actual_heading = 0.0
-        print "actual_heading: %f radians" % actual_heading
+            actual_heading = 0.0'''
+        #print "actual_heading: %f radians" % actual_heading
 
 
-
-        if abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
+        if self.crane_x == 0 and self.crane_y == 0:
+            heading_error_radian = np.pi
+            heading_error_percent = 50.0
+        elif abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
             heading_error_radian = abs(actual_heading-(crane_heading + 2*np.pi))
             heading_error_percent = abs((actual_heading-(crane_heading + 2*np.pi))/(2*np.pi)*100)
         else:
@@ -81,7 +88,7 @@ class monte(object):
             heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
         self.head_error = heading_error_radian
-        print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+        #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
         actual_horizontal_distance = np.sqrt(self.actual_x**2+self.actual_y**2)
@@ -181,12 +188,12 @@ class monte(object):
         #self.file = csv.writer(open(file_name,'w'))
         #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
-        x = 0
-        y = 1000
+        x = -19000
+        y = -1000
         z = -2000
         self.calculate_error(x,y,z)
 
-        x = 0
+        x = 19000
         y = -1000
         z = -2000
         self.calculate_error(x,y,z)
@@ -196,13 +203,15 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        '''resolution = 500
-        for x in range(-20000,20000+resolution+1,resolution):
-            for y in range(-20000,20000+resolution+1,resolution):
-                self.sample_rate = 300                
+        resolution = 2000
+
+        for x in range(-20000,20001,resolution):
+            for y in range(-20000,20001,resolution):
+                self.sample_rate = 1000                
 
                 z = -2000
                 self.calculate_error(x,y,z)
+
                 print x
 
                 x_list = x_list + [x]
@@ -214,15 +223,19 @@ class monte(object):
         yi = np.linspace(-20, 20, 40)
         npts = len(x_list)
 
+
         x_list = [x / 1000 for x in x_list]
         y_list = [y / 1000 for y in y_list]
 
         # grid the data.
         zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
+        levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
-        CS = plt.contourf(xi, yi, zi, 15,
-                          vmax=abs(zi).max(), vmin=-abs(zi).max())
+        CS = plt.contourf(xi, yi, zi, levels, #100,
+                          vmax=1.04, vmin=0)
+                          #vmax=abs(zi).max(), vmin=-abs(zi).max())
+
         cb = plt.colorbar()
         cb.set_label(label='Heading Error (Radians)')#,size=18)
         # plot data points.
@@ -244,9 +257,9 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Tshape%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Tshape_hi_res_%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
-        plt.show()'''
+        plt.show()
 
         #while not rospy.is_shutdown():
 

@@ -28,6 +28,7 @@ class solver():
         self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]    
 
     def calc_vals (self, data):
+        #print data
         x,y,z = self.crane_solver(data)
 
         print "calculated x: %0.3f y: %0.3f" % (x,y)
@@ -42,7 +43,7 @@ class solver():
     def actu_vals (self, data):
         x,y,z = self.crane_solver(data)
 
-        print "actual x: %0.3f y: %0.3f" % (x,y)
+        #print "actual x: %0.3f y: %0.3f" % (x,y)
 
         self.crane_pub.publish(Crane_pos(
             header=Header(stamp=rospy.Time.now(),
@@ -104,8 +105,17 @@ class solver():
 
         D2 = holder - holder2 
 
+        print A1
+        print B2
+        print A2
+        print B1
+
+
         x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
         y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
+
+        #print x
+        #print y
 
         myx = x 
         myy = y        
@@ -140,7 +150,7 @@ class solver():
 
     def __init__(self):
         rospy.init_node('crane_method')
-        rospy.Subscriber('/hydrophones/actualtimestamps', Actual_time_stamps, self.actu_vals)
+        #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actu_vals)
         rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
