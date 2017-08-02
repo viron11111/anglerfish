@@ -3,6 +3,7 @@ import rospy
 import rosparam
 import random
 import numpy as np
+from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
 import math
 import os
@@ -33,8 +34,8 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [25.4,   0,     0]
-        hydro2_xyz = [-25.4,  0,     0]
+        hydro1_xyz = [-25.4,   0,     0]
+        hydro2_xyz = [25.4,  0,     0]
         hydro3_xyz = [0,      -25.4, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
@@ -73,6 +74,8 @@ class monte(object):
         heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
         heading_error_radian = abs(actual_heading - crane_heading)
+
+        self.head_error = heading_error_radian
         #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
@@ -147,24 +150,82 @@ class monte(object):
         self.position = [4000.0, 3000.0, -1000.0]
         self.sample_rate = 300
 
+        self.head_error = 0
+        x_list = []
+        y_list = []
+        z_list = []
+
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
         trigger = 0
 
-        date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
-        file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
+        #date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
+        #file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
 
         z = -1000
 
-        self.file = csv.writer(open(file_name,'w'))
-        self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
+        #self.file = csv.writer(open(file_name,'w'))
+        #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        for j in range(100, 2050, 50):
+        resolution = 5000
+        for x in range(-20000,20000+resolution+1,resolution):
+            for y in range(-20000,20000+resolution+1,resolution):
+                self.sample_rate = 950                
+
+                z = -2000
+                self.calculate_error(x,y,z)
+
+                x_list = x_list + [x]
+                y_list = y_list + [y]
+                z_list = z_list + [self.head_error]
+
+
+
+        # define grid.
+        xi = np.linspace(-20, 20, 40)
+        yi = np.linspace(-20, 20, 40)
+        npts = len(x_list)
+
+        x_list = [x / 1000 for x in x_list]
+        y_list = [y / 1000 for y in y_list]
+
+        # grid the data.
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
+        # contour the gridded data, plotting dots at the nonuniform data points.
+        CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
+        CS = plt.contourf(xi, yi, zi, 15,
+                          vmax=abs(zi).max(), vmin=-abs(zi).max())
+        cb = plt.colorbar()
+        cb.set_label(label='Radians',size=18)
+        # plot data points.
+        #plt.scatter(x, y, marker='o', s=5, zorder=10)
+        ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
+        ref = ref()
+
+        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
+            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko')
+
+        plt.xlim(-20, 20)
+        plt.ylim(-20, 20)
+        z = abs(z/1000)
+        plt.ylabel('Meters',size=18)
+        plt.xlabel('Meters',size=18)
+        plt.title('%i k/S/s sample rate (%d points) at depth %i meter(s)' % (self.sample_rate,npts,z),size=20, weight='bold')
+        plt.show()
+
+        #while not rospy.is_shutdown():
+
+            #rate.sleep()
+
+
+
+
+        '''for j in range(100, 2050, 50):
             for x in range(-40000,40000,5000):
                 for y in range(-40000,40000,5000):
                     self.sample_rate = j                
@@ -181,7 +242,7 @@ class monte(object):
             samples = 0
             self.heading_error_sum = 0.0
             self.declination_error_sum = 0.0
-            self.distance_error_sum = 0.0
+            self.distance_error_sum = 0.0'''            
 
         os.system("rosnode kill acoustic_monte")            
 
