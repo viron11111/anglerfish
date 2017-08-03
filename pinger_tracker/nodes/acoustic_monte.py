@@ -34,9 +34,9 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [50.8,   0,     0]
-        hydro2_xyz = [25.4,  50.8,     0]
-        hydro3_xyz = [0, -50.8, 0]
+        hydro1_xyz = [25.4,   0,     0]
+        hydro2_xyz = [-25.4,  0,     0]
+        hydro3_xyz = [0, -25.4, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -103,6 +103,8 @@ class monte(object):
         else:
             actual_declination = 0.0
 
+        
+
         #print "calculated_declination: %f radians" % calculated_declination
         #print "actual_declination: %f radians" % actual_declination
 
@@ -114,7 +116,7 @@ class monte(object):
             declination_error_radian = abs(actual_declination - calculated_declination)
             declination_error_percent = abs((actual_declination - calculated_declination)/(2*np.pi)*100)
 
-
+        self.declination_error = declination_error_radian
         #declination_error_percent = abs((actual_declination-calculated_declination)/(2*np.pi)*100)
         #declination_error_radian = abs(actual_declination - calculated_declination)
         #print "{}\tdeclination_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (declination_error_radian, declination_error_percent)
@@ -138,7 +140,67 @@ class monte(object):
 
         #print "***********************************"
 
+    def plot_grid_graph(self,x_list,y_list,z,z_list,typemeasure):
+        # define grid.
 
+
+
+        xi = np.linspace(-20, 20, 40)
+        yi = np.linspace(-20, 20, 40)
+        npts = len(x_list)
+
+        x_list = [x / 1000 for x in x_list]
+        y_list = [y / 1000 for y in y_list]
+
+        # grid the data.
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
+        # contour the gridded data, plotting dots at the nonuniform data points.
+        if typemeasure == 'Heading':
+            levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
+        elif typemeasure == "Declination":
+            levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
+        #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
+
+        if typemeasure == 'Heading':
+            vmax = 1.04
+            vmin = 0
+        elif typemeasure == 'Declination':
+            vmax=abs(zi).max()
+            vmin=-abs(zi).max()
+
+        CS = plt.contourf(xi, yi, zi, levels, #100,
+                          vmax=vmax, vmin=vmin)
+                          #vmax=abs(zi).max(), vmin=-abs(zi).max())
+
+        cb = plt.colorbar()
+        cb.set_label(label='%s Error (Radians)' % typemeasure)#,size=18)
+        # plot data points.
+        #plt.scatter(x, y, marker='o', s=5, zorder=10)
+        ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
+        ref = ref()
+
+        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
+            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'wo')
+        plt.plot([ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
+            [ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko', markersize = 3)
+        plt.plot([ref.hydro0_xyz[0]/30], [ref.hydro0_xyz[1]/30], 'yo', markersize = 3)
+
+        plt.xlim(-20, 20)
+        plt.ylim(-20, 20)
+        z = abs(z/1000)
+        plt.ylabel('Meters')#,size=18)
+        plt.xlabel('Meters')#,size=18)
+        figure_title = 'Pinger Location VS %s Accuracy' % typemeasure
+        figure_sub_title = '%i k/S/s sample rate (%d points) at depth %i meter(s)' % (self.sample_rate,npts,z)
+        
+
+        plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
+
+        plt.savefig('Tshape_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+                     orientation = 'landscape', bbox_inches='tight')
+        #plt.show()
+        plt.clf()
+        plt.close()
 
     def __init__(self):
 
@@ -172,9 +234,11 @@ class monte(object):
         self.sample_rate = 300
 
         self.head_error = 0
+        self.declination_error = 0
         x_list = []
         y_list = []
         z_list = []
+        d_list = []
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
 
@@ -203,11 +267,11 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 2000
+        resolution = 4500       
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 1000                
+                self.sample_rate = 2000                
 
                 z = -2000
                 self.calculate_error(x,y,z)
@@ -217,51 +281,11 @@ class monte(object):
                 x_list = x_list + [x]
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
+                d_list = d_list + [self.declination_error]
 
-        # define grid.
-        xi = np.linspace(-20, 20, 40)
-        yi = np.linspace(-20, 20, 40)
-        npts = len(x_list)
+        self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')
 
-
-        x_list = [x / 1000 for x in x_list]
-        y_list = [y / 1000 for y in y_list]
-
-        # grid the data.
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
-        # contour the gridded data, plotting dots at the nonuniform data points.
-        levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
-        #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
-        CS = plt.contourf(xi, yi, zi, levels, #100,
-                          vmax=1.04, vmin=0)
-                          #vmax=abs(zi).max(), vmin=-abs(zi).max())
-
-        cb = plt.colorbar()
-        cb.set_label(label='Heading Error (Radians)')#,size=18)
-        # plot data points.
-        #plt.scatter(x, y, marker='o', s=5, zorder=10)
-        ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
-        ref = ref()
-
-        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
-            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'wo')
-        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
-            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko', markersize = 3)
-
-        plt.xlim(-20, 20)
-        plt.ylim(-20, 20)
-        z = abs(z/1000)
-        plt.ylabel('Meters')#,size=18)
-        plt.xlabel('Meters')#,size=18)
-        figure_title = 'Pinger Location VS Heading Accuracy'
-        figure_sub_title = '%i k/S/s sample rate (%d points) at depth %i meter(s)' % (self.sample_rate,npts,z)
-        
-
-        plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
-
-        plt.savefig('Diamond_sigsim_update_%i_d%i_s%i.png' % (self.sample_rate,z,npts), dpi=300,
-                     orientation = 'landscape', bbox_inches='tight')
-        plt.show()
 
         #while not rospy.is_shutdown():
 
