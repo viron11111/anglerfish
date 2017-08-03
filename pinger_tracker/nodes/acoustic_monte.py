@@ -196,7 +196,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Tshape_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Yshape_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         #plt.show()
         plt.clf()
@@ -252,26 +252,16 @@ class monte(object):
         #self.file = csv.writer(open(file_name,'w'))
         #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
-        x = -19000
-        y = -1000
-        z = -2000
-        self.calculate_error(x,y,z)
-
-        x = 19000
-        y = -1000
-        z = -2000
-        self.calculate_error(x,y,z)
-
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 4500       
+        resolution = 5000       
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 2000                
+                self.sample_rate = 300                
 
                 z = -2000
                 self.calculate_error(x,y,z)
@@ -313,7 +303,7 @@ class monte(object):
             self.declination_error_sum = 0.0
             self.distance_error_sum = 0.0'''            
 
-        os.system("rosnode kill acoustic_monte")            
+        #os.system("rosnode kill acoustic_monte")            
 
 
 

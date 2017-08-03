@@ -79,8 +79,10 @@ class solver():
         elif data.header.frame_id == "phase_shift":
             del1 = (data.calculated_time_stamps[1])*c #mm/uSec
             del2 = (data.calculated_time_stamps[2])*c #mm/uSec
-            del3 = (data.calculated_time_stamps[3])*c #mm/uSec            
-
+            del3 = (data.calculated_time_stamps[3])*c #mm/uSec  
+            print "\n"
+            print "calc1: %f calc2: %f, calc3: %f" % (data.calculated_time_stamps[1], data.calculated_time_stamps[2], data.calculated_time_stamps[3]) 
+            print "del1: %f del2: %f del3 %f" % (del1,del2,del3)
 
         left = x1/del1 if del1 != 0 else 0
         B1 = -y2/del2 if del2 != 0 else 0
@@ -105,14 +107,15 @@ class solver():
 
         D2 = holder - holder2 
 
-        print A1
-        print B2
-        print A2
-        print B1
-
 
         x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
         y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
+
+        print "A1: %f" % A1
+        print "D1: %f" % D1
+        print "A2: %f" % A2
+        print "B2: %f" % B2
+        print "D2: %f" % D2
 
         #print x
         #print y

@@ -67,37 +67,57 @@ class solver():
         x3 = self.hydro3[0]
         y3 = self.hydro3[1]
 
-
         calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
-        goonies = calc_service()
+        tstampts = calc_service()
 
-        del1 = (goonies.calculated_time_stamps[1])*c #mm/uSec
-        del2 = (goonies.calculated_time_stamps[2])*c #mm/uSec
-        del3 = (goonies.calculated_time_stamps[3])*c #mm/uSec            
+        calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
+        tstampts = calc_service()
+
+        del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
+        del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
+        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec        
+
+        '''del1 = (tstampts.calculated_time_stamps[1])*c #mm/uSec
+        del2 = (tstampts.calculated_time_stamps[2])*c #mm/uSec
+        del3 = (tstampts.calculated_time_stamps[3])*c #mm/uSec   '''
+
+        print "del1: %f del2: %f del3: %f" % (del1, del2, del3)        
 
 
         left = x1/del1 if del1 != 0 else 0
         B1 = -y2/del2 if del2 != 0 else 0
         right = x2/del2 if del2 != 0 else 0
 
+        print "left = %f B1 = %f right = %f" % (left, B1, right)
+
         A1 = left - right    # eqn (12)
+
+        print "A1: %f" % A1
         
         catch = (x1*x1-del1*del1)/(2.0*del1) if del1 != 0 else 0
         zero = (x2*x2 + y2*y2-del2*del2)/(2.0*del2) if del2 != 0 else 0
 
         D1 = zero - catch
+
+        print "D1: %f" % D1
         
         zz = (x1/del1) if del1 != 0 else 0
         z = (x3/del3) if del3 != 0 else 0
 
         A2 = zz - z   # eqn (14)
 
+        print "A2: %f" % A2
+
         B2 = -y3/del3 if del3 != 0 else 0
+
+        print "B2: %f" % B2
 
         holder = (x3*x3 + y3*y3-del3*del3)/(2.0*del3) if del3 != 0 else 0
         holder2 = (x1*x1-del1*del1)/(2*del1) if del1 != 0 else 0
 
         D2 = holder - holder2 
+
+        print "D2: %f" % D2
 
         x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
         y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
@@ -111,6 +131,8 @@ class solver():
         zsquared = -T2/T1 if T1 != 0 else 0
 
         z = -math.sqrt(abs(zsquared))
+
+        #print "x: %f, y: %f, z: %f" % (x,y,z)
 
         return Crane_solutionResponse(x, y, z)        
 
