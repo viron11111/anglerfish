@@ -97,12 +97,12 @@ class phaser(Multilaterator):
         self.actual_stamps = data.actual_time_stamps
 
     def calculate_time_stamps_phase(self,input):
-        ping = rospy.ServiceProxy('/hydrophones/ping', Ping_service)
+        ping = rospy.ServiceProxy('/hydrophones/ping', Ping_service_with_stamps)
         data = ping()
 
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
-        #self.ping_stamps = data.stamps
+        self.ping_stamps = data.stamps
 
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0  #25k is the longest signal expected
@@ -136,8 +136,8 @@ class phaser(Multilaterator):
         
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        #for i in range(4):
-        #    calculated[i] = calculated[i] + self.ping_stamps[i]
+        for i in range(4):
+            calculated[i] = calculated[i] + self.ping_stamps[i]
 
         print "{}calculated timestamps (uSec):".format(self.W)
 

@@ -169,13 +169,15 @@ class simulator():
         self.tstamps = [x * y for x, y in zip(self.tstamps,microseconds)]
         actual_time_stamps = list(self.tstamps)
 
+        #print actual_time_stamps
+
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
 
     def discrete_time_stamps(self,time):
 
         step = 1.0/(self.sample_rate)*1000
 
-        time_holder = time#+np.random.uniform(-step/2, step/2)
+        time_holder = time #np.random.uniform(-step/2, step/2)
 
         divider = abs(int(time_holder/(step)))
         min_time = abs(divider*step+2*step)
@@ -250,9 +252,11 @@ class simulator():
 
         #if wave != [] and None not in self.data:   
 
+        tstamps[1] = tstamps[1] + 1.0/(self.sample_rate)*1000
+
         self.data = list(map(int, self.data))
 
-        return Ping_serviceResponse(self.number_of_hydrophones,
+        return Ping_service_with_stampsResponse(self.number_of_hydrophones,
             self.data_points,
             self.sample_rate*1000,
             self.resolution,
@@ -288,7 +292,7 @@ class simulator():
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
 
-        rospy.Service('hydrophones/ping', Ping_service, self.ping_service)
+        rospy.Service('hydrophones/ping', Ping_service_with_stamps, self.ping_service)
         rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
         #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 

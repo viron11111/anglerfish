@@ -65,6 +65,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    Ping_service.srv
+   Ping_service_with_stamps.srv
    Transmitter_position_service.srv
    Hydrophone_locations_service.srv
    Crane_pos_service.srv

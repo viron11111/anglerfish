@@ -60,6 +60,7 @@ class bncrftsolver():
             tstamps = data.actual_time_stamps
 
         res_msg = sonar.get_pulse_location(np.array(tstamps))
+       
         
         return res_msg
 
@@ -76,6 +77,18 @@ class bncrftsolver():
         self.pub = rospy.Publisher('hydrophones/bancroft_pos', Bancroft_pos, queue_size = 1)
 
         rate = rospy.Rate(1)
+
+        hydrophone_locations = np.array([self.hydro0, self.hydro1, self.hydro2, self.hydro3])
+
+        c = 1.484  # millimeters/microsecond
+        #hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
+        sonar = Multilaterator(hydrophone_locations, c, 'bancroft', [])        
+
+        tstamps = [0.0, -13.333333015441895, 13.333333015441895, 13.333333015441895]
+
+        res_msg = sonar.get_pulse_location(np.array(tstamps))
+
+        print res_msg
 
         while not rospy.is_shutdown():
 

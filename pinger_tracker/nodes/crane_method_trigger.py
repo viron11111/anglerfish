@@ -70,17 +70,18 @@ class solver():
         calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
         tstampts = calc_service()
 
-        calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
+        '''calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
         tstampts = calc_service()
 
         del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
         del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
-        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec        
+        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec '''       
 
-        '''del1 = (tstampts.calculated_time_stamps[1])*c #mm/uSec
+        del1 = (tstampts.calculated_time_stamps[1])*c #mm/uSec
         del2 = (tstampts.calculated_time_stamps[2])*c #mm/uSec
-        del3 = (tstampts.calculated_time_stamps[3])*c #mm/uSec   '''
+        del3 = (tstampts.calculated_time_stamps[3])*c #mm/uSec   
 
+        print "\n"
         print "del1: %f del2: %f del3: %f" % (del1, del2, del3)        
 
 
@@ -132,7 +133,7 @@ class solver():
 
         z = -math.sqrt(abs(zsquared))
 
-        #print "x: %f, y: %f, z: %f" % (x,y,z)
+        print "x: %f, y: %f, z: %f" % (x,y,z)
 
         return Crane_solutionResponse(x, y, z)        
 

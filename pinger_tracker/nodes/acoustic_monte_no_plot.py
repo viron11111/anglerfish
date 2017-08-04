@@ -34,9 +34,9 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [50.4,   0,     0]
-        hydro2_xyz = [-35.4,  15,     0]
-        hydro3_xyz = [15, -45.4, 0]
+        hydro1_xyz = [25.4,   0,     0]
+        hydro2_xyz = [-25.4,  0,     0]
+        hydro3_xyz = [0, -25.4, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -200,7 +200,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Zexperiment_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Yshape_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         #plt.show()
         plt.clf()
@@ -234,7 +234,7 @@ class monte(object):
         self.B  = '\033[34m' # blue
         self.P  = '\033[35m' # purple      
 
-        self.position = [3000.0, 3000.0, -1000.0]
+        self.position = [20000.0, 20000.0, -2000.0]
         self.sample_rate = 300
 
         self.head_error = 0
@@ -261,11 +261,11 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 1000       
+        resolution = 2000       
 
-        for x in range(-20000,20001,resolution):
+        '''for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 600                
+                self.sample_rate = 300                
 
                 z = -2000
                 self.calculate_error(x,y,z)
@@ -278,7 +278,7 @@ class monte(object):
                 d_list = d_list + [self.declination_error]
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
-        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')'''
 
 
         #while not rospy.is_shutdown():
