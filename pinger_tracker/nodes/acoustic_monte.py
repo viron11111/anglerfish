@@ -34,9 +34,9 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [50.4,   0,     0]
-        hydro2_xyz = [-35.4,  15,     0]
-        hydro3_xyz = [15, -45.4, 0]
+        hydro1_xyz = [-25.4,   0,     0]
+        hydro2_xyz = [25.4,  0,     0]
+        hydro3_xyz = [0, -25.4, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -131,13 +131,17 @@ class monte(object):
 
         distance_difference = actual_distance-crane_distance
         if actual_distance != 0.0:
+            if crane_distance >= 30:
+                crane_distance = 0
             distance_error = (1.0 - (crane_distance/actual_distance))*100
+            if distance_error > 100 or distance_error < -100:
+                print "diserr: %f, crane_distance: %f, actual_distance: %f" % (distance_error, crane_distance, actual_distance)
         else:
             distance_error = 0.0
 
-        #self.heading_error_sum = self.heading_error_sum + heading_error_radian
-        #self.declination_error_sum = self.declination_error_sum + declination_error_radian
-        #self.distance_error_sum = self.distance_error_sum + distance_error
+        self.heading_error_sum = self.heading_error_sum + heading_error_radian
+        self.declination_error_sum = self.declination_error_sum + declination_error_radian
+        self.distance_error_sum = self.distance_error_sum + distance_error
 
         #print "{}\tdistance_error: %.4f meters {}%.4f%%{}".format(self.W,self.O,self.W) % (distance_difference, distance_error)
 
@@ -248,13 +252,13 @@ class monte(object):
 
         trigger = 0
 
-        #date_time = strftime("%d_%m_%y_%H_%M_%S", localtime())
-        #file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
+        date_time = strftime("%y_%m_%d_%H_%M_%S", localtime())
+        file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
 
-        z = -1000
+        z = -2000
 
-        #self.file = csv.writer(open(file_name,'w'))
-        #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
+        self.file = csv.writer(open(file_name,'w'))
+        self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
         samples = 0
         self.heading_error_sum = 0.0
@@ -263,7 +267,7 @@ class monte(object):
 
         resolution = 1000       
 
-        for x in range(-20000,20001,resolution):
+        '''for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
                 self.sample_rate = 600                
 
@@ -278,7 +282,7 @@ class monte(object):
                 d_list = d_list + [self.declination_error]
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
-        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')'''
 
 
         #while not rospy.is_shutdown():
@@ -288,13 +292,17 @@ class monte(object):
 
 
 
-        '''for j in range(100, 2050, 50):
-            for x in range(-40000,40000,5000):
-                for y in range(-40000,40000,5000):
+        for j in range(100, 10000, 10):
+            #print j
+            for x in range(-20000,20001,resolution):
+                #print x
+                for y in range(-20000,20001,resolution):
+                    #print y
                     self.sample_rate = j                
                     #x = x*1000
                     #y = y*1000
-                    z = -1000
+                    z = -2000
+
                     self.calculate_error(x,y,z)
                     samples += 1
             heading_error = self.heading_error_sum/samples
@@ -305,9 +313,9 @@ class monte(object):
             samples = 0
             self.heading_error_sum = 0.0
             self.declination_error_sum = 0.0
-            self.distance_error_sum = 0.0'''            
+            self.distance_error_sum = 0.0           
 
-        #os.system("rosnode kill acoustic_monte")            
+        os.system("rosnode kill acoustic_monte")            
 
 
 
