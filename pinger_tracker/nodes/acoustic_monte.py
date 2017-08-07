@@ -131,7 +131,7 @@ class monte(object):
 
         distance_difference = actual_distance-crane_distance
         if actual_distance != 0.0:
-            if crane_distance >= 30:
+            if crane_distance >= 30000:
                 crane_distance = 0
             distance_error = (1.0 - (crane_distance/actual_distance))*100
             if distance_error > 100 or distance_error < -100:
@@ -265,7 +265,7 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 1000       
+        resolution = 5000       
 
         '''for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):

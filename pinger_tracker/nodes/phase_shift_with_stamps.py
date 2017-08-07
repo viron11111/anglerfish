@@ -131,31 +131,31 @@ class phaser(Multilaterator):
         self.end = time.clock()
 
         microseconds = [1e6,1e6,1e6,1e6]
-        print "*********************************"
-        print ("{}time to perform timestamps (Sec): {}%0.3f{}\n".format(self.W,self.O,self.W) % (self.end-self.start))
+        #print "*********************************"
+        #print ("{}time to perform timestamps (Sec): {}%0.3f{}\n".format(self.W,self.O,self.W) % (self.end-self.start))
         
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
         for i in range(4):
             calculated[i] = calculated[i] + self.ping_stamps[i]
 
-        print "{}calculated timestamps (uSec):".format(self.W)
+        #print "{}calculated timestamps (uSec):".format(self.W)
 
-        print "\t" + str(calculated)
+        #print "\t" + str(calculated)
 
         astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
         astamps = astamps()
         self.actual_stamps = astamps.actual_time_stamps
 
-        print "actual timestamps (uSec):"
-        print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
-        print "difference (uSec):"
+        #print "actual timestamps (uSec):"
+        #print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
+        #print "difference (uSec):"
         
         difference = [x - y for x, y in zip(list(self.actual_stamps), calculated)]
         
-        print "\t" + str(difference)
+        #print "\t" + str(difference)
         errors = sum(map(abs, difference))
-        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
+        #print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
 
         return Calculated_time_stamps_serviceResponse(calculated)
 

@@ -1,0 +1,5 @@
+Sample Rate,Heading Error (rad),Declination Error (rad),Distance Error percent,Depth: -2000 mm
+100000,0.90,0.49,99.93
+110000,0.73,0.44,99.92
+120000,0.97,0.40,99.89
+130000,1.05,0.37,99.89
