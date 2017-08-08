@@ -33,10 +33,19 @@ class monte(object):
 
         #can change x1, x2, x3, y2, y3
  
+        #equilateral triangle layout
+        '''hyp = 50.8
+        var_a = hyp/2
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-25.4,   0,     0]
-        hydro2_xyz = [25.4,  0,     0]
-        hydro3_xyz = [0, -25.4, 0]
+        hydro1_xyz = [2*var_a,   0,     0]
+        hydro2_xyz = [-var_a,  -var_a*np.sqrt(3),     0]
+        hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
+
+        #MIL T-shape layout
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [25.4,   0,     0]
+        hydro2_xyz = [-25.4,  0,     0]
+        hydro3_xyz = [0,  -25.4, 0]       
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -161,13 +170,13 @@ class monte(object):
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         if typemeasure == 'Heading':
             levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
         elif typemeasure == "Declination":
             levels = 15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
-        #CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
+        CS = plt.contour(xi, yi, zi, 15, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
             vmax = 1.04
@@ -204,9 +213,9 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Zexperiment_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Tshape_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
-        #plt.show()
+        plt.show()
         plt.clf()
         plt.close()
 
@@ -265,11 +274,11 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 5000       
+        resolution = 2000       
 
-        '''for x in range(-20000,20001,resolution):
+        for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 600                
+                self.sample_rate = 1000                
 
                 z = -2000
                 self.calculate_error(x,y,z)
@@ -282,7 +291,7 @@ class monte(object):
                 d_list = d_list + [self.declination_error]
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
-        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')'''
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')
 
 
         #while not rospy.is_shutdown():
@@ -292,7 +301,7 @@ class monte(object):
 
 
 
-        for j in range(100, 10000, 10):
+        '''for j in range(100, 10000, 10):
             #print j
             for x in range(-20000,20001,resolution):
                 #print x
@@ -313,7 +322,7 @@ class monte(object):
             samples = 0
             self.heading_error_sum = 0.0
             self.declination_error_sum = 0.0
-            self.distance_error_sum = 0.0           
+            self.distance_error_sum = 0.0 '''          
 
         os.system("rosnode kill acoustic_monte")            
 
