@@ -135,7 +135,7 @@ class solver():
 
         #print "x: %f, y: %f, z: %f" % (x,y,z)
 
-        return Crane_solutionResponse(x, y, z)        
+        return Crane_pos_serviceResponse(x, y, z)        
 
     def __init__(self):
         rospy.init_node('crane_method_service')
@@ -143,8 +143,8 @@ class solver():
         #rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
-        self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_solution, self.crane_solver)
-        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+        self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_pos_service, self.crane_solver)
+        #self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
 
         rate = rospy.Rate(1)
 
