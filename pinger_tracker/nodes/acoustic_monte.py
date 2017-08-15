@@ -45,7 +45,7 @@ class monte(object):
         '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [25.4,   0,     0]
         hydro2_xyz = [-25.4,  0,     0]
-        hydro3_xyz = [0,  -25.4, 0]       '''
+        hydro3_xyz = [0,  -25.4, 0]  '''     
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -214,7 +214,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Equilater_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Equilateral_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         plt.show()
         plt.clf()
@@ -249,7 +249,7 @@ class monte(object):
         self.P  = '\033[35m' # purple      
 
         self.position = [3000.0, 3000.0, -1000.0]
-        self.sample_rate = 300
+        self.sample_rate = 1000
 
         self.head_error = 0
         self.declination_error = 0
@@ -279,7 +279,7 @@ class monte(object):
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 300                
+                self.sample_rate = 1000               
 
                 z = -2000
                 self.calculate_error(x,y,z)

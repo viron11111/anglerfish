@@ -183,7 +183,7 @@ class simulator():
         self.Ts = 1.0/self.Fs # sampling interval
 
         plt.ion()
-        fig, ax = plt.subplots(3, 1)  #3x1 plot 
+        fig, ax = plt.subplots(1, 1)  #3x1 plot 
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
         catch = 0  
@@ -243,8 +243,9 @@ class simulator():
             phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
             self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
             
-            ax[0].cla()
-            ax[1].cla()
+            #ax[0].cla()
+            #ax[1].cla()
+            ax.cla()
 
             #self.noise is used to add noise to the silent portion of the signal            
             self.noise = np.random.normal(-((2**self.resolution)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length/self.Ts)))
@@ -263,6 +264,8 @@ class simulator():
             print self.hydro2
             print self.hydro3
 
+            legends = [None]*4
+
             for i in range(0,4):  #for loop that creates and plots the four waves
             
                 self.amplitude_jitter = random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
@@ -275,11 +278,15 @@ class simulator():
                     n = len(wave)
                     t = np.arange(0,n*self.Ts,self.Ts)
                     if len(t) == len(wave):
-                        ax[0].plot(t,wave)
-                        ax[1].plot(t,wave)
+                        '''ax[0].plot(t,wave)
+                        ax[1].plot(t,wave)'''
+                        legends[i], = ax.plot(t,wave,linewidth=2.0, label='Hydrophone %i' % i)
+                        
+                        
                 else:
                     wave = []
 
+            #rospy.logwarn(legends)
 
             if wave != [] and None not in self.data:
                 wave = wave[n/2:n]  #cut out first half of signal (silence) to enhance FFT
@@ -295,23 +302,32 @@ class simulator():
                 Y = Y*(1/self.amplitude) #Compensate for FFT, multiply by inverse of amplitude
                
                 #scale decided by ADC bits (resolution)           
-                ax[0].set_title("Four Hydrophone Channels Full Scale")
+                '''ax[0].set_title("Four Hydrophone Channels Full Scale")
                 ax[0].set_ylim(0,2**self.resolution)
-                ax[0].set_xlabel('Time')
-                ax[0].set_ylabel('Amplitude')
+                #ax[0].set_xlabel('Time')
+                ax[0].set_ylabel('Amplitude')'''
 
                 #zoomed in version of signal
-                ax[1].set_title("Autosize on Hydrophone channels")
-                ax[1].set_xlabel('Time')
-                ax[1].set_ylabel('Amplitude')
+                '''ax[1].set_title("Simulated Received Signals")
+                ax[1].set_xlabel('Time (seconds)')
+                ax[1].set_ylabel('Amplitude')        '''
 
-                ax[2].cla()
-                ax[2].set_title("FFT On Channel One")
+                ax.legend(loc="upper left", fontsize=16)
+                ax.set_title("Simulated Received Signals", weight = 'bold', size = 28, x = 0.5, y = 1.02, horizontalalignment='center')
+                ax.set_xlabel('Time (seconds)', size = 16, weight = 'bold', x = 0.5, y = 0)
+                ax.set_ylabel('Amplitude', size = 16, weight = 'bold', x = 0, y = 0.5)
+                ax.tick_params(axis='both', which='major', labelsize=14, pad=20)
+                ax.tick_params(axis='both', which='minor', labelsize=12, pad=20)
+                ax.xaxis.labelpad = 20
+                ax.yaxis.labelpad = 20
+
+                '''ax[2].cla()
+                #ax[2].set_title("FFT On Channel One")
                 ax[2].plot(frq,abs(Y),'r') # plotting the FFT spectrum
                 ax[2].set_xlim(5000,50000)
                 ax[2].set_ylim(0,1)
                 ax[2].set_xlabel('Freq (Hz)')
-                ax[2].set_ylabel('|Y(freq)|')
+                ax[2].set_ylabel('|Y(freq)|')'''
 
                 plt.pause(0.05)                
 
