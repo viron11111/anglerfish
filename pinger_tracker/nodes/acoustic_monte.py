@@ -214,7 +214,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Equilateral_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Equilateral_with_1_5mm_error_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         plt.show()
         plt.clf()
@@ -275,7 +275,7 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 100       
+        resolution = 500       
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):

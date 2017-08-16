@@ -61,11 +61,12 @@ class solver():
         self.hydro3 = holder.hydro3_xyz        
 
         #position of hydrophones
-        x1 = self.hydro1[0]  #in mm
-        x2 = self.hydro2[0]
-        y2 = self.hydro2[1]
-        x3 = self.hydro3[0]
-        y3 = self.hydro3[1]
+        x1 = self.hydro1[0] + 0.75 #np.random.uniform(-1, 1)  #in mm
+        x2 = self.hydro2[0] - 0.75 #np.random.uniform(-1, 1)
+        y2 = self.hydro2[1] + 0.75 #np.random.uniform(-1, 1)
+        x3 = self.hydro3[0] - 0.75 #np.random.uniform(-1, 1)
+        y3 = self.hydro3[1] + 0.75 #np.random.uniform(-1, 1)
+        #print "x1: %f" % x1
 
         calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
         tstampts = calc_service()
