@@ -61,7 +61,7 @@ class plotter():
         self.trigger = False
 
         plt.ion()
-        fig, ax = plt.subplots(3, 1)
+        fig, ax = plt.subplots(1, 1)
 
         while not rospy.is_shutdown():
             #print self.trigger
@@ -73,6 +73,7 @@ class plotter():
                 Fs = 300000
                 Ts = 1.0/Fs        
 
+                legends = [None]*4
                 wave = [None]*len(self.a)
 
                 if len(self.a) != 0:
@@ -102,7 +103,7 @@ class plotter():
                         print "ping detected"
                         left_line = np.arange(0,300,300)'''
 
-                ax[0].cla()
+                '''ax[0].cla()
                 ax[0].set_title("Four Hydrophone Channels Full Scale")
                 ax[0].plot(t,self.a)
                 ax[0].plot(t,self.b)
@@ -110,25 +111,39 @@ class plotter():
                 ax[0].plot(t,self.d)
                 ax[0].set_ylim(0,65536)
                 ax[0].set_xlabel('Time')
-                ax[0].set_ylabel('Amplitude')
+                ax[0].set_ylabel('Amplitude')'''
 
-                ax[1].cla()
-                ax[1].set_title("Four Hydrophone Channels Autosized")
-                ax[1].plot(t,self.a)
-                ax[1].plot(t,self.b)
-                ax[1].plot(t,self.c)
-                ax[1].plot(t,self.d)
-                ax[1].set_xlabel('Time')
-                ax[1].set_ylabel('Amplitude')
+                ax.cla()
+                #ax.set_title("Four Hydrophone Channels Autosized")
+                ax.plot(t,self.a, linewidth=2.0, label='Hydrophone 0')
+                ax.plot(t,self.b, linewidth=2.0, label='Hydrophone 1')
+                ax.plot(t,self.c, linewidth=2.0, label='Hydrophone 2')
+                ax.plot(t,self.d, linewidth=2.0, label='Hydrophone 3')
+                #ax[1].set_xlabel('Time')
+                #ax[1].set_ylabel('Amplitude')
+
+
+                ax.legend(loc="upper left", fontsize=25)
+                ax.set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                ax.set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                ax.set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
+                ax.set_xlim(0,0.0008)
+                ax.tick_params(axis='both', which='major', labelsize=25, pad=20)
+                ax.tick_params(axis='both', which='minor', labelsize=25, pad=20)
+                ax.xaxis.labelpad = 20
+                ax.yaxis.labelpad = 20
+
+
+
 
                 #ax[2].axvline(30000)
-                ax[2].cla()
+                '''ax[2].cla()
                 ax[2].set_title("FFT On Channel One")
                 ax[2].plot(frq,abs(Y),'r') # plotting the spectrum
                 ax[2].set_xlim(5000,50000)
                 #ax[2].set_ylim(0,300)
                 ax[2].set_xlabel('Freq (Hz)')
-                ax[2].set_ylabel('|Y(freq)|')
+                ax[2].set_ylabel('|Y(freq)|')'''
 
                 #plot_url = py.plot_mpl(fig, filename='mpl-basic-fft')
                 plt.pause(0.05)

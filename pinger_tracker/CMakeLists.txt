@@ -52,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Ping.msg
+   Ping_updated.msg
    Transmitter_position.msg
    Hydrophone_locations.msg
    Ls_pos.msg

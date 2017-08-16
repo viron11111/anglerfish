@@ -312,12 +312,12 @@ class simulator():
                 ax[1].set_xlabel('Time (seconds)')
                 ax[1].set_ylabel('Amplitude')        '''
 
-                ax.legend(loc="upper left", fontsize=16)
-                ax.set_title("Simulated Received Signals", weight = 'bold', size = 28, x = 0.5, y = 1.02, horizontalalignment='center')
-                ax.set_xlabel('Time (seconds)', size = 16, weight = 'bold', x = 0.5, y = 0)
-                ax.set_ylabel('Amplitude', size = 16, weight = 'bold', x = 0, y = 0.5)
-                ax.tick_params(axis='both', which='major', labelsize=14, pad=20)
-                ax.tick_params(axis='both', which='minor', labelsize=12, pad=20)
+                ax.legend(loc="upper left", fontsize=25)
+                ax.set_title("Simulated Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                ax.set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                ax.set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
+                ax.tick_params(axis='both', which='major', labelsize=25, pad=20)
+                ax.tick_params(axis='both', which='minor', labelsize=25, pad=20)
                 ax.xaxis.labelpad = 20
                 ax.yaxis.labelpad = 20
 
