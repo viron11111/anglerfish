@@ -34,18 +34,24 @@ class monte(object):
         #can change x1, x2, x3, y2, y3
  
         #equilateral triangle layout
-        hyp = 50.8
+        '''hyp = 50.8
         var_a = hyp/2
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [2*var_a,   0,     0]
         hydro2_xyz = [-var_a,  -var_a*np.sqrt(3),     0]
-        hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]
+        hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
 
         #MIL T-shape layout
         '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [25.4,   0,     0]
         hydro2_xyz = [-25.4,  0,     0]
         hydro3_xyz = [0,  -25.4, 0]  '''     
+
+        # Diamond layout
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [50.8,   0,     0]
+        hydro2_xyz = [25.4,  25.4,     0]
+        hydro3_xyz = [25.4,  -25.4, 0]  
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -275,7 +281,7 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 500       
+        resolution = 2000       
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
