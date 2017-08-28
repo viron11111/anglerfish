@@ -42,16 +42,16 @@ class monte(object):
         hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
 
         #MIL T-shape layout
-        '''hydro0_xyz = [0,      0,     0]
+        hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [25.4,   0,     0]
         hydro2_xyz = [-25.4,  0,     0]
-        hydro3_xyz = [0,  -25.4, 0]  '''     
+        hydro3_xyz = [0,  -25.4, 0]      
 
         # Diamond layout
-        hydro0_xyz = [0,      0,     0]
+        '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [50.8,   0,     0]
         hydro2_xyz = [25.4,  25.4,     0]
-        hydro3_xyz = [25.4,  -25.4, 0]  
+        hydro3_xyz = [25.4,  -25.4, 0]  '''
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -104,6 +104,8 @@ class monte(object):
             heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
         self.head_error = heading_error_radian
+        if self.head_error >= 6.0:
+            print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
         #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
@@ -180,13 +182,14 @@ class monte(object):
         zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         if typemeasure == 'Heading':
-            levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,6.30]
+            levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0, 6.0, 6.28]
         elif typemeasure == "Declination":
             levels = 15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
-            vmax = 1.04
+            #vmax = 1.04
+            vmax = 6.28
             vmin = 0
         elif typemeasure == 'Declination':
             vmax=abs(zi).max()
@@ -220,7 +223,7 @@ class monte(object):
 
         plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
 
-        plt.savefig('Equilateral_with_1_5mm_error_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
+        plt.savefig('Tshape_high_error_resolution_contours_%s_%i_d%i_s%i.png' % (typemeasure,self.sample_rate,z,npts), dpi=300,
                      orientation = 'landscape', bbox_inches='tight')
         plt.show()
         plt.clf()
@@ -281,11 +284,11 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 2000       
+        resolution = 1000       
 
         for x in range(-20000,20001,resolution):
             for y in range(-20000,20001,resolution):
-                self.sample_rate = 1000               
+                self.sample_rate = 500               
 
                 z = -2000
                 self.calculate_error(x,y,z)
