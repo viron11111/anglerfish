@@ -7,11 +7,13 @@
 #include <sys/time.h>
 
 #include "ros/ros.h"
+
 #include "std_msgs/String.h"
+#include <ros/package.h>
 
 #include <sstream>
 
-#include <advantechDriver/Ping_received.h>
+#include "advantech_pci1714/Ping_received.h>"
 
 using namespace Automation::BDaq;
 using namespace std;
@@ -125,21 +127,21 @@ public:
 	}	
 };
 
-bool ready_or_not(advantechDriver::Ping_received::Request &req;
-	advantechDriver::Ping_received::Response &res)
-{
-	res.rdy = true;
-	return true;
-}
+//bool ready_or_not(advantechDriver::Ping_received::Request &req;
+//	advantechDriver::Ping_received::Response &res)
+//{
+//	res.rdy = true;
+//	return true;
+//}
 
 int main(int argc, char **argv)
 {
 
-	ros::init(argc, argv, "advantechDriver");
+	ros::init(argc, argv, "advantechDriver_node");
 
 	ros::NodeHandle n;
 
-	ros::Service_Server service = n.advertiseService("ping_received", ready_or_not);
+	//ros::Service_Server service = n.advertiseService("ping_received", ready_or_not);
 	//advantechDriver::Ping_received srv
 
 

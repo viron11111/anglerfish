@@ -1,23 +1,21 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(pinger_tracker)
+project(advantech_pci1714)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  roscpp
-  std_msgs
   message_generation
-  dynamic_reconfigure
-  visualization_msgs
+  roscpp
+  message_runtime
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
-#find_package(libiodaq REQUIRED COMPONENTS system)
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -50,31 +48,17 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   Ping.msg
-   Ping_updated.msg
-   Transmitter_position.msg
-   Hydrophone_locations.msg
-   Ls_pos.msg
-   Bancroft_pos.msg
-   Crane_pos.msg
-   Calculated_time_stamps.msg
-   Actual_time_stamps.msg
- )
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
- add_service_files(
+add_service_files(
    FILES
-   Ping_service.srv
-   Ping_service_with_stamps.srv
-   Transmitter_position_service.srv
-   Hydrophone_locations_service.srv
-   Crane_pos_service.srv
-   Calculated_time_stamps_service.srv
-   Actual_time_stamps_service.srv
-   Actual_position.srv
-   Sample_rate.srv
+   Ping_received.srv
+   Ping.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -85,10 +69,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,9 +89,10 @@ generate_messages(
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
- generate_dynamic_reconfigure_options(
- 	cfg/signal_generation.cfg
- )
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -119,10 +104,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES pinger_tracker
-#  CATKIN_DEPENDS rospy
-#  DEPENDS system_lib
+  #CATKIN_DEPENDS
 )
 
 ###########
@@ -131,17 +113,14 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+#include_directories(include)
 include_directories(
-# include
   ${catkin_INCLUDE_DIRS}
-  #${compatibility.h_INCLUDE_DIRS}
-  #${bdaqctrl.h_INCLUDE_DIRS}
-  #${lbiodaq_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pinger_tracker.cpp
+#   src/${PROJECT_NAME}/advantech_pci1714.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -152,7 +131,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/pinger_tracker_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/advantech_pci1714_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,8 +141,7 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# make sure configure headers are built before any node using them
-#add_dependencies(pinger_tracker ${PROJECT_NAME}_gencfg)
+
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -210,7 +188,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pinger_tracker.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_advantech_pci1714.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -218,8 +196,8 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-#add_executable(advantechDriver src/advantechDriver.cpp libraries/bdaqctrl.h libraries/compatibility.h)
-#add_library(libbiodaq STATIC IMPORTED)
-#set_property(TARGET libbiodaq PROPERTY IMPORTED_LOCATION /usr/lib/libbiodaq.so)
-#target_link_libraries(advantechDriver ${catkin_LIBRARIES} libbiodaq)
-#add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+add_executable(advantechDriver src/advantechDriver.cpp) # libraries/bdaqctrl.h libraries/compatibility.h)
+add_library(libbiodaq STATIC IMPORTED)
+set_property(TARGET libbiodaq PROPERTY IMPORTED_LOCATION /usr/lib/libbiodaq.so)
+target_link_libraries(advantechDriver ${catkin_LIBRARIES} libbiodaq)
+#add_dependencies(advantechDriver advantech_pci1714_cpp)
