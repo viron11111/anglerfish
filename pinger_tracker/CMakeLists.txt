@@ -9,6 +9,7 @@ project(pinger_tracker)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roscpp
   std_msgs
   message_generation
   dynamic_reconfigure
@@ -16,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+#find_package(libiodaq REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -133,6 +134,9 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${compatibility.h_INCLUDE_DIRS}
+  ${bdaqctrl.h_INCLUDE_DIRS}
+  ${lbiodaq_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -213,3 +217,9 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(advantechDriver src/advantechDriver.cpp libraries/bdaqctrl.h libraries/compatibility.h)
+add_library(libbiodaq STATIC IMPORTED)
+set_property(TARGET libbiodaq PROPERTY IMPORTED_LOCATION /usr/lib/libbiodaq.so)
+target_link_libraries(advantechDriver ${catkin_LIBRARIES} libbiodaq)
+#add_dependencies(talker beginner_tutorials_generate_messages_cpp)
