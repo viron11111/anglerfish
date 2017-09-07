@@ -13,7 +13,7 @@
 
 #include <sstream>
 
-#include "advantech_pci1714/Ping_received.h>"
+#include "advantech_pci1714/Ping_received.h"
 
 using namespace Automation::BDaq;
 using namespace std;
