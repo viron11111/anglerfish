@@ -12,8 +12,10 @@
 #include <ros/package.h>
 
 #include <sstream>
+#include <typeinfo>
 
 #include "advantech_pci1714/Ping_received.h"
+#include "advantech_pci1714/Ping.h"
 
 using namespace Automation::BDaq;
 using namespace std;
@@ -25,9 +27,9 @@ int32        startChannel = 1;
 const int32  channelCount = 2;
 const int32  intervalCount = 64; 
 
-double        samplingFrequency = 5000000;  //in Hz
+double        samplingFrequency = 1000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
-const int32  sampleCount =  40000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
+const int32  sampleCount =  1000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
 #define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount
@@ -35,9 +37,9 @@ double       Data[USER_BUFFER_SIZE];
 
 // Set trigger parameters
 TriggerAction triggerAction = DelayToStop;
-ActiveSignal  triggerEdge = FallingEdge;
+ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = -0.1;
+double        triggerLevel = 0.02;
 int           triggerDelayCount = sampleCount/1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
@@ -127,23 +129,25 @@ public:
 	}	
 };
 
-//bool ready_or_not(advantechDriver::Ping_received::Request &req;
-//	advantechDriver::Ping_received::Response &res)
-//{
-//	res.rdy = true;
-//	return true;
-//}
+bool ping_publish(advantech_pci1714::Ping::Request &req,
+				  advantech_pci1714::Ping::Response &res)
+{
+	res.channels = channelCount;
+	res.samples = USER_BUFFER_SIZE;
+	res.sample_rate = samplingFrequency;
+	res.adc_bit = 12;
+	std::vector<double> v(Data, Data + sizeof Data / sizeof Data[0]);
+	res.data = v;
+	return true;
+}
 
 int main(int argc, char **argv)
 {
 
 	ros::init(argc, argv, "advantechDriver_node");
-
 	ros::NodeHandle n;
 
-	//ros::Service_Server service = n.advertiseService("ping_received", ready_or_not);
-	//advantechDriver::Ping_received srv
-
+	ros::ServiceServer service = n.advertiseService("/hydrophones/ping", ping_publish);
 
 	ErrorCode ret = Success;
 
@@ -205,23 +209,25 @@ int main(int argc, char **argv)
 		ret = bfdAiCtrl->RunOnce();
 		CHK_RESULT(ret);
 
-		// Step 8: Do anything you are interesting while the device is acquiring data.
-		do
-		{
-		
-			cout << "do loop loop loop" << endl;	
-			SLEEP(1);
-		}while(!kbhit());
+		ros::Rate loop_rate(10);
+	    while (ros::ok())
+	    {
+
+		    ros::spinOnce();
+
+		    loop_rate.sleep();
+
+		}
 
 		// step 9: stop the operation if it is running.
 		ret = bfdAiCtrl->Stop(); 
 		CHK_RESULT(ret);
 		cout << "STOPPED PROGRAM" << endl;
-	}
-	while(false);
 
-	// Step 10: close device, release any allocated resource before quit.
-	bfdAiCtrl->Dispose();
+		// Step 10: close device, release any allocated resource before quit.
+		bfdAiCtrl->Dispose();
+	}
+	while(false);		
 
 	// If something wrong in this execution, print the error code on screen for tracking.
 	if(BioFailed(ret))
@@ -229,6 +235,11 @@ int main(int argc, char **argv)
 		printf("Some error occurred. And the last error code is Ox%X.\n", ret);
 		waitAnyKey();// wait any key to quit!
 	}
+
+  return 0;
+}
+
+
 
 /*
 
@@ -262,12 +273,6 @@ int main(int argc, char **argv)
     ++count;
   }
   */
-
-
-  return 0;
-}
-
-
 
 /*
 using namespace std::chrono;
