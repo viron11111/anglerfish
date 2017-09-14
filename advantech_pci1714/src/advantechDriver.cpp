@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sys/time.h>
 
+#include <unistd.h>
+
 #include "ros/ros.h"
 
 #include "std_msgs/String.h"
@@ -39,8 +41,8 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.02;
-int           triggerDelayCount = sampleCount/1.25;
+double        triggerLevel = 0.01;
+int           triggerDelayCount = sampleCount/2.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
 
@@ -101,6 +103,7 @@ public:
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
+	  usleep(12000);  //Add delay to ensure we don't pick up same signal twice
 	  set_trigger();
 	  return;
 	}
@@ -173,6 +176,9 @@ int main(int argc, char **argv)
 
 		ret = scanChannel->setIntervalCount(intervalCount);
 		CHK_RESULT(ret);
+
+		//double setBurnoutRetValue(10);
+		//bfdAiCtrl -> setValueRange(5);
 		
 		// Step 4.1: Set sampling frequency
 		ConvertClock * convertClock = bfdAiCtrl->getConvertClock();		

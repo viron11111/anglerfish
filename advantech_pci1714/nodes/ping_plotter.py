@@ -16,6 +16,8 @@ from std_msgs.msg import UInt16
 from advantech_pci1714.srv import *
 
 import time
+import scipy.fftpack
+import operator
 
 class plotter():
 
@@ -33,7 +35,7 @@ class plotter():
         self.trigger = False
 
         plt.ion()
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots(2, 1)
 
         while not rospy.is_shutdown():
             ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
@@ -61,63 +63,88 @@ class plotter():
             self.a = data[starting_sample + 0:int(length):2]
             #print self.a
             self.b = data[starting_sample + 1:int(length):2]
- 
 
+            signal = 'bad' 
+
+            N = len(self.a)   #number of samples in channel1
             Fs = sample_rate
-            Ts = 1.0/Fs        
+            Ts = 1.0/Fs    
+            #x = np.linspace(0.0, N*Ts, N)    
+            yf = scipy.fftpack.fft(self.a)
+            index, value = max(enumerate(abs(yf)), key=operator.itemgetter(1))
+            print "**************************"
+            print "**************************"
+            print "**************************"
+            print "**************************"
+            print "length of whole list: ", len(yf)
+            print "index in whole list: ", index
+            print "max value in whole list: ", abs(value)
+            
+            front_half = self.a[:len(self.a)/2]
+            yf_1 = scipy.fftpack.fft(front_half)
+            indexf, value = max(enumerate(abs(yf_1)), key=operator.itemgetter(1))
+            print "**************************"
+            print "length of front_half: ", len(yf_1)
+            print "index in front_half: ", index
+            print "max value in front_half: ", abs(value)            
+            
+            back_half  = self.a[len(self.a)/2:]
+            yf_2 = scipy.fftpack.fft(back_half )
+            indexb, value = max(enumerate(abs(yf_2)), key=operator.itemgetter(1))
+            print "**************************"
+            print "length of back_half: ", len(yf_2)
+            print "index in back_half: ", index
+            print "max value in back_half: ", abs(value)
 
-            legends = [None]*channels
-            wave = [None]*len(self.a)
+            if indexf != indexb and index >= 25:
+                signal = 'good'
+                print "GOOD SIGNAL GOOD SIGNAL GOOD SIGNAL!!!!!!!"
 
-            if len(self.a) != 0:
-                for i in range(len(self.a)):
-                    wave[i] = self.a[i]        
+            if signal == "good":
+                xf = np.linspace(0.0, 1.0/(2.0*Ts), N/2)
 
-            y = self.a
 
-            n = len(y)
+                legends = [None]*channels  #set up ledgends for x channels
+                wave = [None]*len(self.a)  #make empty list
 
-            #print len(self.a)
-            #print n
+                n = len(self.a)   #length of samples (samplecount/4 from AdvanTech driver c++)
 
-            t = np.arange(0,n*Ts,Ts)
+                t = np.arange(0,n*Ts,Ts)  #resolution of sampling, ie 1 MS/s = 1*10^-6
 
-            if len(t) > n:
-                #print t
-                t = t[:-1]
+                if len(t) > n:
+                    #print t
+                    t = t[:-1]  #make sure len(t) is = to len(n), shave the last number off            
 
-            y = wave[n/2:n]
-            n = len(y)
+                ax[0].cla()
+                ax[0].plot(t,self.a, linewidth=2.0, label='Hydrophone 0')
+                ax[0].plot(t,self.b, linewidth=2.0, label='Hydrophone 1')
 
-            k = np.arange(n)
-            T = float(n)/float(Fs)            
-            frq = k/T # two sides frequency range
+                ax[0].legend(loc="upper left", fontsize=25)
+                ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
+                ax[0].set_ylim(-0.5,0.5)
+                ax[0].set_xlim(0,x_axis_length)
+                ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
+                ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
+                ax[0].xaxis.labelpad = 20
+                ax[0].yaxis.labelpad = 20
 
-            frq = frq[range(n/2)] # one side frequency range
-            Y = np.fft.fft(y)/n # fft computing and normalization
-            Y = Y[range(n/2)]/2**16
 
-            #print t
+                ax[1].cla()
+                #ax[2].set_title("FFT On Channel One")
+                #ax[1].plot(frq,abs(Y),'r') # plotting the FFT spectrum
+                ax[1].plot(xf,2.0/N * np.abs(yf[:N//2]),'r') # plotting the FFT spectrum
+                #print abs(Y)
+                ax[1].set_xlim(5000,50000)
+                #plt.xticks(np.arange(5000, 50000+1, 500.0))
+                #ax[1].set_ylim(0,n/10)
+                ax[1].set_xlabel('Freq (Hz)')
+                ax[1].set_ylabel('|Y(freq)|')
 
-            ax.cla()
-            #ax.set_title("Four Hydrophone Channels Autosized")
-            ax.plot(t,self.a, linewidth=2.0, label='Hydrophone 0')
-            ax.plot(t,self.b, linewidth=2.0, label='Hydrophone 1')
-            #ax.plot(t,self.c, linewidth=2.0, label='Hydrophone 2')
-            #ax.plot(t,self.d, linewidth=2.0, label='Hydrophone 3')
-            #ax[1].set_xlabel('Time')
 
-            ax.legend(loc="upper left", fontsize=25)
-            ax.set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
-            ax.set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
-            ax.set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
-            ax.set_xlim(0,x_axis_length)
-            ax.tick_params(axis='both', which='major', labelsize=25, pad=20)
-            ax.tick_params(axis='both', which='minor', labelsize=25, pad=20)
-            ax.xaxis.labelpad = 20
-            ax.yaxis.labelpad = 20
 
-            plt.pause(0.05)
+                plt.pause(0.05)
 
             rate.sleep()
 
