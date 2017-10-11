@@ -7,6 +7,7 @@ from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
 import math
 import os
+import cmath
 
 from std_msgs.msg import Header, Bool
 from pinger_tracker.msg import *
@@ -42,16 +43,16 @@ class monte(object):
         hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
 
         #MIL T-shape layout
-        '''hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [25.4,   0,     0]
-        hydro2_xyz = [-25.4,  0,     0]
-        hydro3_xyz = [0,  -25.4, 0]      '''
-
-        # Diamond layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [101.6,   0,     0]
+        hydro2_xyz = [-101.6,  0,     0]
+        hydro3_xyz = [0,  -101.6, 0]      
+
+        # Equilateral layout (actual)
+        '''hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [101.6,   0,     0]
         hydro2_xyz = [-50.8,  88.0,     0]
-        hydro3_xyz = [-50.8,  -88.0, 0]  
+        hydro3_xyz = [-50.8,  -88.0, 0]  '''
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -206,11 +207,11 @@ class monte(object):
         ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
         ref = ref()
 
-        plt.plot([ref.hydro0_xyz[0]/30, ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
-            [ref.hydro0_xyz[1]/30, ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'wo')
-        plt.plot([ref.hydro1_xyz[0]/30, ref.hydro2_xyz[0]/30, ref.hydro3_xyz[0]/30], 
-            [ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko', markersize = 3)
-        plt.plot([ref.hydro0_xyz[0]/30], [ref.hydro0_xyz[1]/30], 'yo', markersize = 3)
+        plt.plot([ref.hydro0_xyz[0]/100, ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
+            [ref.hydro0_xyz[1]/100, ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'wo')
+        plt.plot([ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
+            [ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
+        plt.plot([ref.hydro0_xyz[0]/100], [ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
 
         plt.xlim(self.xdistancemin/1000, self.xdistancemax/1000)
         plt.ylim(self.ydistancemin/1000, self.ydistancemax/1000)
@@ -271,27 +272,51 @@ class monte(object):
 
         trigger = 0
 
-        date_time = strftime("%y_%m_%d_%H_%M_%S", localtime())
-        file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
+        #date_time = strftime("%y_%m_%d_%H_%M_%S", localtime())
+        #file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
 
         z = -2000
 
-        self.file = csv.writer(open(file_name,'w'))
-        self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
+        #self.file = csv.writer(open(file_name,'w'))
+        #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
 
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 100  
+        resolution = 10000  
 
         self.xdistancemin = -10000 #in mm
         self.xdistancemax = 10000 #in mm
         self.ydistancemin =  -10000 #in mm
         self.ydistancemax = 10000 #inmm    
 
-        for x in range(self.xdistancemin,self.xdistancemax+1,resolution):
+        self.max_range = 10000
+        distance_resolution = 1000
+        degree_angle_resolution = 20
+        rad_resolution = math.radians(degree_angle_resolution)
+
+        number_of_steps_per_rev = 360.0/degree_angle_resolution
+        number_of_rings = self.max_range/distance_resolution
+        total_samples = number_of_steps_per_rev * number_of_rings
+
+
+        print rad_resolution
+        print number_of_rings
+        print "total samples %i" % total_samples
+
+        for dis in range(distance_resolution,self.max_range, distance_resolution):
+            for deg in range(0,int(number_of_steps_per_rev)):
+                phi = deg*rad_resolution
+                x = dis * np.cos(phi)
+                y = dis * np.sin(phi) 
+                print "x: %f y: %f" % (x,y)
+
+                #print dis
+
+
+        '''for x in range(self.xdistancemin,self.xdistancemax+1,resolution):
             for y in range(self.ydistancemin,self.ydistancemax+1,resolution):
                 self.sample_rate = 1000               
 
@@ -306,7 +331,7 @@ class monte(object):
                 d_list = d_list + [self.declination_error]
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
-        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')'''
 
 
         #while not rospy.is_shutdown():
