@@ -151,6 +151,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	ros::ServiceServer service = n.advertiseService("/hydrophones/ping", ping_publish);
+	ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ping_received");
+	//ros::ServiceServer service = n.advertiseService("/hydrophones/ping_received", ping_received);
 
 	ErrorCode ret = Success;
 

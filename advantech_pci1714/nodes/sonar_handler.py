@@ -76,8 +76,6 @@ class plotter():
             adc_bit = ping.adc_bit
             data = ping.data
 
-            #print("data received from service")
-
             rate.sleep()
 
 def main():
