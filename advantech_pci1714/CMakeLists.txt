@@ -12,6 +12,7 @@ add_service_files(DIRECTORY srv
    FILES
    Ping_received.srv
    Ping.srv
+   Hydrophone_locations_service.srv
  )
 
  generate_messages(

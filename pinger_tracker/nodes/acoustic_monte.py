@@ -171,8 +171,8 @@ class monte(object):
 
 
 
-        xi = np.linspace(self.xdistancemin/1000, self.xdistancemax/1000, (self.xdistancemax/1000)*2)
-        yi = np.linspace(self.ydistancemin/1000, self.ydistancemax/1000, (self.ydistancemax/1000)*2)
+        xi = np.linspace(-self.max_range/1000, self.max_range/1000, (self.max_range/1000)*2)
+        yi = np.linspace(-self.max_range/1000, self.max_range/1000, (self.max_range/1000)*2)
         npts = len(x_list)
 
         x_list = [x / 1000 for x in x_list]
@@ -213,8 +213,8 @@ class monte(object):
             [ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
         plt.plot([ref.hydro0_xyz[0]/100], [ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
 
-        plt.xlim(self.xdistancemin/1000, self.xdistancemax/1000)
-        plt.ylim(self.ydistancemin/1000, self.ydistancemax/1000)
+        plt.xlim(-self.max_range/1000, self.max_range/1000)
+        plt.ylim(-self.max_range/1000, self.max_range/1000)
         z = abs(z/1000)
         plt.ylabel('Meters')#,size=18)
         plt.xlabel('Meters')#,size=18)
@@ -292,26 +292,42 @@ class monte(object):
         self.ydistancemin =  -10000 #in mm
         self.ydistancemax = 10000 #inmm    
 
+        #**********for polar coors****************
+
+        self.sample_rate = 1000
+        z = -1000 #depth of pinger
+
         self.max_range = 10000
         distance_resolution = 1000
-        degree_angle_resolution = 20
+        degree_angle_resolution = 5
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
         number_of_rings = self.max_range/distance_resolution
         total_samples = number_of_steps_per_rev * number_of_rings
 
-
         print rad_resolution
         print number_of_rings
         print "total samples %i" % total_samples
 
-        for dis in range(distance_resolution,self.max_range, distance_resolution):
+        for dis in range(distance_resolution,self.max_range+distance_resolution, distance_resolution):
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
                 y = dis * np.sin(phi) 
                 print "x: %f y: %f" % (x,y)
+
+                self.calculate_error(x,y,z)
+
+                x_list = x_list + [x]
+                y_list = y_list + [y]
+                z_list = z_list + [self.head_error]
+                d_list = d_list + [self.declination_error]
+
+        self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
+        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')       
+
+        #****************polar coors**********************         
 
                 #print dis
 
