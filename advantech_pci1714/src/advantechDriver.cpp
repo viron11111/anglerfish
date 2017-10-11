@@ -26,7 +26,7 @@ using namespace std;
 // Configure the following three parameters before running the sample
 #define      deviceDescription  L"PCI-1714UL,BID#15"
 int32        startChannel = 1;
-const int32  channelCount = 2;
+const int32  channelCount = 4;
 const int32  intervalCount = 64; 
 
 double        samplingFrequency = 1000000;  //in Hz
@@ -41,7 +41,7 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.01;
+double        triggerLevel = 0.1;
 int           triggerDelayCount = sampleCount/2.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();

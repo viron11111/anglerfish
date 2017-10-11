@@ -42,16 +42,16 @@ class monte(object):
         hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
 
         #MIL T-shape layout
-        hydro0_xyz = [0,      0,     0]
+        '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [25.4,   0,     0]
         hydro2_xyz = [-25.4,  0,     0]
-        hydro3_xyz = [0,  -25.4, 0]      
+        hydro3_xyz = [0,  -25.4, 0]      '''
 
         # Diamond layout
-        '''hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [50.8,   0,     0]
-        hydro2_xyz = [25.4,  25.4,     0]
-        hydro3_xyz = [25.4,  -25.4, 0]  '''
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [101.6,   0,     0]
+        hydro2_xyz = [-50.8,  88.0,     0]
+        hydro3_xyz = [-50.8,  -88.0, 0]  
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -170,8 +170,8 @@ class monte(object):
 
 
 
-        xi = np.linspace(-20, 20, 40)
-        yi = np.linspace(-20, 20, 40)
+        xi = np.linspace(self.xdistancemin/1000, self.xdistancemax/1000, (self.xdistancemax/1000)*2)
+        yi = np.linspace(self.ydistancemin/1000, self.ydistancemax/1000, (self.ydistancemax/1000)*2)
         npts = len(x_list)
 
         x_list = [x / 1000 for x in x_list]
@@ -179,7 +179,7 @@ class monte(object):
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
         # contour the gridded data, plotting dots at the nonuniform data points.
         if typemeasure == 'Heading':
             levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0, 6.0, 6.28]
@@ -212,8 +212,8 @@ class monte(object):
             [ref.hydro1_xyz[1]/30, ref.hydro2_xyz[1]/30, ref.hydro3_xyz[1]/30], 'ko', markersize = 3)
         plt.plot([ref.hydro0_xyz[0]/30], [ref.hydro0_xyz[1]/30], 'yo', markersize = 3)
 
-        plt.xlim(-20, 20)
-        plt.ylim(-20, 20)
+        plt.xlim(self.xdistancemin/1000, self.xdistancemax/1000)
+        plt.ylim(self.ydistancemin/1000, self.ydistancemax/1000)
         z = abs(z/1000)
         plt.ylabel('Meters')#,size=18)
         plt.xlabel('Meters')#,size=18)
@@ -284,13 +284,18 @@ class monte(object):
         self.declination_error_sum = 0.0
         self.distance_error_sum = 0.0
 
-        resolution = 1000       
+        resolution = 100  
 
-        for x in range(-20000,20001,resolution):
-            for y in range(-20000,20001,resolution):
-                self.sample_rate = 500               
+        self.xdistancemin = -10000 #in mm
+        self.xdistancemax = 10000 #in mm
+        self.ydistancemin =  -10000 #in mm
+        self.ydistancemax = 10000 #inmm    
 
-                z = -2000
+        for x in range(self.xdistancemin,self.xdistancemax+1,resolution):
+            for y in range(self.ydistancemin,self.ydistancemax+1,resolution):
+                self.sample_rate = 1000               
+
+                z = -1000 #depth of pinger
                 self.calculate_error(x,y,z)
 
                 print x
