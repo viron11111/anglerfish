@@ -66,6 +66,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
+   #ping_services used when testing simulator
    Ping_service.srv
    Ping_service_with_stamps.srv
    Transmitter_position_service.srv

@@ -9,6 +9,8 @@ import time
 from std_msgs.msg import Header
 from pinger_tracker.msg import *
 from pinger_tracker.srv import *
+from advantech_pci1714.srv import *
+
 from multilateration import Multilaterator
 import multilateration as mlat
 from time_signal_1d import TimeSignal1D
@@ -72,12 +74,49 @@ class phaser(Multilaterator):
 
         return reference
 
+    def a_add_zeros_5v(self, a_sig):
+        channel_length = len(a_sig)
+
+        if channel_length % 2 != 0:
+            zeros = [0]*(channel_length+1)
+        else:
+            zeros = [0]*(channel_length)      
+
+        signed = [-(2**self.bit)/2]*channel_length
+
+        a_sig = list(a_sig)
+        #a_sig = [x + y for x, y in zip(a_sig, signed)]     
+
+        signal = zeros + a_sig
+
+        return signal        
+
+
+    def ref_add_zeros_5v(self, ref_sig):
+        channel_length = len(ref_sig)
+
+        if channel_length % 2 != 0:
+            zeros = [0]*(channel_length+1)
+        else:
+            zeros = [0]*(channel_length)      
+
+        signed = [-(2**self.bit)/2]*channel_length
+
+        ref_sig = list(ref_sig)
+        #ref_sig = [x + y for x, y in zip(ref_sig, signed)]   
+        
+        reference = zeros[channel_length/2:] + ref_sig + zeros[:channel_length/2+1]           
+
+        return reference        
+
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
 
-        signal = self.a_add_zeros(a_sig)
-    
-        reference = self.ref_add_zeros(ref_sig)
+        #signal = self.a_add_zeros(a_sig)    
+        #reference = self.ref_add_zeros(ref_sig)
+        signal = self.a_add_zeros_5v(a_sig)    
+        reference = self.ref_add_zeros_5v(ref_sig)
+
 
         length = len(reference)-1
       
@@ -86,8 +125,15 @@ class phaser(Multilaterator):
         phase_holder = 0
         max_list = []
 
+        #rospy.logwarn("REFERENCE")
+        #rospy.loginfo(reference)
+        #rospy.logwarn("SIGNAL")
+        #rospy.loginfo(signal)
+
         cross_corr = np.correlate(reference, signal, mode='full')
         max_idx = cross_corr.argmax()
+
+        #rospy.loginfo(max_idx)
         
         phase_holder = 2*channel_length-1 - max_idx
         
@@ -97,7 +143,8 @@ class phaser(Multilaterator):
         self.actual_stamps = data.actual_time_stamps
 
     def calculate_time_stamps_phase(self,input):
-        ping = rospy.ServiceProxy('/hydrophones/ping', Ping_service)
+        #ping = rospy.ServiceProxy('/hydrophones/ping', Ping_service)
+        ping = rospy.ServiceProxy('/hydrophones/ping', Ping)
         data = ping()
 
         self.bit = data.adc_bit
@@ -143,19 +190,19 @@ class phaser(Multilaterator):
 
         print "\t" + str(calculated)
 
-        astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
-        astamps = astamps()
-        self.actual_stamps = astamps.actual_time_stamps
+        #astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
+        #astamps = astamps()
+        #self.actual_stamps = astamps.actual_time_stamps
 
-        print "actual timestamps (uSec):"
-        print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
-        print "difference (uSec):"
+        #print "actual timestamps (uSec):"
+        #print "\t" + str(self.actual_stamps) #str([x * y for x, y in zip(self.actual_stamps,microseconds)])
+        #print "difference (uSec):"
         
-        difference = [x - y for x, y in zip(list(self.actual_stamps), calculated)]
+        #difference = [x - y for x, y in zip(list(self.actual_stamps), calculated)]
         
-        print "\t" + str(difference)
-        errors = sum(map(abs, difference))
-        print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
+        #print "\t" + str(difference)
+        #errors = sum(map(abs, difference))
+        #print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
 
         return Calculated_time_stamps_serviceResponse(calculated)
 

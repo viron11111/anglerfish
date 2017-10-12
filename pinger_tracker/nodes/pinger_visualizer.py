@@ -20,6 +20,7 @@ import math
 import tf, tf2_ros
 
 from pinger_tracker.msg import *
+from advantech_pci1714.srv import *
 
 class visualizer(object):
 
@@ -296,6 +297,14 @@ class visualizer(object):
 
     def draw_hydrophones(self): 
 
+        hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
+        holder = hydro()
+
+        self.hydro0 = holder.hydro0_xyz
+        self.hydro1 = holder.hydro1_xyz
+        self.hydro2 = holder.hydro2_xyz
+        self.hydro3 = holder.hydro3_xyz  
+
         marker1 = Marker()
         marker1.header.frame_id = "/map"
         marker1.header.stamp = rospy.Time.now()
@@ -363,7 +372,7 @@ class visualizer(object):
         rospy.Subscriber('hydrophones/bancroft_pos', Bancroft_pos, self.bancroft)
         rospy.Subscriber('hydrophones/crane_pos', Crane_pos, self.crane)
         rospy.Subscriber('hydrophones/ls_pos', Ls_pos, self.ls)
-        rospy.Subscriber('hydrophones/ping', Ping, self.actual_pos)
+        #rospy.Subscriber('hydrophones/ping', Ping, self.actual_pos)
         rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
         #rospy.sleep(1)
 

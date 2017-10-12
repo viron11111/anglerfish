@@ -135,6 +135,14 @@ class solver():
         z = -math.sqrt(abs(zsquared))
 
         #print "x: %f, y: %f, z: %f" % (x,y,z)
+        
+        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+        self.crane_pub.publish(Crane_pos(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='Crane_pos_calc'),
+            x_pos=x,
+            y_pos=y,
+            z_pos=z))
 
         return Crane_pos_serviceResponse(x, y, z)        
 

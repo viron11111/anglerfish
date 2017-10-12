@@ -31,7 +31,7 @@ const int32  intervalCount = 64;
 
 double        samplingFrequency = 1000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
-const int32  sampleCount =  1000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
+const int32  sampleCount =  2000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
 #define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount
@@ -41,7 +41,7 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.1;
+double        triggerLevel = 0.05;
 int           triggerDelayCount = sampleCount/2.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
@@ -100,6 +100,15 @@ public:
 			//chan1data.close();
 		}
 		printf("completed sample\n");
+		ros::NodeHandle n;
+		ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ready");
+		ROS_INFO("point 1");
+		advantech_pci1714::Ping_received srv;
+		ROS_INFO("point 2");
+
+		srv.request;
+		ROS_INFO("point 3");
+		client.call(srv);		
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
@@ -151,7 +160,18 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	ros::ServiceServer service = n.advertiseService("/hydrophones/ping", ping_publish);
-	ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ping_received");
+
+	/*
+	if(client.call(srv))
+	{
+		ROS_INFO("Client called ping_received");
+	}
+	else
+	{	
+		ROS_ERROR("Unable to contact /hydrophones/ready");
+		return 1;
+	}*/
+
 	//ros::ServiceServer service = n.advertiseService("/hydrophones/ping_received", ping_received);
 
 	ErrorCode ret = Success;
