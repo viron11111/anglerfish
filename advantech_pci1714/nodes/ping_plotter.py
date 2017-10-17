@@ -123,7 +123,7 @@ class plotter():
             ax[0].plot(t,self.c, linewidth=2.0, label='Hydrophone C')
             ax[0].plot(t,self.d, linewidth=2.0, label='Hydrophone D')
 
-            #ax[0].legend(loc="upper left", fontsize=25)
+            ax[0].legend(loc="upper left", fontsize=25)
             ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
             ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
             ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)

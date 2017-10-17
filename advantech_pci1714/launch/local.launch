@@ -1,0 +1,12 @@
+<launch>
+ 
+  <node pkg="pinger_tracker" type="phase_shift_trigger.py" name="phaseshift" respawn="true">
+  </node>
+
+  <node pkg="pinger_tracker" type="crane_method_trigger.py" name="crane_method" respawn="true">
+  </node>
+
+  <node pkg="advantech_pci1714" type="advantechDriver" name="advantech_driver" respawn="true">
+  </node>
+
+</launch>
