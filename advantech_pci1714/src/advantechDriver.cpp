@@ -31,7 +31,7 @@ const int32  intervalCount = 64;
 
 double        samplingFrequency = 1000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
-const int32  sampleCount =  2000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
+const int32  sampleCount =  1500;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
 #define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount

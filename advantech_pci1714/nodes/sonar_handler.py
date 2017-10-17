@@ -135,15 +135,15 @@ class plotter():
 
         #MIL T-shape layout
         #hydro0_xyz = [0,      0,     0]
-        #hydro1_xyz = [101.6,   0,     0]
-        #hydro2_xyz = [-101.6,  0,     0]
-        #hydro3_xyz = [0,  -101.6, 0]      
+        #hydro1_xyz = [100.0,   0,     0]
+        #hydro2_xyz = [-100.0,  0,     0]
+        #hydro3_xyz = [0,  -100.0, 0]      
 
         # Equilateral layout (actual)
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [101.6,   0,     0]
-        hydro2_xyz = [-50.8,  88.0,     0]
-        hydro3_xyz = [-50.8,  -88.0, 0]
+        hydro1_xyz = [100.0,   0,     0]
+        hydro2_xyz = [-50,  86.6,     0]
+        hydro3_xyz = [-50,  -86.6, 0]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
