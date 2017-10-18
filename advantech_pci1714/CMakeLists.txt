@@ -15,6 +15,12 @@ add_service_files(DIRECTORY srv
    Hydrophone_locations_service.srv
  )
 
+## Generate messages in the 'msg' folder
+ add_message_files(
+   FILES
+   Pingdata.msg
+ )
+
  generate_messages(
   DEPENDENCIES
   std_msgs

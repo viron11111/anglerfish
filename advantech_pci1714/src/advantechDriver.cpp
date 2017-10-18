@@ -18,6 +18,7 @@
 
 #include "advantech_pci1714/Ping_received.h"
 #include "advantech_pci1714/Ping.h"
+#include <advantech_pci1714/Pingdata.h>
 
 using namespace Automation::BDaq;
 using namespace std;
@@ -25,13 +26,13 @@ using namespace std;
 //-----------------------------------------------------------------------------------
 // Configure the following three parameters before running the sample
 #define      deviceDescription  L"PCI-1714UL,BID#15"
-int32        startChannel = 1;
+int32        startChannel = 0;
 const int32  channelCount = 4;
 const int32  intervalCount = 64; 
 
-double        samplingFrequency = 1000000;  //in Hz
+double        samplingFrequency = 2000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
-const int32  sampleCount =  1500;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
+const int32  sampleCount =  10000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
 #define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount
@@ -41,8 +42,8 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.1;
-int           triggerDelayCount = sampleCount/2.0;//1.25;
+double        triggerLevel = 0.2;
+int           triggerDelayCount = sampleCount/3.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
 
@@ -99,8 +100,25 @@ public:
 			}
 			//chan1data.close();
 		}
-		printf("completed sample\n");
+		printf("completed sample\n");	
+
 		ros::NodeHandle n;
+
+		//ros::NodeHandle n;
+		ros::Publisher pingpub = n.advertise<advantech_pci1714::Pingdata>("/hydrophones/ping",1);
+		advantech_pci1714::Pingdata msg;
+		msg.header.stamp = ros::Time::now();
+		msg.header.frame_id = "/world";
+		msg.channels = channelCount;
+		msg.samples = USER_BUFFER_SIZE;
+		msg.sample_rate = samplingFrequency;
+		msg.adc_bit = 12;
+		std::vector<double> v(Data, Data + sizeof Data / sizeof Data[0]);
+		msg.data = v;
+
+		pingpub.publish(msg);
+		#ROS_ERROR("%d",msg.data);	
+
 		ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ready");
 		ROS_INFO("point 1");
 		advantech_pci1714::Ping_received srv;
@@ -108,7 +126,8 @@ public:
 
 		srv.request;
 		ROS_INFO("point 3");
-		client.call(srv);		
+		client.call(srv);	
+
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
@@ -150,6 +169,7 @@ bool ping_publish(advantech_pci1714::Ping::Request &req,
 	res.adc_bit = 12;
 	std::vector<double> v(Data, Data + sizeof Data / sizeof Data[0]);
 	res.data = v;
+
 	return true;
 }
 
@@ -160,6 +180,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	ros::ServiceServer service = n.advertiseService("/hydrophones/ping", ping_publish);
+	//ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
+
 
 	/*
 	if(client.call(srv))
