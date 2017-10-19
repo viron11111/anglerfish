@@ -53,8 +53,8 @@ class solver():
         P1 = [0,0,0]
         P2 = [0,0,0]
 
-        #c = 1.484 # speed of sound in 20 C water per uSec
-        c = 0.343 #speed of sound in air
+        c = 1.484 # speed of sound in 20 C water per uSec
+        #c = 0.343 #speed of sound in air
 
         hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
         holder = hydro()

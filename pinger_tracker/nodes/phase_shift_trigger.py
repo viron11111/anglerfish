@@ -10,6 +10,7 @@ from std_msgs.msg import Header
 from pinger_tracker.msg import *
 from pinger_tracker.srv import *
 from advantech_pci1714.srv import *
+from advantech_pci1714.msg import *
 
 from multilateration import Multilaterator
 import multilateration as mlat
@@ -158,6 +159,18 @@ class phaser(Multilaterator):
         self.signal = []
         self.timestamps = []
 
+        self.ping_pub = rospy.Publisher('/hydrophones/pingmsg', Pingdata, queue_size = 1)
+
+        self.ping_pub.publish(Pingdata(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='ping'),
+            channels=data.channels,
+	    samples=data.samples,
+	    sample_rate=data.sample_rate,
+            adc_bit=self.bit,
+	    data=data.data))
+
+
         for i in range(data.channels):
             self.signal.append([])
             self.signal[i] = data.data[i::4]
@@ -203,6 +216,13 @@ class phaser(Multilaterator):
         #print "\t" + str(difference)
         #errors = sum(map(abs, difference))
         #print "Absolute sum of errors (uSec): {}%0.3f{}".format('\033[43m',self.W) % errors  
+
+	self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+
+        self.calc_stamps_pub.publish(Calculated_time_stamps(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='phase_shift'),
+            calculated_time_stamps=calculated))
 
         return Calculated_time_stamps_serviceResponse(calculated)
 

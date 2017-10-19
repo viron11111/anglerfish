@@ -26,7 +26,7 @@ using namespace std;
 //-----------------------------------------------------------------------------------
 // Configure the following three parameters before running the sample
 #define      deviceDescription  L"PCI-1714UL,BID#15"
-int32        startChannel = 0;
+int32        startChannel = 1;
 const int32  channelCount = 4;
 const int32  intervalCount = 64; 
 
@@ -43,8 +43,8 @@ TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
 //double        triggerLevel = 0.2;
-double        triggerLevel = 0.05;
-int           triggerDelayCount = sampleCount/3.0;//1.25;
+double        triggerLevel = 0.2;
+int           triggerDelayCount = sampleCount/2.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
 
@@ -106,7 +106,7 @@ public:
 		ros::NodeHandle n;
 
 		//ros::NodeHandle n;
-		ros::Publisher pingpub = n.advertise<advantech_pci1714::Pingdata>("/hydrophones/ping",1);
+		/*ros::Publisher pingpub = n.advertise<advantech_pci1714::Pingdata>("/hydrophones/ping",1);
 		advantech_pci1714::Pingdata msg;
 		msg.header.stamp = ros::Time::now();
 		msg.header.frame_id = "/world";
@@ -117,7 +117,7 @@ public:
 		std::vector<double> v(Data, Data + sizeof Data / sizeof Data[0]);
 		msg.data = v;
 
-		pingpub.publish(msg);
+		pingpub.publish(msg);*/
 		//ROS_ERROR("%d",msg.data);	
 
 		ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ready");
