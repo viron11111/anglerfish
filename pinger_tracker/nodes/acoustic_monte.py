@@ -43,16 +43,22 @@ class monte(object):
         hydro3_xyz = [-var_a,  var_a*np.sqrt(3), 0]'''
 
         #MIL T-shape layout
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [101.6,   0,     0]
-        hydro2_xyz = [-101.6,  0,     0]
-        hydro3_xyz = [0,  -101.6, 0]      
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [100,   0,     0]
+        #hydro2_xyz = [-100,  0,     0]
+        #hydro3_xyz = [0,  -100, 0]      
 
         # Equilateral layout (actual)
         '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [101.6,   0,     0]
         hydro2_xyz = [-50.8,  88.0,     0]
         hydro3_xyz = [-50.8,  -88.0, 0]  '''
+
+        #experimental layout
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [173.2,   0,     0]
+        hydro2_xyz = [86.6,  -150,     0]
+        hydro3_xyz = [86.6,  -50, -100]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -180,7 +186,7 @@ class monte(object):
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         if typemeasure == 'Heading':
             levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0, 6.0, 6.28]

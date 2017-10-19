@@ -117,7 +117,7 @@ public:
 		msg.data = v;
 
 		pingpub.publish(msg);
-		#ROS_ERROR("%d",msg.data);	
+		//ROS_ERROR("%d",msg.data);	
 
 		ros::ServiceClient client = n.serviceClient<advantech_pci1714::Ping_received>("/hydrophones/ready");
 		ROS_INFO("point 1");

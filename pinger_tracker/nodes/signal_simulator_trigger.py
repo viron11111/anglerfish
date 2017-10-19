@@ -143,6 +143,15 @@ class simulator():
         return hydro0_xyz, hydro1_xyz, hydro2_xyz, hydro3_xyz
 
     def actual_time_stamps_service(self, data):
+        
+        hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
+        data = hydro()
+
+        self.hydro0 = data.hydro0_xyz
+        self.hydro1 = data.hydro1_xyz
+        self.hydro2 = data.hydro2_xyz
+        self.hydro3 = data.hydro3_xyz
+
         hydrophone_locations = {   
         'hydro0': {'x':  self.hydro0[0], 'y':   self.hydro0[1], 'z':  self.hydro0[2]},
         'hydro1': {'x':  self.hydro1[0], 'y':   self.hydro1[1], 'z':  self.hydro1[2]},
@@ -151,7 +160,13 @@ class simulator():
 
         c = 1.484  # millimeters/microsecond
         hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
-        #sonar = Multilaterator(hydrophone_locations, c, 'LS')
+        #sonar = Multilaterator(hydrophone_locations, c, 'LS')       
+        
+        pos = rospy.ServiceProxy('hydrophones/actual_position', Actual_position)
+        pos = pos()
+        self.position = pos.actual_position         
+
+        print self.position
 
         pulse = Pulse(self.position[0], self.position[1], self.position[2], 0)
         tstamps = hydrophone_array.listen(pulse)
@@ -166,6 +181,8 @@ class simulator():
         microseconds = [1e6,1e6,1e6,1e6]
         self.tstamps = [x * y for x, y in zip(self.tstamps,microseconds)]
         actual_time_stamps = list(self.tstamps)
+
+
 
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
         
@@ -248,8 +265,8 @@ class simulator():
 
         self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
         self.frame = rospy.get_param('~frame', '/hydrophones')
-        self.resolution = rospy.get_param('resolution', 16)  #ADC bits
-        self.signal_freq = rospy.get_param('signal_freq', 27)  #pinger freq
+        self.resolution = rospy.get_param('resolution', 12)  #ADC bits
+        self.signal_freq = rospy.get_param('signal_freq', 30)  #pinger freq
         self.amplitude = rospy.get_param('amplitude', 0.1)      #received signal amplitude 0.0-1.0
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
