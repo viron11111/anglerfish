@@ -42,7 +42,8 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.2;
+//double        triggerLevel = 0.2;
+double        triggerLevel = 0.05;
 int           triggerDelayCount = sampleCount/3.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();

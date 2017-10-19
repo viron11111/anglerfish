@@ -140,10 +140,16 @@ class plotter():
         #hydro3_xyz = [0,  -100.0, 0]      
 
         # Equilateral layout (actual)
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [100.0,   0,     0]
+        #hydro2_xyz = [-50,  86.6,     0]
+        #hydro3_xyz = [-50,  -86.6, 0]
+
+        #experimental layout
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [100.0,   0,     0]
-        hydro2_xyz = [-50,  86.6,     0]
-        hydro3_xyz = [-50,  -86.6, 0]
+        hydro1_xyz = [173.2,   0,     0]
+        hydro2_xyz = [86.6,  -150,     0]
+        hydro3_xyz = [86.6,  -50, -100]
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
@@ -155,6 +161,7 @@ class plotter():
         self.screen = pygame.display.set_mode((400, 300))
         done = False   
 
+        #self.pingpub = rospy.Publisher('/hydrophones/ping', , queue_size=1)
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
         rospy.Service('hydrophones/ready', Ping_received, self.received)
 

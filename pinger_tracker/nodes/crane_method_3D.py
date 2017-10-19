@@ -53,7 +53,8 @@ class solver():
         P1 = [0,0,0]
         P2 = [0,0,0]
 
-        c = 1.484 # speed of sound in 20 C water per uSec
+        #c = 1.484 # speed of sound in 20 C water per uSec
+        c = 0.343 #speed of sound in air
 
         hydro = rospy.ServiceProxy('hydrophones/hydrophone_position', Hydrophone_locations_service)
         holder = hydro()
@@ -72,8 +73,8 @@ class solver():
         z3 = self.hydro3[2]
         #print "x1: %f" % x1
 
-        #calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
-        calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
+        calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
+        #calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
         tstampts = calc_service()
 
         '''calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
@@ -91,13 +92,13 @@ class solver():
         #print tstampts.actual_time_stamps[2]
         #print tstampts.actual_time_stamps[3] 
 
-        #del1 = (tstampts.calculated_time_stamps[1])*c #mm/uSec
-        #del2 = (tstampts.calculated_time_stamps[2])*c #mm/uSec
-        #del3 = (tstampts.calculated_time_stamps[3])*c #mm/uSec   
+        del1 = (tstampts.calculated_time_stamps[1])*c #mm/uSec
+        del2 = (tstampts.calculated_time_stamps[2])*c #mm/uSec
+        del3 = (tstampts.calculated_time_stamps[3])*c #mm/uSec   
 
-        del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
-        del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
-        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  
+        #del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
+        #del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
+        #del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  
 
         '''#Experiment
         x1 = 8.500000
