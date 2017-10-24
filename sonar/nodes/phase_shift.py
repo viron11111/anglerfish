@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 import time
 
 from std_msgs.msg import Header
+
 from advantech_pci1714.msg import *
+
+from pinger_tracker.msg import Calculated_time_stamps
 import matplotlib.pyplot as plt
 
 #from multilateration import Multilaterator
@@ -204,10 +207,10 @@ class phaser():
 
 
         
-        phase_holder = 2*channel_length-1 - max_idx
+        phase_holder = len(reference) - 1 - max_idx
         #print phase_holder
         
-        return (channel_length/2-phase_holder)*(1.0/self.sample_rate)        
+        return phase_holder*(1.0/self.sample_rate)        
 
     def parse_ping(self, data):
         self.bit = data.adc_bit
@@ -233,9 +236,9 @@ class phaser():
             #right_periods = int((channel_length/2)+signal_periods/Ts)
             
             #self.signal[left_periods:right_periods]
-        cross_corr = np.correlate(self.signal[0], self.signal[0], mode='full')
-        max_idx = cross_corr.argmax()
-        print max_idx            
+        #cross_corr = np.correlate(self.signal[0], self.signal[0], mode='full')
+        #max_idx = cross_corr.argmax()
+        #print max_idx            
         
         #print self.signal[0][0:10]
         for i in range(3):
@@ -245,7 +248,13 @@ class phaser():
         microseconds = [1e6,1e6,1e6,1e6]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        #print ("%0.2f, %0.2f, %0.2f, %0.2f" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
+        self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+        self.calc_stamps_pub.publish(Calculated_time_stamps(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='phase_shift'),
+            calculated_time_stamps=calculated))
 
     def __init__(self):
 
@@ -263,10 +272,11 @@ class phaser():
         #self.hydro3 = [0,     -25.4, 0]
 
         rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.parse_ping)
+
         #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actual)
         #rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
 
-        #self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+        self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
 
         #rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
 
