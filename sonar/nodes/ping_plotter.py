@@ -31,12 +31,16 @@ class plotter():
         adc_bit = data.adc_bit
         data = data.data
 
+        data = data[15000:21000:1]
+        samples = float(len(data)/channels)
+
         time = (samples/float(sample_rate))#*10**6
 
         #print("data received from service")
 
         length = samples*channels
         self.x_axis_length = samples*(1.0/sample_rate)
+
         starting_sample = 0
         distance = (float(length)/float(samples))*time
 
@@ -47,6 +51,8 @@ class plotter():
         self.b = data[starting_sample + 1:int(length):channels]
         self.c = data[starting_sample + 2:int(length):channels]
         self.d = data[starting_sample + 3:int(length):channels]
+
+        #self.x_axis_length = len(self.a)
 
         signal = 'bad' 
 

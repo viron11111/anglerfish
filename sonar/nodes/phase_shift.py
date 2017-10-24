@@ -8,6 +8,7 @@ import time
 
 from std_msgs.msg import Header
 from advantech_pci1714.msg import *
+import matplotlib.pyplot as plt
 
 #from multilateration import Multilaterator
 #import multilateration as mlat
@@ -107,35 +108,7 @@ class phaser():
 
         return reference        
 
-    def determine_phase(self, ref_sig, a_sig):
-        channel_length = len(ref_sig)
 
-        #signal = self.a_add_zeros(a_sig)    
-        #reference = self.ref_add_zeros(ref_sig)
-        signal = self.a_add_zeros_5v(a_sig)    
-        reference = self.ref_add_zeros_5v(ref_sig)
-
-
-        length = len(reference)-1
-      
-        sum_val = 0
-        sum_val_max = 0
-        phase_holder = 0
-        max_list = []
-
-        #rospy.logwarn("REFERENCE")
-        #rospy.loginfo(reference)
-        #rospy.logwarn("SIGNAL")
-        #rospy.loginfo(signal)
-
-        cross_corr = np.correlate(reference, signal, mode='full')
-        max_idx = cross_corr.argmax()
-
-        #rospy.loginfo(max_idx)
-        
-        phase_holder = 2*channel_length-1 - max_idx
-        
-        return (channel_length/2-phase_holder)*(1.0/self.sample_rate)
 
     def actual(self, data):
         self.actual_stamps = data.actual_time_stamps
@@ -196,30 +169,83 @@ class phaser():
             calculated_time_stamps=calculated))
 
         return Calculated_time_stamps_serviceResponse(calculated)'''
+    def determine_phase(self, ref_sig, a_sig):
+        channel_length = len(ref_sig)
+
+        #signal = self.a_add_zeros(a_sig)    
+        #reference = self.ref_add_zeros(ref_sig)
+        #signal = self.a_add_zeros_5v(a_sig)    
+        #reference = self.ref_add_zeros_5v(ref_sig)
+
+        reference = ref_sig
+        signal = a_sig
+
+
+        length = len(reference)-1
+      
+        sum_val = 0
+        sum_val_max = 0
+        phase_holder = 0
+        max_list = []
+
+        #rospy.logwarn("REFERENCE")
+        #rospy.loginfo(reference)
+        #rospy.logwarn("SIGNAL")
+        #rospy.loginfo(signal)
+
+        cross_corr = np.correlate(reference, signal, mode='full')
+        max_idx = cross_corr.argmax()
+
+        #rospy.loginfo(len(cross_corr))
+        #print len(reference)
+        #plt.plot(cross_corr)
+        #plt.ylabel('some numbers')
+        #plt.show()
+
+
+        
+        phase_holder = 2*channel_length-1 - max_idx
+        #print phase_holder
+        
+        return (channel_length/2-phase_holder)*(1.0/self.sample_rate)        
 
     def parse_ping(self, data):
-        print "Parseping"
         self.bit = data.adc_bit
         self.sample_rate = data.sample_rate
         #self.ping_stamps = data.stamps
 
+        channels = data.channels
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0  #25k is the longest signal expected
-        channel_length = len(data.data)/data.channels
+        data = data.data[15000:21000:1]
+
+        #channel_length = len(data.data)/data.channels
+        #channel_length = len(data)/data.channels
 
         self.signal = []
-        self.timestamps = []
+        self.timestamps = [0.0]
 
-        for i in range(data.channels):
+        for i in range(channels):
             self.signal.append([])
-            self.signal[i] = data.data[i::4]
-            left_periods = int((channel_length/2)-signal_periods/Ts)
-            right_periods = int((channel_length/2)+signal_periods/Ts)
-            #print self.signal
-            self.signal[left_periods:right_periods]
+            #self.signal[i] = data.data[i::4]
+            self.signal[i] = data[i::4]
+            #left_periods = int((channel_length/2)-signal_periods/Ts)
+            #right_periods = int((channel_length/2)+signal_periods/Ts)
+            
+            #self.signal[left_periods:right_periods]
+        cross_corr = np.correlate(self.signal[0], self.signal[0], mode='full')
+        max_idx = cross_corr.argmax()
+        print max_idx            
+        
+        #print self.signal[0][0:10]
+        for i in range(3):
+            #self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i+1]))
+            self.timestamps.append(self.determine_phase(self.signal[0], self.signal[i+1]))
 
-        print(len(self.signal[0]))
+        microseconds = [1e6,1e6,1e6,1e6]
+        calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
+        #print ("%0.2f, %0.2f, %0.2f, %0.2f" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
     def __init__(self):
 
