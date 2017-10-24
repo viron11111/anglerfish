@@ -9,4 +9,10 @@
   <node pkg="advantech_pci1714" type="advantechDriver" name="advantech_driver" respawn="true">
   </node>
 
+  <node pkg="advantech_pci1714" type="sonar_handler.py" name="sonar_handler" respawn="true">
+  </node>
+
+  <node pkg="advantech_pci1714" type="ping_plotter.py" name="ping_plotter" respawn="true">
+  </node>
+
 </launch>
