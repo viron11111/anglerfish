@@ -159,7 +159,7 @@ class simulator():
 
         #y = [q-r for q,r in zip(y,10^12)]
                       
-        print "make git push21"
+        print "make git push2122"
 
 
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
