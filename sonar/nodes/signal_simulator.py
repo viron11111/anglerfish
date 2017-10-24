@@ -98,7 +98,7 @@ class simulator():
         self.samples = ((self.signal_length/2)-offset)*self.sample_rate*1000  #Number of samples during half the signal, for pre_signal
 
 
-        pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
+        pre_signal = [0.05]*int(self.samples)  #dead period prior to signal
 
         if len(pre_signal) == len(self.noise[0:len(pre_signal)]):
             pre_signal = pre_signal + self.noise[0:len(pre_signal)]*random.uniform(1.0,2) #add noise with noise multiplier
@@ -108,7 +108,7 @@ class simulator():
 
     def create_wave(self, offset):
 
-        print offset
+        #print offset
       
 
         self.Fs = self.sample_rate*1000  # sampling rate
@@ -120,7 +120,7 @@ class simulator():
 
         pre_signal = self.create_silence(offset) #[(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
-
+       
         t = np.arange(0.0,(self.signal_length/2)+offset,self.Ts) # time vector for signal waves
 
         total = len(t)+int_sample
@@ -133,13 +133,14 @@ class simulator():
 
         #self.phase_jitter randomly places phase within on sampling time
         #amplitude jitter for realism
-        y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) + 1  #create sine wave
+        y = np.sin(2*np.pi*ff*t+self.phase_jitter)*(self.amplitude*self.amplitude_jitter) #+ 1  #create sine wave
+        #y = y * 5
 
-        y = (y/2) * 2**self.resolution  #turn sine wave into an int
+        #y = (y/2) * 2**self.resolution  #turn sine wave into an int
 
-        y = np.array(y,dtype=int) #Help from Kevin, turn Floats in y to Int
+        #y = np.array(y,dtype=int) #Help from Kevin, turn Floats in y to Int
 
-        if self.noise_sync == 'True':
+        '''if self.noise_sync == 'True':
             x = self.noise*int(100*self.signal_noise)
 
             y = [q + r for q, r in zip(y, x)]
@@ -153,7 +154,11 @@ class simulator():
             
             x = self.noise*int(100*self.signal_noise)
 
-            y = [q + r for q, r in zip(y, x)]                
+            y = [q + r for q, r in zip(y, x)]  '''
+
+
+        #y = [q-r for q,r in zip(y,10^12)]
+                      
 
 
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
