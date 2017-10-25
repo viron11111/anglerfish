@@ -24,35 +24,56 @@ class plotter():
     def plot_ping(self,data):       
 
         channels = data.channels
-        samples = float(data.samples/channels)
+        #samples = float(data.samples/channels)
         #print samples
         sample_rate = data.sample_rate
         #print sample_rate
         adc_bit = data.adc_bit
-        data = data.data
+        values = data.data
 
-        data = data[15000:21000:1]
-        samples = float(len(data)/channels)
+        #values = values[15000:21000:1]
+        
+        samples = float(data.samples) #float(len(data)/channels)
 
         time = (samples/float(sample_rate))#*10**6
 
         #print("data received from service")
 
         length = samples*channels
-        self.x_axis_length = samples*(1.0/sample_rate)
+        self.x_axis_length = (samples/4.0)*(1.0/sample_rate)
+
+        #print samples
+        #print self.x_axis_length
 
         starting_sample = 0
         distance = (float(length)/float(samples))*time
 
         #self.x = np.arange(starting_sample*(time/samples),distance, time/samples)
         #print self.x
-        self.a = data[starting_sample + 0:int(length):channels]
+        self.a = values[starting_sample + 0:int(length):channels]
         #print self.a
-        self.b = data[starting_sample + 1:int(length):channels]
-        self.c = data[starting_sample + 2:int(length):channels]
-        self.d = data[starting_sample + 3:int(length):channels]
+        self.b = values[starting_sample + 1:int(length):channels]
+        self.c = values[starting_sample + 2:int(length):channels]
+        self.d = values[starting_sample + 3:int(length):channels]
 
-        #self.x_axis_length = len(self.a)
+        #print len(self.a1)
+        #print range(len(self.a1)-1)
+
+        self.a1 = [0]*int(samples/4)
+        self.b1 = [0]*int(samples/4)
+        self.c1 = [0]*int(samples/4)
+        self.d1 = [0]*int(samples/4)
+        #print samples/4
+
+        '''for i in range(len(self.a)-3):
+            #print i
+            self.a1[i] = self.a[i]*(0.25) + self.a[i+1]*(0.25) + self.a[i+2]*(0.25) + self.a[i+3]*(0.25)
+            self.b1[i] = self.b[i]*(0.25) + self.b[i+1]*(0.25) + self.b[i+2]*(0.25) + self.b[i+3]*(0.25)
+            self.c1[i] = self.c[i]*(0.25) + self.c[i+1]*(0.25) + self.c[i+2]*(0.25) + self.c[i+3]*(0.25)
+            self.d1[i] = self.d[i]*(0.25) + self.d[i+1]*(0.25) + self.d[i+2]*(0.25) + self.d[i+3]*(0.25)'''
+
+
+        #print len(self.a)
 
         signal = 'bad' 
 
@@ -114,6 +135,7 @@ class plotter():
 
         #self.x = []
         self.a = []
+        self.a1 = []
         self.b = []
         self.c = []
         self.d = []
@@ -131,7 +153,8 @@ class plotter():
             #ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
             #ping = ping_service()
 
-            rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping)
+            #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
+            rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
             #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
 
             self.ax[0].cla()
@@ -140,11 +163,11 @@ class plotter():
             self.ax[0].plot(self.t,self.c, linewidth=2.0, label='Hydrophone C')
             self.ax[0].plot(self.t,self.d, linewidth=2.0, label='Hydrophone D')
 
-            #self.ax[0].legend(loc="upper left", fontsize=25)
+            self.ax[0].legend(loc="upper left", fontsize=10)
             self.ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
             self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
             self.ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
-            self.ax[0].set_ylim(-5,5)
+            self.ax[0].set_ylim(-0.2,0.2)
             self.ax[0].set_xlim(0,self.x_axis_length)
             self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
             self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)

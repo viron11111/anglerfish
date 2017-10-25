@@ -47,68 +47,137 @@ class plotter():
 
         rospy.loginfo("heading: %f deg, declination: %f deg" % (crane_heading, calculated_declination))
 
-        pygame.font.init() # you have to call this at the start, 
-                   # if you want to use this module.
-        myfont = pygame.font.SysFont('Comic Sans MS', 20)
-        bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-        bhydro = myfont.render('B', False, (255, 0, 0))
-        chydro = myfont.render('C', False, (255, 0, 0))
-        dhydro = myfont.render('D', False, (255, 0, 0))
-        north  = myfont.render('180', False, (255, 255, 0))
-        west  = myfont.render('270', False, (255, 255, 0))
-        east  = myfont.render('90', False, (255, 255, 0))
-        south  = myfont.render('0', False, (255, 255, 0))
-        heading  = bigfont.render(('Bearing: %0.1f' % crane_heading), False, (255, 255, 255))
-        declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
-       
-        self.screen.fill((0,0,0))
+        array = "z-offset"
 
-        angle = crane_heading+180
-        pos = 100,150
+        array = "equilateral"
 
-        arrow=pygame.Surface((5,80))
-        arrow.fill((0,255,0))
-        pygame.draw.rect(arrow, (0,0,0), pygame.Rect(0, 40, 5, 80))
-        #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
-        arrow.set_colorkey((255,255,255))
+        if array == "equilateral":
+            pygame.font.init() # you have to call this at the start, 
+                       # if you want to use this module.
+            myfont = pygame.font.SysFont('Comic Sans MS', 20)
+            bigfont = pygame.font.SysFont('Comic Sans MS', 30)
+            bhydro = myfont.render('B', False, (255, 0, 0))
+            chydro = myfont.render('C', False, (255, 0, 0))
+            dhydro = myfont.render('D', False, (255, 0, 0))
+            north  = myfont.render('180', False, (255, 255, 0))
+            west  = myfont.render('270', False, (255, 255, 0))
+            east  = myfont.render('90', False, (255, 255, 0))
+            south  = myfont.render('0', False, (255, 255, 0))
+            heading  = bigfont.render(('Bearing: %0.1f' % crane_heading), False, (255, 255, 255))
+            declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
+           
+            self.screen.fill((0,0,0))
 
-        nar=pygame.transform.rotate(arrow,angle)
-        nrect=nar.get_rect(center=pos)
-        self.screen.blit(nar, nrect)
-        pygame.display.flip()
+            angle = crane_heading+180
+            pos = 100,150
 
-        self.screen.blit(bhydro,(95,105))
-        self.screen.blit(chydro,(60,155))
-        self.screen.blit(dhydro,(130,155))
-        self.screen.blit(north,(95,90))
-        self.screen.blit(east,(143,155))
-        self.screen.blit(west,(35,155))
-        self.screen.blit(south,(90,195))
-        self.screen.blit(heading,(10,30))
-        self.screen.blit(declination,(220,30))
+            arrow=pygame.Surface((5,80))
+            arrow.fill((0,255,0))
+            pygame.draw.rect(arrow, (0,0,0), pygame.Rect(0, 40, 5, 80))
+            #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
+            arrow.set_colorkey((255,255,255))
+
+            nar=pygame.transform.rotate(arrow,angle)
+            nrect=nar.get_rect(center=pos)
+            self.screen.blit(nar, nrect)
+            pygame.display.flip()
+
+            self.screen.blit(bhydro,(95,105))
+            self.screen.blit(chydro,(60,155))
+            self.screen.blit(dhydro,(130,155))
+            self.screen.blit(north,(95,90))
+            self.screen.blit(east,(143,155))
+            self.screen.blit(west,(35,155))
+            self.screen.blit(south,(90,195))
+            self.screen.blit(heading,(10,30))
+            self.screen.blit(declination,(220,30))
 
 
-        pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0)
-        pygame.draw.circle(self.screen, (255,255,255), (100, 125), 5, 0)
-        pygame.draw.circle(self.screen, (255,255,255), (78, 163), 5, 0)
-        pygame.draw.circle(self.screen, (255,255,255), (122, 163), 5, 0)       
+            pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (100, 125), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (78, 163), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (122, 163), 5, 0)       
 
-        angle2 = calculated_declination-90
-        pos2 = 220,90
+            angle2 = calculated_declination-90
+            pos2 = 220,90
 
-        arrow2=pygame.Surface((5,200))
-        arrow2.fill((0,255,0))
-        pygame.draw.rect(arrow2, (0,0,0), pygame.Rect(0, 100, 5, 200))
-        #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
-        arrow2.set_colorkey((255,255,255))
+            arrow2=pygame.Surface((5,200))
+            arrow2.fill((0,255,0))
+            pygame.draw.rect(arrow2, (0,0,0), pygame.Rect(0, 100, 5, 200))
+            #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
+            arrow2.set_colorkey((255,255,255))
 
-        nar2=pygame.transform.rotate(arrow2,angle2)
-        nrect2=nar2.get_rect(center=pos2)
-        self.screen.blit(nar2, nrect2)
-        pygame.display.flip()        
+            nar2=pygame.transform.rotate(arrow2,angle2)
+            nrect2=nar2.get_rect(center=pos2)
+            self.screen.blit(nar2, nrect2)
+            pygame.display.flip()        
 
-        pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
-        pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)          
+            pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
+            pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2) 
+
+        elif array == "z-offset":
+            pygame.font.init() # you have to call this at the start, 
+                       # if you want to use this module.
+            myfont = pygame.font.SysFont('Comic Sans MS', 20)
+            bigfont = pygame.font.SysFont('Comic Sans MS', 30)
+            bhydro = myfont.render('C', False, (255, 0, 0))
+            chydro = myfont.render('B', False, (255, 0, 0))
+            dhydro = myfont.render('A', False, (255, 0, 0))
+            north  = myfont.render('180', False, (255, 255, 0))
+            west  = myfont.render('270', False, (255, 255, 0))
+            east  = myfont.render('90', False, (255, 255, 0))
+            south  = myfont.render('0', False, (255, 255, 0))
+            heading  = bigfont.render(('Bearing: %0.1f' % crane_heading), False, (255, 255, 255))
+            declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
+           
+            self.screen.fill((0,0,0))
+
+            angle = crane_heading+180
+            pos = 100,150
+
+            arrow=pygame.Surface((5,80))
+            arrow.fill((0,255,0))
+            pygame.draw.rect(arrow, (0,0,0), pygame.Rect(0, 40, 5, 80))
+            #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
+            arrow.set_colorkey((255,255,255))
+
+            nar=pygame.transform.rotate(arrow,angle)
+            nrect=nar.get_rect(center=pos)
+            self.screen.blit(nar, nrect)
+            pygame.display.flip()
+
+            self.screen.blit(bhydro,(95,105))
+            self.screen.blit(chydro,(60,155))
+            self.screen.blit(dhydro,(130,155))
+            self.screen.blit(north,(95,90))
+            self.screen.blit(east,(143,155))
+            self.screen.blit(west,(35,155))
+            self.screen.blit(south,(90,195))
+            self.screen.blit(heading,(10,30))
+            self.screen.blit(declination,(220,30))
+
+
+            pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (100, 125), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (78, 163), 5, 0)
+            pygame.draw.circle(self.screen, (255,255,255), (122, 163), 5, 0)       
+
+            angle2 = calculated_declination-90
+            pos2 = 220,90
+
+            arrow2=pygame.Surface((5,200))
+            arrow2.fill((0,255,0))
+            pygame.draw.rect(arrow2, (0,0,0), pygame.Rect(0, 100, 5, 200))
+            #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
+            arrow2.set_colorkey((255,255,255))
+
+            nar2=pygame.transform.rotate(arrow2,angle2)
+            nrect2=nar2.get_rect(center=pos2)
+            self.screen.blit(nar2, nrect2)
+            pygame.display.flip()        
+
+            pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
+            pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)              
 
     def received(self,data):
         rospy.loginfo("Ping received")
@@ -139,9 +208,9 @@ class plotter():
                    # if you want to use this module.
         myfont = pygame.font.SysFont('Comic Sans MS', 20)
         bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-        bhydro = myfont.render('B', False, (255, 0, 0))
-        chydro = myfont.render('C', False, (255, 0, 0))
-        dhydro = myfont.render('D', False, (255, 0, 0))
+        bhydro = myfont.render('C', False, (255, 0, 0))
+        chydro = myfont.render('B', False, (255, 0, 0))
+        dhydro = myfont.render('A', False, (255, 0, 0))
         north  = myfont.render('180', False, (255, 255, 0))
         west  = myfont.render('270', False, (255, 255, 0))
         east  = myfont.render('90', False, (255, 255, 0))

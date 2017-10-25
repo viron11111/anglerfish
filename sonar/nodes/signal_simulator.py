@@ -59,6 +59,11 @@ class simulator():
         self.hydro2 = [data.hydro2_xyz[0],data.hydro2_xyz[1],data.hydro2_xyz[2]]
         self.hydro3 = [data.hydro3_xyz[0],data.hydro3_xyz[1],data.hydro3_xyz[2]]
 
+        self.hydro0 = [0,      0,     0]
+        self.hydro1 = [173.2,   0,     0]
+        self.hydro2 = [86.6,  -150,     0]
+        self.hydro3 = [86.6,  -50, -100] 
+
     def callback_signal(self, config, level):
         self.resolution = int("{ADC_bits}".format(**config))
         self.sample_rate = int("{sample_rate}".format(**config))
@@ -84,7 +89,9 @@ class simulator():
         'hydro2': {'x':  self.hydro2[0], 'y':   self.hydro2[1], 'z':  self.hydro2[2]},
         'hydro3': {'x':  self.hydro3[0], 'y':   self.hydro3[1], 'z':  self.hydro3[2]}}
 
-        c = 1.484  # millimeters/microsecond
+        c = 1.484  # millimeters/microsecond in water
+        #c = 0.343  # millimeters/microsecond in air
+
         hydrophone_array = ReceiverArraySim(hydrophone_locations, c)
         #sonar = Multilaterator(hydrophone_locations, c, 'LS')
 
@@ -176,7 +183,7 @@ class simulator():
     def __init__(self):
         signal.signal(signal.SIGINT, self.signal_handler)
         rospy.init_node('signal_simulator')
-        self.position = [5000, 2000, -2000]  # in mm, default position 
+        self.position = [5000, 0000, 0000]  # in mm, default position 
 
         srv = Server(SignalConfig, self.callback_signal)
 
@@ -207,7 +214,7 @@ class simulator():
         self.signal_freq = rospy.get_param('signal_freq', 30)  #pinger freq
         self.amplitude = rospy.get_param('amplitude', 1.0)      #received signal amplitude 0.0-1.0
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
-        self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
+        self.signal_length = rospy.get_param('signal_length', 0.0004)  #800 uSec from default paul board
 
         #self.signal_pub = rospy.Publisher('hydrophones/pingmsg', Pingdata, queue_size = 1)
         self.tstamps_pub = rospy.Publisher('/hydrophones/actual_time_stamps', Actual_time_stamps, queue_size = 1)
@@ -259,6 +266,7 @@ class simulator():
                         break                   
                 catch = 0           
 
+            self.position = [5000, 0, 0]
             tstamps = self.create_time_stamps(self.position)
 
             #converts timestamps to Sec because create_time_stamps uses uSec
