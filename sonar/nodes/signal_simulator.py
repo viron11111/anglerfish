@@ -98,10 +98,11 @@ class simulator():
         self.samples = ((self.signal_length/2)-offset)*self.sample_rate*1000  #Number of samples during half the signal, for pre_signal
 
 
+
         pre_signal = [0.05]*int(self.samples)  #dead period prior to signal
 
         if len(pre_signal) == len(self.noise[0:len(pre_signal)]):
-            pre_signal = pre_signal + self.noise[0:len(pre_signal)]*random.uniform(1.0,2) #add noise with noise multiplier
+            pre_signal = pre_signal + self.noise[0:len(pre_signal)]#*random.uniform(1.0,2) #add noise with noise multiplier
 
         return pre_signal
 
@@ -158,9 +159,6 @@ class simulator():
 
 
         #y = [q-r for q,r in zip(y,10^12)]
-                      
-        print "make git push2122"
-
 
         wave_func = np.append(pre_signal,y)  #append silence before signal to actual signal
 
@@ -178,7 +176,7 @@ class simulator():
     def __init__(self):
         signal.signal(signal.SIGINT, self.signal_handler)
         rospy.init_node('signal_simulator')
-        self.position = [3000, 5000, -2000]  # in mm, default position 
+        self.position = [5000, 2000, -2000]  # in mm, default position 
 
         srv = Server(SignalConfig, self.callback_signal)
 
@@ -200,14 +198,14 @@ class simulator():
 
         
 
-        self.sample_rate = rospy.get_param('~sample_rate', 600)  #ADC sampling rate
+        self.sample_rate = rospy.get_param('~sample_rate', 2000)  #ADC sampling rate
         #self.thresh = rospy.get_param('~thresh', 500)
         self.frame = rospy.get_param('~frame', '/hydrophones')
         #permute_str = rospy.get_param('~permute', '1 2 3 4')
         #self.samples = rospy.get_param('sample_number', 1024)
-        self.resolution = rospy.get_param('resolution', 16)  #ADC bits
-        self.signal_freq = rospy.get_param('signal_freq', 27)  #pinger freq
-        self.amplitude = rospy.get_param('amplitude', 0.1)      #received signal amplitude 0.0-1.0
+        self.resolution = rospy.get_param('resolution', 12)  #ADC bits
+        self.signal_freq = rospy.get_param('signal_freq', 30)  #pinger freq
+        self.amplitude = rospy.get_param('amplitude', 1.0)      #received signal amplitude 0.0-1.0
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
@@ -216,6 +214,8 @@ class simulator():
         self.hydro_lct_pub = rospy.Publisher('hydrophones/hydrophone_locations', Hydrophone_locations, queue_size = 1)
 
         self.tx_rate = 1.0
+
+        self.sample_rate = 2000
 
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
@@ -266,6 +266,7 @@ class simulator():
                 tstamps[i] = tstamps[i]*10**-6
 
             self.tstamps=tstamps
+            #print self.tstamps
 
 
             microseconds = [1e6,1e6,1e6,1e6]
@@ -276,17 +277,18 @@ class simulator():
                     header=Header(stamp=rospy.Time.now(),
                                   frame_id='signal_sim'),
                     actual_time_stamps=self.tstamps))
+            print self.tstamps
 
             #phase jitter, shifts sine wave left or right within one sampling period (1/300000 sec for Paul board)
-            phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
-            self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
+            self.phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
+            #self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)    
             
             #ax[0].cla()
             #ax[1].cla()
             ax.cla()
 
             #self.noise is used to add noise to the silent portion of the signal            
-            self.noise = np.random.normal(-((2**self.resolution)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length/self.Ts)))
+            self.noise = np.random.normal(-((2**self.resolution*0)*0.0005)/2,((2**self.resolution)*0.0005)/2,(int(self.signal_length*0/self.Ts)))
 
             #turn Float noise into Int noise
             for i in range(0,len(self.noise)):
@@ -296,11 +298,11 @@ class simulator():
             self.data_points = int(self.signal_length/self.Ts)*self.number_of_hydrophones
             self.data = [None]*self.data_points
 
-            print self.position
-            print self.hydro0
-            print self.hydro1
-            print self.hydro2
-            print self.hydro3
+            #print self.position
+            #print self.hydro0
+            #print self.hydro1
+            #print self.hydro2
+            #print self.hydro3
 
             legends = [None]*4
 
@@ -318,6 +320,7 @@ class simulator():
                     if len(t) == len(wave):
                         '''ax[0].plot(t,wave)
                         ax[1].plot(t,wave)'''
+                        #print wave
                         legends[i], = ax.plot(t,wave,linewidth=2.0, label='Hydrophone %i' % i)
                         
                         
@@ -367,9 +370,13 @@ class simulator():
                 ax[2].set_xlabel('Freq (Hz)')
                 ax[2].set_ylabel('|Y(freq)|')'''
 
-                plt.pause(0.05)                
+                plt.pause(0.05)               
+                
 
-                self.data = list(map(int, self.data))
+
+                #self.data = list(map(int, self.data))
+
+
                 #print self.data
 
                 '''self.simulate_pub.publish(Ping(
@@ -387,6 +394,7 @@ class simulator():
                     channels=self.number_of_hydrophones,
                     samples=self.data_points,
                     data=self.data,
+                    adc_bit = 12,
                     sample_rate=self.sample_rate*1000))
                     
             

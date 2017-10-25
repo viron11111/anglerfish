@@ -196,6 +196,8 @@ class phaser():
         #rospy.logwarn("SIGNAL")
         #rospy.loginfo(signal)
 
+        print len(reference)
+
         cross_corr = np.correlate(reference, signal, mode='full')
         max_idx = cross_corr.argmax()
 
@@ -207,7 +209,7 @@ class phaser():
 
 
         
-        phase_holder = len(reference) - 1 - max_idx
+        phase_holder = max_idx - (len(reference) - 1)
         #print phase_holder
         
         return phase_holder*(1.0/self.sample_rate)        
@@ -220,7 +222,7 @@ class phaser():
         channels = data.channels
         Ts = 1.0/self.sample_rate
         signal_periods = 1.0/25000.0  #25k is the longest signal expected
-        data = data.data[15000:21000:1]
+        data = data.data#[15000:21000:1]
 
         #channel_length = len(data.data)/data.channels
         #channel_length = len(data)/data.channels
