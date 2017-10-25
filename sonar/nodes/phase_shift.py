@@ -273,8 +273,9 @@ class phaser():
         #self.hydro2 = [25.4,  0,     0]
         #self.hydro3 = [0,     -25.4, 0]
 
-        rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.parse_ping) # for simulation and bags
+        #rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.parse_ping) # for simulation and bags
         #rospy.Subscriber('hydrophones/pingraw', Pingdata, self.parse_ping)
+        rospy.Subscriber('hydrophones/pingconditioned', Pingdata, self.parse_ping)
 
         #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.actual)
         #rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)

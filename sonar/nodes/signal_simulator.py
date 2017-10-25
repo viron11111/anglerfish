@@ -214,7 +214,7 @@ class simulator():
         self.signal_freq = rospy.get_param('signal_freq', 30)  #pinger freq
         self.amplitude = rospy.get_param('amplitude', 1.0)      #received signal amplitude 0.0-1.0
         self.number_of_hydrophones = rospy.get_param('number_of_hydrophones', 4)  
-        self.signal_length = rospy.get_param('signal_length', 0.0004)  #800 uSec from default paul board
+        self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
         #self.signal_pub = rospy.Publisher('hydrophones/pingmsg', Pingdata, queue_size = 1)
         self.tstamps_pub = rospy.Publisher('/hydrophones/actual_time_stamps', Actual_time_stamps, queue_size = 1)
@@ -329,6 +329,7 @@ class simulator():
                         '''ax[0].plot(t,wave)
                         ax[1].plot(t,wave)'''
                         #print wave
+                        #if i == 0 or i == 1:
                         legends[i], = ax.plot(t,wave,linewidth=2.0, label='Hydrophone %i' % i)
                         
                         
