@@ -89,7 +89,7 @@ class solver():
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [173.2,   0,     0]
         hydro2_xyz = [86.6,  -150,     0]
-        hydro3_xyz = [86.6,  -50, -100]        
+        hydro3_xyz = [86.6,  -50, -82]        
 
         x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
         x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
@@ -172,7 +172,7 @@ class solver():
 
         Q2bleft = (del1*del1-x1*x1)/(2.0*del1) if (2.0*del1) != 0 else 0
         Q2bmiddle = (D1*y3)/(B1*del3) if (B1*del3) != 0 else 0
-        Q2bright = (del3*del3 - x3*x3 - y3*y3 - z3*z3)/(2*del3) if (2*del3) != 0 else 0
+        Q2bright = (del3*del3 - x3*x3 - y3*y3 - z3*z3)/(2.0*del3) if (2.0*del3) != 0 else 0
 
         Q2b = Q2bleft + Q2bmiddle - Q2bright
 
@@ -189,7 +189,7 @@ class solver():
         R1cleft = (D1*D1)/(B1*B1) if (B1*B1) != 0 else 0
         R1cright = (x1*x1*x1*x1)/(4.0*del1*del1) if (4.0*del1*del1) != 0 else 0
 
-        R1c = (x1*x1)/2 - (del1*del1)/4 + R1cleft - R1cright
+        R1c = (x1*x1)/2.0 - (del1*del1)/4.0 + R1cleft - R1cright
 
         AA = Q1*Q1*R1a + Q2a*Q2a
         BB = Q1*Q1*R1b + 2.0*Q2a*Q2b
@@ -199,7 +199,7 @@ class solver():
 
 
 
-        if (discr < 0):
+        '''if (discr < 0):
             #no real solution was found; set garbage values for P1 and P2 and return 0
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
@@ -217,27 +217,50 @@ class solver():
             P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
             P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
 
-        #print "x: %f, y: %f, z: %f" % (x,y,z)
+        #print "x: %f, y: %f, z: %f" % (x,y,z)'''
+
+        P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
+        P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
+
+        # get corresponding value for y coordinate  ;  eqn (11)
+        P1[1] = (A1*P1[0]+D1)/B1 if B1 != 0 else 0
+        P2[1] = (A1*P2[0]+D1)/B1 if B1 != 0 else 0
+
+        # get correspoinding value for z coordinate ;  eqn (16)
+        P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
+        P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
 
 
 
         P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
         P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
-        if P1sum > P2sum:
+        print "P1sum: %d" % P1sum
+        rospy.loginfo("x1: %f" % (P1[0]))
+        rospy.loginfo("y1: %f" % (P1[1]))
+        rospy.loginfo("z1: %f" % (P1[2]))
+
+        print "P2sum: %d" % P2sum
+        rospy.loginfo("x2: %f" % (P2[0]))
+        rospy.loginfo("y2: %f" % (P2[1]))
+        rospy.loginfo("z2: %f" % (P2[2]))
+
+        if P1sum > P2sum or P2[2]>0:
             x = P1[0]
             y = P1[1]
             z = P1[2]
-            rospy.loginfo("x1: %f" % (P1[0]))
-            rospy.loginfo("y1: %f" % (P1[1]))
-            rospy.loginfo("z1: %f" % (P1[2]))
+            print "**P1**"
+            #rospy.loginfo("x1: %f" % (P1[0]))
+            #rospy.loginfo("y1: %f" % (P1[1]))
+            #rospy.loginfo("z1: %f" % (P1[2]))
         else:
             x = P2[0]
             y = P2[1]
             z = P2[2]
-            rospy.loginfo("x2: %f" % (P2[0]))
-            rospy.loginfo("y2: %f" % (P2[1]))
-            rospy.loginfo("z2: %f" % (P2[2]))            
+            print "**P2**"
+            #rospy.loginfo("x2: %f" % (P2[0]))
+            #rospy.loginfo("y2: %f" % (P2[1]))
+            #rospy.loginfo("z2: %f" % (P2[2]))            
         
         self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
         self.crane_pub.publish(Crane_pos(

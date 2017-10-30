@@ -41,6 +41,7 @@ class condition():
         break_num = 0
 
         #find the first signal
+        #looks for first signal to go above self.break_val value
         for i in range(samples/4):
             if self.signal[0][i] >= self.break_val:
                 break_num = i
@@ -55,23 +56,30 @@ class condition():
                 break_num = i
                 break
 
-        print break_num
+        #print break_num
 
+        #Buffering holder (zeros) based on the time of 1 period at 25 kHz
         num_samples_save = int((1.0/25000.0)*sample_rate)
         zeros = [0]*num_samples_save        
 
-        #eliminate all information before first signal
+        #eliminate all information before first signal by adding zeros in front of signal
+        #appy to other 3 signals
         for i in range(channels):
             self.signal[i]= self.signal[i][break_num-num_samples_save::]
             self.signal[i] = np.append(zeros,self.signal[i])
 
+        #holder for new signal length (still contains samples following initial signal)
         final_length = len(self.signal[0])
 
         lastest_signal = 0
         current_signal = 0
 
+        #using same variable as above
+        #Buffering holder for keeping 3 periods of actual signal at 25 kHz
         num_samples_save = int((3.0/25000.0)*sample_rate)
 
+        #function to allow 3 periods length of signal to continue
+        #after 3 periods (at 25 kHz), following values are "zero'd"
         for b in range(channels):
             #print("start")
             zeros = []
@@ -86,8 +94,7 @@ class condition():
                     self.signal[b] = np.append(self.signal[b],zeros)
                     break
 
-        #print lastest_signal
-
+        
         for i in range(channels):
             self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
 

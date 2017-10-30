@@ -155,41 +155,44 @@ class plotter():
             #ping = ping_service()
 
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
-            rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            #rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+            #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
+            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
             #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
 
-            self.ax[0].cla()
-            self.ax[0].plot(self.t,self.a, linewidth=2.0, label='Hydrophone A')
-            self.ax[0].plot(self.t,self.b, linewidth=2.0, label='Hydrophone B')
-            self.ax[0].plot(self.t,self.c, linewidth=2.0, label='Hydrophone C')
-            self.ax[0].plot(self.t,self.d, linewidth=2.0, label='Hydrophone D')
+            if len(self.t) == len(self.a):
 
-            self.ax[0].legend(loc="upper left", fontsize=10)
-            self.ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
-            self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
-            self.ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
-            #self.ax[0].set_ylim(-0.5,0.5)
-            self.ax[0].set_xlim(0,self.x_axis_length)
-            self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
-            self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
-            self.ax[0].xaxis.labelpad = 20
-            self.ax[0].yaxis.labelpad = 20
+                self.ax[0].cla()
+                print "%i, %i" % (len(self.t), len(self.a))
+                self.ax[0].plot(self.t,self.a, linewidth=2.0, label='Hydrophone A')
+                self.ax[0].plot(self.t,self.b, linewidth=2.0, label='Hydrophone B')
+                self.ax[0].plot(self.t,self.c, linewidth=2.0, label='Hydrophone C')
+                self.ax[0].plot(self.t,self.d, linewidth=2.0, label='Hydrophone D')
+
+                self.ax[0].legend(loc="upper left", fontsize=10)
+                self.ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                self.ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
+                #self.ax[0].set_ylim(-0.5,0.5)
+                self.ax[0].set_xlim(0,self.x_axis_length)
+                self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
+                self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
+                self.ax[0].xaxis.labelpad = 20
+                self.ax[0].yaxis.labelpad = 20
 
 
-            self.ax[1].cla()
-            #self.ax[2].set_title("FFT On Channel One")
-            #self.ax[1].plot(frq,abs(Y),'r') # plotting the FFT spectrum
-            if self.yf[0] != 0:
-                self.ax[1].plot(self.xf,2.0/self.N * np.abs(self.yf[:self.N//2]),'r') # plotting the FFT spectrum
-            #print abs(Y)
-            self.ax[1].set_xlim(5000,50000)
-            #plt.xticks(np.arange(5000, 50000+1, 500.0))
-            #self.ax[1].set_ylim(0,n/10)
-            self.ax[1].set_xlabel('Freq (Hz)')
-            self.ax[1].set_ylabel('|Y(freq)|')
+                self.ax[1].cla()
+                #self.ax[2].set_title("FFT On Channel One")
+                #self.ax[1].plot(frq,abs(Y),'r') # plotting the FFT spectrum
+                if self.yf[0] != 0:
+                    self.ax[1].plot(self.xf,2.0/self.N * np.abs(self.yf[:self.N//2]),'r') # plotting the FFT spectrum
+                #print abs(Y)
+                self.ax[1].set_xlim(5000,50000)
+                #plt.xticks(np.arange(5000, 50000+1, 500.0))
+                #self.ax[1].set_ylim(0,n/10)
+                self.ax[1].set_xlabel('Freq (Hz)')
+                self.ax[1].set_ylabel('|Y(freq)|')
 
-            plt.pause(0.05)
+                plt.pause(0.05)
 
             rate.sleep()
 
