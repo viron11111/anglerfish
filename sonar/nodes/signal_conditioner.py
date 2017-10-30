@@ -113,7 +113,7 @@ class condition():
 
             #print amplitude_ratio
 
-            #testing for push git
+            #for testing purposes, git
 
             #********* NORMALIZATION for weak signals **********
             for b in range(channels):
