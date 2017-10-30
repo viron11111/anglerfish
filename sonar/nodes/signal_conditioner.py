@@ -34,11 +34,20 @@ class condition():
 
         self.signal = []        
 
+        #Seperate list into individual channels
         for i in range(channels):
             self.signal.append([])
             self.signal[i] = data[i::4]
 
         break_num = 0
+
+        #determine average noise offset and apply offset
+        avg_offset = [0]*channels
+        for b in range(channels):
+            #use first 100 samples
+            l = self.signal[b][:100]
+            avg_offset[b] = sum(l) / float(len(l))
+            self.signal[b] = [x-avg_offset[b] for x in self.signal[b]]
 
         #find the first signal
         #looks for first signal to go above self.break_val value
@@ -56,72 +65,100 @@ class condition():
                 break_num = i
                 break
 
-        #print break_num
-
-        #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-        num_samples_save = int((1.0/25000.0)*sample_rate)
-        zeros = [0]*num_samples_save        
-
-        #eliminate all information before first signal by adding zeros in front of signal
-        #appy to other 3 signals
-        for i in range(channels):
-            self.signal[i]= self.signal[i][break_num-num_samples_save::]
-            self.signal[i] = np.append(zeros,self.signal[i])
-
-        #holder for new signal length (still contains samples following initial signal)
-        final_length = len(self.signal[0])
-
-        lastest_signal = 0
-        current_signal = 0
-
-        #using same variable as above
-        #Buffering holder for keeping 3 periods of actual signal at 25 kHz
-        num_samples_save = int((3.0/25000.0)*sample_rate)
-
-        #function to allow 3 periods length of signal to continue
-        #after 3 periods (at 25 kHz), following values are "zero'd"
-        for b in range(channels):
-            #print("start")
-            zeros = []
-            for i in range(final_length):
-                if self.signal[b][i] >= self.break_val:
-                    current_signal = i
-                    if current_signal > lastest_signal:
-                        lastest_signal = current_signal
-                    self.signal[b] = self.signal[b][:num_samples_save+i:]
-                    difference = final_length - len(self.signal[b])
-                    zeros = [0]*difference
-                    self.signal[b] = np.append(self.signal[b],zeros)
-                    break
-
+        #rospy.loginfo(break_num)
         
-        for i in range(channels):
-            self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
+        if break_num > 100:
+
+            #Buffering holder (zeros) based on the time of 1 period at 25 kHz
+            num_samples_save = int((1.0/25000.0)*sample_rate)
+            zeros = [0]*num_samples_save        
+
+            #eliminate all information before first signal by adding zeros in front of signal
+            #appy to other 3 signals
+            for i in range(channels):
+                self.signal[i]= self.signal[i][break_num-num_samples_save::]
+                self.signal[i] = np.append(zeros,self.signal[i])
+
+            #holder for new signal length (still contains samples following initial signal)
+            final_length = len(self.signal[0])
+
+            lastest_signal = 0
+            current_signal = 0
+
+            #using same variable as above
+            #Buffering holder for keeping 3 periods of actual signal at 25 kHz
+            num_samples_save = int((15.0/25000.0)*sample_rate)
+
+
+            min_amp = [0]*channels
+            max_amp = [0]*channels
+
+            #find max value and min value in list for normalization purposes
+            #only use 3 periods of 25 kHz length
+            for b in range(channels):
+                for i in range(final_length):
+                    if self.signal[b][i] >= self.break_val:
+                        min_amp[b] = min(self.signal[b][:i+num_samples_save])
+                        max_amp[b] = max(self.signal[b][:i+num_samples_save])
+                        break        
+            
+            #find greatest amplitude difference
+            amplitude = [x - y for x, y in zip(max_amp, min_amp)]
+            max_amplitude = max(amplitude)
+
+            #determine ratio to normalize signal
+            amplitude_ratio = [0]*channels
+            for i in range(channels):
+                amplitude_ratio[i] = max_amplitude/amplitude[i]
+
+            for b in range(channels):
+                self.signal[b] = [x*amplitude_ratio[b] for x in self.signal[b]]
+
+            #function to allow 3 periods length of signal to continue
+            #after 3 periods (at 25 kHz), following values are "zero'd"
+            for b in range(channels):
+                #print("start")
+                zeros = []
+                for i in range(final_length):
+                    if self.signal[b][i] >= self.break_val:
+                        current_signal = i
+                        if current_signal > lastest_signal:
+                            lastest_signal = current_signal
+                        self.signal[b] = self.signal[b][:num_samples_save+i:]
+                        difference = final_length - len(self.signal[b])
+                        zeros = [0]*difference
+                        self.signal[b] = np.append(self.signal[b],zeros)
+                        break
+
+            #Allow 50 zeros passed the latest signal, crop all additional zeros following
+            for i in range(channels):
+                self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
 
 
 
-        #combine four signals back into one array
-        condition_data = []
-
-        for i in range(len(self.signal[0])):
-            condition_data = np.append(condition_data,self.signal[0][i])
-            condition_data = np.append(condition_data,self.signal[1][i])
-            condition_data = np.append(condition_data,self.signal[2][i])
-            condition_data = np.append(condition_data,self.signal[3][i])
 
 
+            #combine four signals back into one array
+            condition_data = []
 
+            for i in range(len(self.signal[0])):
+                condition_data = np.append(condition_data,self.signal[0][i])
+                condition_data = np.append(condition_data,self.signal[1][i])
+                condition_data = np.append(condition_data,self.signal[2][i])
+                condition_data = np.append(condition_data,self.signal[3][i])
 
+            self.simulate_pub.publish(Pingdata(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='signal_conditioner'),
+                channels=channels,
+                samples=len(self.signal[0])*4,
+                data=condition_data,
+                adc_bit = 12,
+                sample_rate=sample_rate))     
 
-        self.simulate_pub.publish(Pingdata(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='signal_conditioner'),
-            channels=channels,
-            samples=len(self.signal[0])*4,
-            data=condition_data,
-            adc_bit = 12,
-            sample_rate=sample_rate))        
-        
+        else:
+            rospy.logwarn("Missed beginning of signal, triggered late")
+            rospy.logwarn("Interference or weak channel")
 
 
     def __init__(self):
@@ -132,7 +169,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.1
+        self.break_val = 0.05
 
         rate = rospy.Rate(1)
 

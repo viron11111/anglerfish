@@ -121,6 +121,17 @@ class solver():
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
         del3 = (data.calculated_time_stamps[3])*c #mm/uSec   
 
+        x1 = 8.5
+        x2 = 5.65
+        y2 = 4.75
+        x3 = -1.75
+        y3 = 3.5
+        z3 = 1.75        
+
+        del1 = 2.053896
+        del2 = -1.349004
+        del3 = -2.817121
+
         #del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
         #del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
         #del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  
@@ -199,12 +210,22 @@ class solver():
 
 
 
-        '''if (discr < 0):
-            #no real solution was found; set garbage values for P1 and P2 and return 0
+        if (discr < 0):
+            rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+            print "BB: ", BB
+            print "discr: ", discr
+            print "AA: ", AA
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
+            x=0
+            y=0
+            z=0
 
         else:
+
+            #print "BB: ", BB
+            #print "discr: ", discr
+            #print "AA: ", AA
 
             P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
             P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
@@ -217,9 +238,72 @@ class solver():
             P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
             P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
 
-        #print "x: %f, y: %f, z: %f" % (x,y,z)'''
+            P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
+            P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
-        P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
+            print "P1sum: %d" % P1sum
+            rospy.loginfo("x1: %f" % (P1[0]))
+            rospy.loginfo("y1: %f" % (P1[1]))
+            rospy.loginfo("z1: %f" % (P1[2]))
+
+            print "P2sum: %d" % P2sum
+            rospy.loginfo("x2: %f" % (P2[0]))
+            rospy.loginfo("y2: %f" % (P2[1]))
+            rospy.loginfo("z2: %f" % (P2[2]))
+
+            dellist = [del1, del2, del3]
+
+            check_d0 = math.sqrt(P1[0]*P1[0]+P1[1]*P1[1]+P1[2]*P1[2])
+            check_d1 = math.sqrt((P1[0]-x1)*(P1[0]-x1)+P1[1]*P1[1]+P1[2]*P1[2])
+            check_d2 = math.sqrt((P1[0]-x2)*(P1[0]-x2)+(P1[1]-y2)*(P1[1]-y2)+P1[2]*P1[2])
+            check_d3 = math.sqrt((P1[0]-x3)*(P1[0]-x3)+(P1[1]-y3)*(P1[1]-y3)+(P1[2]-z3)*(P1[2]-z3))
+
+            measured1_list = [check_d1 - check_d0, check_d2 - check_d0, check_d3 - check_d0]
+
+            check_d0 = math.sqrt(P2[0]*P2[0]+P2[1]*P2[1]+P2[2]*P2[2])
+            check_d1 = math.sqrt((P2[0]-x1)*(P2[0]-x1)+P2[1]*P2[1]+P2[2]*P2[2])
+            check_d2 = math.sqrt((P2[0]-x2)*(P2[0]-x2)+(P2[1]-y2)*(P2[1]-y2)+P2[2]*P2[2])
+            check_d3 = math.sqrt((P2[0]-x3)*(P2[0]-x3)+(P2[1]-y3)*(P2[1]-y3)+(P2[2]-z3)*(P2[2]-z3))
+
+            measured2_list = [check_d1 - check_d0, check_d2 - check_d0, check_d3 - check_d0]
+
+            print "dellist:        ", dellist
+            print "measured1_list: ", measured1_list
+            print "measured2_list: ", measured2_list
+
+            if P1sum > P2sum or P2[2]>0:
+                x = P1[0]
+                y = P1[1]
+                z = P1[2]
+                print "**P1**"
+                #rospy.loginfo("x1: %f" % (P1[0]))
+                #rospy.loginfo("y1: %f" % (P1[1]))
+                #rospy.loginfo("z1: %f" % (P1[2]))
+            else:
+                x = P2[0]
+                y = P2[1]
+
+                if P2[2] > 0:
+                    print "negative"
+                    P2[2] = -P2[2]
+                
+                z = P2[2]
+                print "**P2**"
+                #rospy.loginfo("x2: %f" % (P2[0]))
+                #rospy.loginfo("y2: %f" % (P2[1]))
+                #rospy.loginfo("z2: %f" % (P2[2]))            
+            
+            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+            self.crane_pub.publish(Crane_pos(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='Crane_pos_calc'),
+                x_pos=x,
+                y_pos=y,
+                z_pos=z))            
+
+        #print "x: %f, y: %f, z: %f" % (x,y,z)
+
+        '''P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
         P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
 
         # get corresponding value for y coordinate  ;  eqn (11)
@@ -228,47 +312,11 @@ class solver():
 
         # get correspoinding value for z coordinate ;  eqn (16)
         P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
-        P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
+        P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0'''
 
 
 
-        P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
-        P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
-        print "P1sum: %d" % P1sum
-        rospy.loginfo("x1: %f" % (P1[0]))
-        rospy.loginfo("y1: %f" % (P1[1]))
-        rospy.loginfo("z1: %f" % (P1[2]))
-
-        print "P2sum: %d" % P2sum
-        rospy.loginfo("x2: %f" % (P2[0]))
-        rospy.loginfo("y2: %f" % (P2[1]))
-        rospy.loginfo("z2: %f" % (P2[2]))
-
-        if P1sum > P2sum or P2[2]>0:
-            x = P1[0]
-            y = P1[1]
-            z = P1[2]
-            print "**P1**"
-            #rospy.loginfo("x1: %f" % (P1[0]))
-            #rospy.loginfo("y1: %f" % (P1[1]))
-            #rospy.loginfo("z1: %f" % (P1[2]))
-        else:
-            x = P2[0]
-            y = P2[1]
-            z = P2[2]
-            print "**P2**"
-            #rospy.loginfo("x2: %f" % (P2[0]))
-            #rospy.loginfo("y2: %f" % (P2[1]))
-            #rospy.loginfo("z2: %f" % (P2[2]))            
-        
-        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-        self.crane_pub.publish(Crane_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='Crane_pos_calc'),
-            x_pos=x,
-            y_pos=y,
-            z_pos=z))
 
         return Crane_pos_serviceResponse(x, y, z)        
 
