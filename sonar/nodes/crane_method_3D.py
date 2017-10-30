@@ -89,7 +89,7 @@ class solver():
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [173.2,   0,     0]
         hydro2_xyz = [86.6,  -150,     0]
-        hydro3_xyz = [86.6,  -50, -82]        
+        hydro3_xyz = [86.6,  -50, -100]        
 
         x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
         x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
@@ -107,7 +107,7 @@ class solver():
 
         del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
         del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
-        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec '''   
+        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  '''
 
         #print tstampts.calculated_time_stamps[1]
         #print tstampts.calculated_time_stamps[2]
@@ -117,11 +117,12 @@ class solver():
         #print tstampts.actual_time_stamps[2]
         #print tstampts.actual_time_stamps[3] 
 
-        del1 = (data.calculated_time_stamps[1])*c #mm/uSec
-        del2 = (data.calculated_time_stamps[2])*c #mm/uSec
-        del3 = (data.calculated_time_stamps[3])*c #mm/uSec   
+        del1 = -(data.calculated_time_stamps[1])*c #mm/uSec
+        del2 = -(data.calculated_time_stamps[2])*c #mm/uSec
+        del3 = -(data.calculated_time_stamps[3])*c #mm/uSec   
 
-        x1 = 8.5
+        #Values from Dr. Crane's documentation:
+        '''x1 = 8.5
         x2 = 5.65
         y2 = 4.75
         x3 = -1.75
@@ -130,26 +131,8 @@ class solver():
 
         del1 = 2.053896
         del2 = -1.349004
-        del3 = -2.817121
+        del3 = -2.817121'''
 
-        #del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
-        #del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
-        #del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  
-
-        '''#Experiment
-        x1 = 8.500000
-        x2 = 5.650000   
-        y2 = 4.750000
-        x3 = -1.750000  
-        y3 = 3.500000   
-        z3 = 1.750000
-        del1 = 2.053896 
-        del2 = -1.349004
-        del3 = -2.817121 '''        
-
-        #print del1
-        #print del2
-        #print del3
         print "********"
 
         #print "\n"
@@ -267,11 +250,25 @@ class solver():
 
             measured2_list = [check_d1 - check_d0, check_d2 - check_d0, check_d3 - check_d0]
 
+            measured1_list = [int(i) for i in measured1_list]
+            measured2_list = [int(i) for i in measured2_list]
+            dellist = [int(i) for i in dellist]
+
+            #print measured2_list == dellist
+
             print "dellist:        ", dellist
             print "measured1_list: ", measured1_list
             print "measured2_list: ", measured2_list
 
-            if P1sum > P2sum or P2[2]>0:
+            if measured1_list == measured2_list:
+                rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
+                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+                P1[0] = P1[1] = P1[2] = 0.0
+                P2[0] = P2[1] = P2[2] = 0.0
+                x=0
+                y=0
+                z=0
+            elif measured1_list == dellist:
                 x = P1[0]
                 y = P1[1]
                 z = P1[2]
@@ -279,26 +276,29 @@ class solver():
                 #rospy.loginfo("x1: %f" % (P1[0]))
                 #rospy.loginfo("y1: %f" % (P1[1]))
                 #rospy.loginfo("z1: %f" % (P1[2]))
-            else:
+            elif measured2_list == dellist:
                 x = P2[0]
-                y = P2[1]
-
-                if P2[2] > 0:
-                    print "negative"
-                    P2[2] = -P2[2]
-                
+                y = P2[1]                
                 z = P2[2]
                 print "**P2**"
                 #rospy.loginfo("x2: %f" % (P2[0]))
                 #rospy.loginfo("y2: %f" % (P2[1]))
                 #rospy.loginfo("z2: %f" % (P2[2]))            
+            else:
+                rospy.logwarn("CHECKFAILED: measured1_list != dellist and measured2_list != dellist")
+                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+                P1[0] = P1[1] = P1[2] = 0.0
+                P2[0] = P2[1] = P2[2] = 0.0
+                x=0
+                y=0
+                z=0
             
             self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
             self.crane_pub.publish(Crane_pos(
                 header=Header(stamp=rospy.Time.now(),
                               frame_id='Crane_pos_calc'),
                 x_pos=x,
-                y_pos=y,
+                y_pos=-y,
                 z_pos=z))            
 
         #print "x: %f, y: %f, z: %f" % (x,y,z)

@@ -87,7 +87,7 @@ class condition():
 
             #using same variable as above
             #Buffering holder for keeping 3 periods of actual signal at 25 kHz
-            num_samples_save = int((15.0/25000.0)*sample_rate)
+            num_samples_save = int((3.0/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
@@ -111,17 +111,39 @@ class condition():
             for i in range(channels):
                 amplitude_ratio[i] = max_amplitude/amplitude[i]
 
+            #print amplitude_ratio
+
+            #********* NORMALIZATION for weak signals **********
             for b in range(channels):
-                self.signal[b] = [x*amplitude_ratio[b] for x in self.signal[b]]
+                if amplitude_ratio[b] > 5:
+                    self.signal[b] = [x*(amplitude_ratio[b]*0.5) for x in self.signal[b]]
+                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % b)
+
+                    degree = 5
+                    window=degree*2-1  
+                    weight=np.array([1.0]*window)  
+                    weightGauss=[]  
+                    for i in range(window):  
+                        i=i-degree+1  
+                        frac=i/float(window)  
+                        gauss=1/(np.exp((4*(frac))**2))  
+                        weightGauss.append(gauss) 
+                    weight=np.array(weightGauss)*weight  
+                    smoothed=[0.0]*(len(self.signal[b])-window)
+                    for i in range(len(smoothed)):  
+                        smoothed[i]=sum(np.array(self.signal[b][i:i+window])*weight)/sum(weight) 
+                    self.signal[b] = smoothed
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
+            max_signal_range = [0]*channels
             for b in range(channels):
-                #print("start")
+                #print("start")                
                 zeros = []
                 for i in range(final_length):
                     if self.signal[b][i] >= self.break_val:
                         current_signal = i
+                        max_signal_range[b] = current_signal
                         if current_signal > lastest_signal:
                             lastest_signal = current_signal
                         self.signal[b] = self.signal[b][:num_samples_save+i:]
@@ -129,6 +151,12 @@ class condition():
                         zeros = [0]*difference
                         self.signal[b] = np.append(self.signal[b],zeros)
                         break
+
+            '''signal_holder_average = float(sum(max_signal_range))/len(max_signal_range) if len(max_signal_range) > 0 else float('nan')
+            for i in range(channels):
+                diff = abs(signal_holder_average - max_signal_range[i])
+                if diff >= 250:
+                    rospy.logwarn("SIGNAL DESCREPANCY: abnormally high sample length, check hydrophone %i signal" % i)'''
 
             #Allow 50 zeros passed the latest signal, crop all additional zeros following
             for i in range(channels):
@@ -169,7 +197,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.05
+        self.break_val = 0.1
 
         rate = rospy.Rate(1)
 
