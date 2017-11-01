@@ -62,7 +62,7 @@ class condition():
         if earliest_break_num > 100:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((0.75/25000.0)*sample_rate)
+            num_samples_save = int((1.5/25000.0)*sample_rate)
             zeros = [0]*num_samples_save        
 
             #eliminate all information before first signal by adding zeros in front of signal
@@ -94,7 +94,7 @@ class condition():
 
             #using same variable as above
             #Buffering holder for keeping 3 periods of actual signal at 25 kHz
-            num_samples_save = int((3.0/25000.0)*sample_rate)
+            num_samples_save = int((1.0/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
@@ -122,13 +122,31 @@ class condition():
 
             #for testing purposes, git more headaches
 
-            #********* NORMALIZATION for weak signals **********
-            for b in range(channels):
-                if amplitude_ratio[b] > 5:
-                    self.signal[b] = [x*(amplitude_ratio[b]*1.0) for x in self.signal[b]]
-                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % b)
+            self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]
+            '''degree = 5
+            window=degree*2-1  
+            weight=np.array([1.0]*window)  
+            weightGauss=[]  
+            for i in range(window):  
+                i=i-degree+1  
+                frac=i/float(window)  
+                gauss=1/(np.exp((4*(frac))**2))  
+                weightGauss.append(gauss) 
+            weight=np.array(weightGauss)*weight  
+            smoothed=[0.0]*(len(self.signal[0])-window)
+            for i in range(len(smoothed)):  
+                smoothed[i]=sum(np.array(self.signal[0][i:i+window])*weight)/sum(weight) 
+            self.signal[0] = smoothed'''
 
-                    degree = 5
+
+            #********* NORMALIZATION for weak signals **********
+            for b in range(channels-1):
+                if amplitude_ratio[b+1] > 5:
+                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.5) for x in self.signal[b+1]]
+                    phoneno = b+1
+                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % phoneno)
+
+                    '''degree = 5
                     window=degree*2-1  
                     weight=np.array([1.0]*window)  
                     weightGauss=[]  
@@ -138,10 +156,10 @@ class condition():
                         gauss=1/(np.exp((4*(frac))**2))  
                         weightGauss.append(gauss) 
                     weight=np.array(weightGauss)*weight  
-                    smoothed=[0.0]*(len(self.signal[b])-window)
+                    smoothed=[0.0]*(len(self.signal[b+1])-window)
                     for i in range(len(smoothed)):  
-                        smoothed[i]=sum(np.array(self.signal[b][i:i+window])*weight)/sum(weight) 
-                    self.signal[b] = smoothed
+                        smoothed[i]=sum(np.array(self.signal[b+1][i:i+window])*weight)/sum(weight) 
+                    self.signal[b+1] = smoothed'''
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
@@ -164,10 +182,6 @@ class condition():
             #Allow 50 zeros passed the latest signal, crop all additional zeros following
             for i in range(channels):
                 self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
-
-
-
-
 
             #combine four signals back into one array
             condition_data = []
@@ -200,7 +214,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.15
+        self.break_val = 0.15 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 

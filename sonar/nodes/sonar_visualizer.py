@@ -113,7 +113,7 @@ class plotter():
 
         elif array == "z-offset":
             heading = float(crane_heading)
-            heading = -heading - 45
+            heading = heading - 45
             if heading < 0:
                 heading = 360 + heading
             pygame.font.init() # you have to call this at the start, 
@@ -142,7 +142,7 @@ class plotter():
                 self.screen.blit(badfix,(45,130))       
                 self.screen.blit(badfix,(225,130))       
             else:
-                angle = crane_heading + 45
+                angle = 360 - crane_heading + 45
                 pos = 100,150
 
                 arrow=pygame.Surface((5,80))

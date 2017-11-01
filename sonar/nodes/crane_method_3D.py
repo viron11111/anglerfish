@@ -88,8 +88,8 @@ class solver():
         #experimental layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  -150,     0]
-        hydro3_xyz = [86.6,  -50, -100]        
+        hydro2_xyz = [86.6,  150,     0]
+        hydro3_xyz = [86.6,  50, -100]        
 
         x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
         x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
@@ -97,25 +97,6 @@ class solver():
         x3 = hydro3_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
         y3 = hydro3_xyz[1] #+ 0.75 #np.random.uniform(-1, 1)
         z3 = hydro3_xyz[2]
-
-        #calc_service = rospy.ServiceProxy('hydrophones/calculated_time_stamps', Calculated_time_stamps_service)
-        #calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
-        #tstampts = calc_service()
-
-        '''calc_service = rospy.ServiceProxy('hydrophones/actual_time_stamps', Actual_time_stamps_service)
-        tstampts = calc_service()
-
-        del1 = (tstampts.actual_time_stamps[1])*c #mm/uSec
-        del2 = (tstampts.actual_time_stamps[2])*c #mm/uSec
-        del3 = (tstampts.actual_time_stamps[3])*c #mm/uSec  '''
-
-        #print tstampts.calculated_time_stamps[1]
-        #print tstampts.calculated_time_stamps[2]
-        #print tstampts.calculated_time_stamps[3]    
-
-        #print tstampts.actual_time_stamps[1]
-        #print tstampts.actual_time_stamps[2]
-        #print tstampts.actual_time_stamps[3] 
 
         del1 = (data.calculated_time_stamps[1])*c #mm/uSec
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
