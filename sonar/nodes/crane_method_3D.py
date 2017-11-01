@@ -102,6 +102,16 @@ class solver():
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
         del3 = (data.calculated_time_stamps[3])*c #mm/uSec   
 
+        print "x1: ", x1
+        print "x2: ", x2
+        print "y2: ", y2
+        print "x3: ", x3
+        print "y3: ", y3
+        print "z3: ", z3
+        print "del1: ", del1
+        print "del2: ", del2
+        print "del3: ", del3
+
         #Values from Dr. Crane's documentation:
         '''x1 = 8.5
         x2 = 5.65
