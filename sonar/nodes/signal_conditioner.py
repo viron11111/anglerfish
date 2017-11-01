@@ -28,9 +28,7 @@ class condition():
         samples  = msg.samples
         sample_rate = msg.sample_rate
         adc_bit = msg.adc_bit
-        data = msg.data
-
-        
+        data = msg.data      
 
         self.signal = []        
 
@@ -51,33 +49,42 @@ class condition():
 
         #find the first signal
         #looks for first signal to go above self.break_val value
-        for i in range(samples/4):
-            if self.signal[0][i] >= self.break_val:
-                break_num = i
-                break
-            elif self.signal[1][i] >= self.break_val:
-                break_num = i
-                break
-            elif self.signal[2][i] >= self.break_val:
-                break_num = i
-                break
-            elif self.signal[3][i] >= self.break_val:
-                break_num = i
-                break
-
-        #rospy.loginfo(break_num)
+        break_num = [0]*channels
+        for b in range(channels):
+            for i in range(samples/4):
+                if self.signal[b][i] >= self.break_val:
+                    break_num[b] = i
+                    break
         
-        if break_num > 100:
+        earliest_break_num = min(break_num)
+
+        #rejection statement for samples triggered in middle of transmission (no start point)
+        if earliest_break_num > 100:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((1.0/25000.0)*sample_rate)
+            num_samples_save = int((0.75/25000.0)*sample_rate)
             zeros = [0]*num_samples_save        
 
             #eliminate all information before first signal by adding zeros in front of signal
             #appy to other 3 signals
-            for i in range(channels):
-                self.signal[i]= self.signal[i][break_num-num_samples_save::]
-                self.signal[i] = np.append(zeros,self.signal[i])
+            for b in range(channels):
+                self.signal[b] = self.signal[b][earliest_break_num-num_samples_save::]
+                self.signal[b] = np.append(zeros,self.signal[b])
+                
+            for b in range(channels):
+                #print "break_num: ",break_num[b]
+                #print "earliest_break_num ", earliest_break_num
+                for i in range(len(self.signal[b])):
+                    if i < break_num[b]-earliest_break_num: 
+                        self.signal[b][i] = 0
+                    else: 
+                        break                
+                    
+
+            '''for b in range(channels):
+                for i in range(len(self.signal[b])):
+                    if i < break_num[b]-num_samples_save: self.signal[b][i] = 0
+                    else: break'''
 
             #holder for new signal length (still contains samples following initial signal)
             final_length = len(self.signal[0])
@@ -118,7 +125,7 @@ class condition():
             #********* NORMALIZATION for weak signals **********
             for b in range(channels):
                 if amplitude_ratio[b] > 5:
-                    self.signal[b] = [x*(amplitude_ratio[b]*0.5) for x in self.signal[b]]
+                    self.signal[b] = [x*(amplitude_ratio[b]*1.0) for x in self.signal[b]]
                     rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % b)
 
                     degree = 5
@@ -153,12 +160,6 @@ class condition():
                         zeros = [0]*difference
                         self.signal[b] = np.append(self.signal[b],zeros)
                         break
-
-            '''signal_holder_average = float(sum(max_signal_range))/len(max_signal_range) if len(max_signal_range) > 0 else float('nan')
-            for i in range(channels):
-                diff = abs(signal_holder_average - max_signal_range[i])
-                if diff >= 250:
-                    rospy.logwarn("SIGNAL DESCREPANCY: abnormally high sample length, check hydrophone %i signal" % i)'''
 
             #Allow 50 zeros passed the latest signal, crop all additional zeros following
             for i in range(channels):
@@ -199,7 +200,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.1
+        self.break_val = 0.15
 
         rate = rospy.Rate(1)
 

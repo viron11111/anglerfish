@@ -117,9 +117,9 @@ class solver():
         #print tstampts.actual_time_stamps[2]
         #print tstampts.actual_time_stamps[3] 
 
-        del1 = -(data.calculated_time_stamps[1])*c #mm/uSec
-        del2 = -(data.calculated_time_stamps[2])*c #mm/uSec
-        del3 = -(data.calculated_time_stamps[3])*c #mm/uSec   
+        del1 = (data.calculated_time_stamps[1])*c #mm/uSec
+        del2 = (data.calculated_time_stamps[2])*c #mm/uSec
+        del3 = (data.calculated_time_stamps[3])*c #mm/uSec   
 
         #Values from Dr. Crane's documentation:
         '''x1 = 8.5

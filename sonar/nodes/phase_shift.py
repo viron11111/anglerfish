@@ -196,7 +196,7 @@ class phaser():
         #rospy.logwarn("SIGNAL")
         #rospy.loginfo(signal)
 
-        print len(reference)
+        #print len(reference)
 
         cross_corr = np.correlate(reference, signal, mode='full')
         max_idx = cross_corr.argmax()
