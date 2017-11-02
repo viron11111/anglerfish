@@ -173,13 +173,22 @@ class solver():
         discr = BB*BB - 4.0*AA*CC ;
 
 
-
         if (discr < 0):
-            #no real solution was found; set garbage values for P1 and P2 and return 0
+            rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+            print "BB: ", BB
+            print "discr: ", discr
+            print "AA: ", AA
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
+            x=0
+            y=0
+            z=0
 
         else:
+
+            #print "BB: ", BB
+            #print "discr: ", discr
+            #print "AA: ", AA
 
             P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
             P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
@@ -192,27 +201,77 @@ class solver():
             P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
             P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
 
-        #print "x: %f, y: %f, z: %f" % (x,y,z)
+            P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
+            P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
-
-
-        P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
-        P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
-
-        if P1sum > P2sum:
-            x = P1[0]
-            y = P1[1]
-            z = P1[2]
+            print "P1sum: %d" % P1sum
             rospy.loginfo("x1: %f" % (P1[0]))
             rospy.loginfo("y1: %f" % (P1[1]))
             rospy.loginfo("z1: %f" % (P1[2]))
-        else:
-            x = P2[0]
-            y = P2[1]
-            z = P2[2]
+
+            print "P2sum: %d" % P2sum
             rospy.loginfo("x2: %f" % (P2[0]))
             rospy.loginfo("y2: %f" % (P2[1]))
-            rospy.loginfo("z2: %f" % (P2[2]))            
+            rospy.loginfo("z2: %f" % (P2[2]))
+
+            dellist = [del1, del2, del3]
+
+            check_d0 = math.sqrt(P1[0]*P1[0]+P1[1]*P1[1]+P1[2]*P1[2])
+            check_d1 = math.sqrt((P1[0]-x1)*(P1[0]-x1)+P1[1]*P1[1]+P1[2]*P1[2])
+            check_d2 = math.sqrt((P1[0]-x2)*(P1[0]-x2)+(P1[1]-y2)*(P1[1]-y2)+P1[2]*P1[2])
+            check_d3 = math.sqrt((P1[0]-x3)*(P1[0]-x3)+(P1[1]-y3)*(P1[1]-y3)+(P1[2]-z3)*(P1[2]-z3))
+
+            measured1_list = [check_d1 - check_d0, check_d2 - check_d0, check_d3 - check_d0]
+
+            check_d0 = math.sqrt(P2[0]*P2[0]+P2[1]*P2[1]+P2[2]*P2[2])
+            check_d1 = math.sqrt((P2[0]-x1)*(P2[0]-x1)+P2[1]*P2[1]+P2[2]*P2[2])
+            check_d2 = math.sqrt((P2[0]-x2)*(P2[0]-x2)+(P2[1]-y2)*(P2[1]-y2)+P2[2]*P2[2])
+            check_d3 = math.sqrt((P2[0]-x3)*(P2[0]-x3)+(P2[1]-y3)*(P2[1]-y3)+(P2[2]-z3)*(P2[2]-z3))
+
+            measured2_list = [check_d1 - check_d0, check_d2 - check_d0, check_d3 - check_d0]
+
+            measured1_list = [int(i) for i in measured1_list]
+            measured2_list = [int(i) for i in measured2_list]
+            dellist = [int(i) for i in dellist]
+
+            #print measured2_list == dellist
+
+            print "dellist:        ", dellist
+            print "measured1_list: ", measured1_list
+            print "measured2_list: ", measured2_list
+
+            if measured1_list == measured2_list:
+                rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
+                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+                P1[0] = P1[1] = P1[2] = 0.0
+                P2[0] = P2[1] = P2[2] = 0.0
+                x=0
+                y=0
+                z=0
+            elif measured1_list == dellist:
+                x = P1[0]
+                y = P1[1]
+                z = P1[2]
+                print "**P1**"
+                #rospy.loginfo("x1: %f" % (P1[0]))
+                #rospy.loginfo("y1: %f" % (P1[1]))
+                #rospy.loginfo("z1: %f" % (P1[2]))
+            elif measured2_list == dellist:
+                x = P2[0]
+                y = P2[1]                
+                z = P2[2]
+                print "**P2**"
+                #rospy.loginfo("x2: %f" % (P2[0]))
+                #rospy.loginfo("y2: %f" % (P2[1]))
+                #rospy.loginfo("z2: %f" % (P2[2]))            
+            else:
+                rospy.logwarn("CHECKFAILED: measured1_list != dellist and measured2_list != dellist")
+                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+                P1[0] = P1[1] = P1[2] = 0.0
+                P2[0] = P2[1] = P2[2] = 0.0
+                x=0
+                y=0
+                z=0     
         
         self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
         self.crane_pub.publish(Crane_pos(

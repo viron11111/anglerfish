@@ -127,8 +127,7 @@ class plotter():
             west  = myfont.render('270', False, (255, 255, 0))
             east  = myfont.render('90', False, (255, 255, 0))
             south  = myfont.render('180', False, (255, 255, 0))
-            heading_number  = bigfont.render(('Bearing: %0.1f' % heading), False, (255, 255, 255))
-            declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
+
            
             self.screen.fill((0,0,0))
 
@@ -136,11 +135,13 @@ class plotter():
             #self.screen.blit(chydro,(60,155))
             #self.screen.blit(dhydro,(130,155))          
 
-            if heading == 0.0 and calculated_declination == 0.0:
+            if heading == 135.0 and calculated_declination == 0.0:
                 self.screen.fill((100,0,0))
                 badfix  = bigfont.render('!!BADFIX!!', False, (255, 0, 0))
                 self.screen.blit(badfix,(45,130))       
-                self.screen.blit(badfix,(225,130))       
+                self.screen.blit(badfix,(225,130))     
+                heading_number  = bigfont.render(('Bearing: ---'), False, (255, 255, 255))
+                declination  = bigfont.render(('Declination: ---'), False, (255, 255, 255))  
             else:
                 angle = 360 - crane_heading + 45
                 pos = 100,150
@@ -172,6 +173,8 @@ class plotter():
                 nar2=pygame.transform.rotate(arrow2,angle2)
                 nrect2=nar2.get_rect(center=pos2)
                 self.screen.blit(nar2, nrect2)
+                heading_number  = bigfont.render(('Bearing: %0.1f' % heading), False, (255, 255, 255))
+                declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
                 pygame.display.update()        
 
             self.screen.blit(north,(100,90))

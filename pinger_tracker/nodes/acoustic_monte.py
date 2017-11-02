@@ -98,7 +98,7 @@ class monte(object):
             actual_heading = np.arctan2(self.actual_y,self.actual_x)+ np.pi
         else:
             actual_heading = 0.0'''
-        print "crane: %f actual: %f" % (crane_heading, actual_heading)
+        #print "crane: %f actual: %f" % (crane_heading, actual_heading)
 
 
         if self.crane_x == 0 and self.crane_y == 0:
@@ -169,6 +169,16 @@ class monte(object):
         self.declination_error_sum = self.declination_error_sum + declination_error_radian
         self.distance_error_sum = self.distance_error_sum + distance_error
 
+        if self.crane_x == 0.0 and self.crane_y == 0.0 and self.crane_z == 0.0:
+            print "x: ", self.crane_x
+            print "y: ", self.crane_y
+            print "z: ", self.crane_z
+            #self.heading_error_sum = 6.0
+            #self.declination_error_sum  = 6.0
+            self.declination_error = 6.0
+            self.head_error = 6.0
+
+
         #print "{}\tdistance_error: %.4f meters {}%.4f%%{}".format(self.W,self.O,self.W) % (distance_difference, distance_error)
 
         #print "***********************************"
@@ -187,6 +197,9 @@ class monte(object):
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
+        #print x_list
+        x_list = list(reversed(x_list))
+        y_list = list(reversed(y_list))
         zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
         # contour the gridded data, plotting dots at the nonuniform data points.
         if typemeasure == 'Heading':
@@ -304,9 +317,9 @@ class monte(object):
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 10000
-        distance_resolution = 2000
-        degree_angle_resolution = 10
+        self.max_range = 15000
+        distance_resolution = 1000
+        degree_angle_resolution = 5
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -330,7 +343,7 @@ class monte(object):
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
-                time.sleep(1.0)
+                #time.sleep(1.0)
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
         self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')       

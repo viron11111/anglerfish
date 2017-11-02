@@ -62,10 +62,12 @@ class monte(object):
         hydro3_xyz = [86.6,  50, -100] 
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
-
+    
     def calculate_error(self, x, y, z):
 
-        ping = rospy.ServiceProxy('/hydrophones/ping', Ping)
+        self.position = [x,y,z]
+        
+    def calculate_error1(self, x, y, z):
 
         self.position = [x,y,z]
 
@@ -252,7 +254,7 @@ class monte(object):
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
         rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
         rospy.Service('hydrophones/sample_rate', Sample_rate, self.sampling_rate)
-        rospy.Service('hydrophones/ping', Ping_service, self.sampling_rate)
+        #rospy.Service('hydrophones/ping', Ping_service, self.sampling_rate)
 
         self.actual_x = 0
         self.actual_y = 0
@@ -308,7 +310,7 @@ class monte(object):
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 2000
+        distance_resolution = 5000
         degree_angle_resolution = 10
         rad_resolution = math.radians(degree_angle_resolution)
 
@@ -329,11 +331,13 @@ class monte(object):
 
                 self.calculate_error(x,y,z)
 
+                ping = rospy.ServiceProxy('/hydrophones/ping_sim', Ping_service)
+
                 x_list = x_list + [x]
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
-                time.sleep(1.0)
+                #time.sleep(1.0)
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
         self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')       
