@@ -130,8 +130,8 @@ class solver():
 
         #print "A1: %f" % A1
         
-        catch = (x1*x1-del1*del1)/(2.0*del1) if del1 != 0 else 0
         zero = (x2*x2 + y2*y2-del2*del2)/(2.0*del2) if del2 != 0 else 0
+        catch = (x1*x1-del1*del1)/(2.0*del1) if del1 != 0 else 0
 
         D1 = zero - catch
 
@@ -225,7 +225,7 @@ class solver():
         return Crane_pos_serviceResponse(x, y, z)        
 
     def __init__(self):
-        rospy.init_node('crane_method_service')
+        rospy.init_node('crane_method_service_simulator')
         #rospy.Subscriber('/hydrophones/actualtimestamps', Actual_time_stamps, self.actu_vals)
         #rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)

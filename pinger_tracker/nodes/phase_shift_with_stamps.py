@@ -139,9 +139,9 @@ class phaser(Multilaterator):
         for i in range(4):
             calculated[i] = calculated[i] + self.ping_stamps[i]
 
-        #print "{}calculated timestamps (uSec):".format(self.W)
+        print "{}calculated timestamps (uSec):".format(self.W)
 
-        #print "\t" + str(calculated)
+        print "\t" + str(calculated)
 
         astamps = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
         astamps = astamps()

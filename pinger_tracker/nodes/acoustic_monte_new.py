@@ -65,6 +65,8 @@ class monte(object):
 
     def calculate_error(self, x, y, z):
 
+        ping = rospy.ServiceProxy('/hydrophones/ping', Ping)
+
         self.position = [x,y,z]
 
         ref = rospy.ServiceProxy('/hydrophones/crane_srv', Crane_pos_service)
@@ -250,6 +252,7 @@ class monte(object):
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
         rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
         rospy.Service('hydrophones/sample_rate', Sample_rate, self.sampling_rate)
+        rospy.Service('hydrophones/ping', Ping_service, self.sampling_rate)
 
         self.actual_x = 0
         self.actual_y = 0
