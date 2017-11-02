@@ -122,7 +122,9 @@ class condition():
 
             #for testing purposes, git more headaches
 
+            ######################
             self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]
+            
             '''degree = 5
             window=degree*2-1  
             weight=np.array([1.0]*window)  
@@ -145,21 +147,6 @@ class condition():
                     self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.5) for x in self.signal[b+1]]
                     phoneno = b+1
                     rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % phoneno)
-
-                    '''degree = 5
-                    window=degree*2-1  
-                    weight=np.array([1.0]*window)  
-                    weightGauss=[]  
-                    for i in range(window):  
-                        i=i-degree+1  
-                        frac=i/float(window)  
-                        gauss=1/(np.exp((4*(frac))**2))  
-                        weightGauss.append(gauss) 
-                    weight=np.array(weightGauss)*weight  
-                    smoothed=[0.0]*(len(self.signal[b+1])-window)
-                    for i in range(len(smoothed)):  
-                        smoothed[i]=sum(np.array(self.signal[b+1][i:i+window])*weight)/sum(weight) 
-                    self.signal[b+1] = smoothed'''
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
@@ -209,7 +196,7 @@ class condition():
     def __init__(self):
         rospy.init_node('signal_conditioner')
 
-        rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.condition_data) # for simulation and bags
+        #rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.condition_data) # for simulation and bags
         rospy.Subscriber('hydrophones/pingraw', Pingdata, self.condition_data)
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
