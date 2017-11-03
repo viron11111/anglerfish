@@ -46,13 +46,19 @@ class simulator():
         #hydro0_xyz = [0,      0,     0]
         #hydro1_xyz = [100,   0,     0]
         #hydro2_xyz = [-100,  0,     0]
-        #hydro3_xyz = [0,  -100, 0]      
+        #hydro3_xyz = [0,  -100, 0]  
 
         # Equilateral layout (actual)
-        '''hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [101.6,   0,     0]
-        hydro2_xyz = [-50.8,  88.0,     0]
-        hydro3_xyz = [-50.8,  -88.0, 0]  '''
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [100.0,   0,     0]
+        #hydro2_xyz = [-50,  86.6,     0]
+        #hydro3_xyz = [-50,  -86.6, 0]
+
+        # Equilateral layout (actual)
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [173.2,   0,     0]
+        #hydro2_xyz = [86.6,  150,     0]
+        #hydro3_xyz = [86.6,  50, 0]
 
         #experimental layout
         hydro0_xyz = [0,      0,     0]
@@ -461,7 +467,7 @@ class simulator():
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 2000
+        distance_resolution = 5000
         degree_angle_resolution = 5
         rad_resolution = math.radians(degree_angle_resolution)
 
