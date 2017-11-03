@@ -102,7 +102,7 @@ class solver():
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
         del3 = (data.calculated_time_stamps[3])*c #mm/uSec   
 
-        print "x1: ", x1
+        '''print "x1: ", x1
         print "x2: ", x2
         print "y2: ", y2
         print "x3: ", x3
@@ -110,7 +110,7 @@ class solver():
         print "z3: ", z3
         print "del1: ", del1
         print "del2: ", del2
-        print "del3: ", del3
+        print "del3: ", del3'''
 
         #Values from Dr. Crane's documentation:
         '''x1 = 8.5
@@ -186,9 +186,6 @@ class solver():
 
         if (discr < 0):
             rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
-            print "BB: ", BB
-            print "discr: ", discr
-            print "AA: ", AA
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
             x=0
@@ -254,11 +251,21 @@ class solver():
             if measured1_list == measured2_list:
                 rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
                 rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
-                P1[0] = P1[1] = P1[2] = 0.0
-                P2[0] = P2[1] = P2[2] = 0.0
-                x=0
-                y=0
-                z=0
+                #P1[0] = P1[1] = P1[2] = 0.0
+                #P2[0] = P2[1] = P2[2] = 0.0
+                #x=0
+                #y=0
+                #z=0
+                if P1sum > P2sum:
+                    x = -P1[0]
+                    y = -P1[1]
+                    z = P1[2]
+                    print "**P1**"
+                elif P2sum > P1sum:
+                    x = P2[0]
+                    y = P2[1]
+                    z = P2[2]
+                    print "**P2**"                    
             elif measured1_list == dellist:
                 x = P1[0]
                 y = P1[1]
@@ -289,7 +296,7 @@ class solver():
                 header=Header(stamp=rospy.Time.now(),
                               frame_id='Crane_pos_calc'),
                 x_pos=x,
-                y_pos=-y,
+                y_pos=y,
                 z_pos=z))            
 
         #print "x: %f, y: %f, z: %f" % (x,y,z)

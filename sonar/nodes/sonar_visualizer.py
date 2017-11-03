@@ -113,7 +113,7 @@ class plotter():
 
         elif array == "z-offset":
             heading = float(crane_heading)
-            heading = heading - 45
+            heading = 180-heading
             if heading < 0:
                 heading = 360 + heading
             pygame.font.init() # you have to call this at the start, 
@@ -143,7 +143,7 @@ class plotter():
                 heading_number  = bigfont.render(('Bearing: ---'), False, (255, 255, 255))
                 declination  = bigfont.render(('Declination: ---'), False, (255, 255, 255))  
             else:
-                angle = 360 - crane_heading + 45
+                angle = crane_heading + 180
                 pos = 100,150
 
                 arrow=pygame.Surface((5,80))
