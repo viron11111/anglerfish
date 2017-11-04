@@ -30,9 +30,9 @@ int32        startChannel = 0;
 const int32  channelCount = 4;
 const int32  intervalCount = 64; 
 
-double        samplingFrequency = 2000000;  //in Hz
+double        samplingFrequency = 1000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
-const int32  sampleCount =  5000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
+const int32  sampleCount =  4000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
 #define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount
@@ -42,7 +42,7 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 1.0;
+double        triggerLevel = 0.75;
 //double        triggerLevel = 1.5;  //1.5V to overcome pool pump
 int           triggerDelayCount = sampleCount/2.0;//1.25;
 
