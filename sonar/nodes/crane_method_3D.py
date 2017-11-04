@@ -87,9 +87,9 @@ class solver():
 
         #experimental layout
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  150,     0]
-        hydro3_xyz = [86.6,  50, -100]        
+        hydro1_xyz = [-173.2,   0,     0]
+        hydro2_xyz = [-86.6,  -150,     0]
+        hydro3_xyz = [-86.6,  -50, -100]        
 
         x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
         x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
@@ -247,6 +247,10 @@ class solver():
             print "dellist:        ", dellist
             print "measured1_list: ", measured1_list
             print "measured2_list: ", measured2_list
+
+            x=0
+            y=0
+            z=0
 
             if measured1_list == measured2_list:
                 rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
