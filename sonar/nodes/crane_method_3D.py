@@ -87,9 +87,17 @@ class solver():
 
         #experimental layout
         hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [-168,   0,     0]
+        hydro2_xyz = [-97,  -150,     0]
+        hydro3_xyz = [-97,  -45, -100]        
+
+        #experimental layout
+        hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
         hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100]        
+        hydro3_xyz = [-86.6,  -50, -100]     
+
+      
 
         x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
         x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
@@ -182,6 +190,30 @@ class solver():
 
         discr = BB*BB - 4.0*AA*CC ;
 
+        '''if del1 > del3:
+            rospy.logwarn("del1 > del3")
+
+            P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
+            P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
+
+            # get corresponding value for y coordinate  ;  eqn (11)
+            P1[1] = -(A1*P1[0]+D1)/B1 if B1 != 0 else 0
+            P2[1] = -(A1*P2[0]+D1)/B1 if B1 != 0 else 0
+
+            # get correspoinding value for z coordinate ;  eqn (16)
+            P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
+            P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
+
+            P1sum = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
+            P2sum = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
+
+            rospy.loginfo("x1: %f" % (P1[0]))
+            rospy.loginfo("y1: %f" % (P1[1]))
+            rospy.loginfo("z1: %f" % (P1[2]))
+
+            rospy.loginfo("x2: %f" % (P2[0]))
+            rospy.loginfo("y2: %f" % (P2[1]))
+            rospy.loginfo("z2: %f" % (P2[2]))'''
 
 
         if (discr < 0):
@@ -251,8 +283,55 @@ class solver():
             x=0
             y=0
             z=0
+            p1sum = abs(P1[0])+abs(P1[1])+abs(P1[2])
+            p2sum = abs(P2[0])+abs(P2[1])+abs(P2[2])            
 
-            if measured1_list == measured2_list:
+            if del1 > del3:
+                rospy.logwarn("del1 > del3")
+                if measured1_list == measured2_list:
+                    if p1sum > p2sum:
+                        x = P1[0]
+                        y = P1[1]
+                        z = P1[2]
+                        rospy.logwarn("P1SUM")
+                    else:
+                        x = P2[0]
+                        y = P2[1]
+                        z = P2[2]
+                        rospy.logwarn("P2SUM")
+                elif (dellist[0] > 0 and dellist[1] > 0 and dellist[2] > 0) and p1sum > p2sum and P1[0] < 0 and P1[1] <0:
+                        x = -P1[0]
+                        y = -P1[1]
+                        z = P1[2]
+                        rospy.logwarn("P1SUM Wierd case")
+                elif measured1_list == dellist:
+                    x = P1[0]
+                    y = P1[1]
+                    z = P1[2]
+                    rospy.logwarn("**P1**")
+                elif measured2_list == dellist:
+                    x = P2[0]
+                    y = P2[1]                
+                    z = P2[2]
+                    rospy.logwarn("**P2**")
+            elif measured1_list == dellist:
+                x = P1[0]
+                y = P1[1]
+                z = P1[2]
+                print "**P1**"
+                #rospy.loginfo("x1: %f" % (P1[0]))
+                #rospy.loginfo("y1: %f" % (P1[1]))
+                #rospy.loginfo("z1: %f" % (P1[2]))
+            elif measured2_list == dellist:
+                x = P2[0]
+                y = P2[1]                
+                z = P2[2]
+                print "**P2**"
+                #rospy.loginfo("x2: %f" % (P2[0]))
+                #rospy.loginfo("y2: %f" % (P2[1]))
+                #rospy.loginfo("z2: %f" % (P2[2]))            
+
+            '''if measured1_list == measured2_list:
                 rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
                 rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
                 #P1[0] = P1[1] = P1[2] = 0.0
@@ -293,7 +372,7 @@ class solver():
                 P2[0] = P2[1] = P2[2] = 0.0
                 x=0
                 y=0
-                z=0
+                z=0'''
             
             self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
             self.crane_pub.publish(Crane_pos(
