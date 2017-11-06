@@ -85,17 +85,19 @@ class solver():
         #hydro2_xyz = [-50,  86.6,     0]
         #hydro3_xyz = [-50,  -86.6, 0]
 
-        #experimental layout
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-168,   0,     0]
-        hydro2_xyz = [-97,  -150,     0]
-        hydro3_xyz = [-97,  -45, -100]        
+        
 
         #experimental layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
         hydro2_xyz = [-86.6,  -150,     0]
         hydro3_xyz = [-86.6,  -50, -100]     
+
+        #experimental layout
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [-168,   0,     0]
+        hydro2_xyz = [-86.6,  -149,     0]
+        hydro3_xyz = [-86.6,  -49, -100]        
 
       
 
@@ -217,7 +219,8 @@ class solver():
 
 
         if (discr < 0):
-            rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
+            rospy.loginfo("no real solution was found; set garbage values for P1 and P2")
+
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
             x=0
@@ -304,16 +307,26 @@ class solver():
                         y = -P1[1]
                         z = P1[2]
                         rospy.logwarn("P1SUM Wierd case")
-                elif measured1_list == dellist:
+                elif measured1_list == dellist:# and p1sum > p2sum:
                     x = P1[0]
                     y = P1[1]
                     z = P1[2]
                     rospy.logwarn("**P1**")
-                elif measured2_list == dellist:
+                elif measured2_list == dellist:# and p2sum > p1sum:
                     x = P2[0]
                     y = P2[1]                
                     z = P2[2]
                     rospy.logwarn("**P2**")
+                '''elif p1sum > p2sum:
+                    x = P1[0]
+                    y = P1[1]
+                    z = P1[2]
+                    rospy.logwarn("P1SUM last")
+                else:
+                    x = P2[0]
+                    y = P2[1]
+                    z = P2[2]
+                    rospy.logwarn("P2SUM last")'''
             elif measured1_list == dellist:
                 x = P1[0]
                 y = P1[1]

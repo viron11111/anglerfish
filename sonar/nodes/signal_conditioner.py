@@ -94,7 +94,7 @@ class condition():
 
             #using same variable as above
             #Buffering holder for keeping 3 periods of actual signal at 25 kHz
-            num_samples_save = int((0.75/25000.0)*sample_rate)
+            num_samples_save = int((1.5/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
