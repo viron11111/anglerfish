@@ -127,7 +127,7 @@ class plotter():
                        # if you want to use this module.
             myfont = pygame.font.SysFont('Comic Sans MS', 20)
             bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-            bhydro = myfont.render('Cardinal', False, (255, 255, 255))
+            bhydro = bigfont.render('Cardinal: %0.1f' % self.card_bearing, False, (255, 255, 255))
             #chydro = myfont.render('B', False, (255, 0, 0))
             #dhydro = myfont.render('A', False, (255, 0, 0))
             north  = myfont.render('0', False, (255, 255, 0))
@@ -138,7 +138,7 @@ class plotter():
            
             self.screen.fill((0,0,0))
 
-            self.screen.blit(bhydro,(175,250))
+            self.screen.blit(bhydro,(130,250))
             #self.screen.blit(chydro,(60,155))
             #self.screen.blit(dhydro,(130,155))          
 

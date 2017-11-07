@@ -52,63 +52,64 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         bearing = 0.0
+        tolerance = 12.5
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])        
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'):
-            if del1 > -3.0 and del1 < 3.0:
+            if del1 > -tolerance/2 and del1 < tolerance/2:
                 bearing = 90.0
             else:
                 bearing = 67.5  
         elif sorted_dels == ('del2', 'del3', 'del1', 'del0'):                        
-            if del1 > -3.0 and del1 < 3.0:
+            if del1 > -tolerance/2 and del1 < tolerance/2:
                 bearing = 90.0
             else:
                 bearing = 112.5              
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'):
-            if abs(del1-del2) < 6.0:
+            if abs(del1-del2) < tolerance:
                 bearing = 135            
             else:
                 bearing = 112.5
         elif sorted_dels == ('del1', 'del2', 'del3', 'del0'):          
-            if abs(del3-del2) < 6.0:
+            if abs(del3-del2) < tolerance:
                 bearing = 180
             else:                
                 bearing = 157.5
         elif sorted_dels == ('del1', 'del3', 'del2', 'del0'):
-            if abs(del2-del3) < 6.0:
+            if abs(del2-del3) < tolerance:
                 bearing = 180
             else:                            
                 bearing = 202.5
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'):
-            if abs(del2) < 6.0:
+            if abs(del2) < tolerance:
                 bearing = 225.0
             else:
                 bearing = 247.5
         elif sorted_dels == ('del1', 'del0', 'del3', 'del2'):
-            if del1 > -3.0 and del1 < 3.0:
+            if del1 > -tolerance/2 and del1 < tolerance/2:
                 bearing = 270.0
             else:
                 bearing = 247.5
         elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):
-            if del1 > -3.0 and del1 < 3.0:
+            if del1 > -tolerance/2 and del1 < tolerance/2:
                 bearing = 270.0
             else:
                 bearing = 292.5            
         elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):
-            if abs(del1-del2) < 6.0:
+            if abs(del1-del2) < tolerance:
                 bearing = 315.0
             else:                            
                 bearing = 292.5            
         elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):        
-            if abs(del1-del2) < 6.0:
+            if abs(del1-del2) < tolerance:
                 bearing = 315.0
-            elif abs(del2-del3) < 6.0:
+            elif abs(del2-del3) < tolerance:
                 bearing = 0.0
             else:                            
                 bearing = 337.5
         elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):            
-            if abs(del2-del3) < 6.0:            
+            if abs(del2-del3) < tolerance:            
                 bearing = 0.0
             else:
                 bearing = 22.5
