@@ -5,6 +5,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import operator
 
 from std_msgs.msg import Header
 
@@ -251,6 +252,10 @@ class phaser():
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
         print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
+        dels = {"del0": calculated[0], "del1": calculated[1], "del2": calculated[2], "del3": calculated[3]}
+        sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
+        print (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])
 
         self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
         self.calc_stamps_pub.publish(Calculated_time_stamps(

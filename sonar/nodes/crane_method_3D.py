@@ -4,6 +4,7 @@ import rosparam
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import operator
 
 from std_msgs.msg import Header
 from pinger_tracker.msg import *
@@ -47,6 +48,79 @@ class solver():
         y = 1000
         z = 2000
         return x,y,z
+
+    def cardinal(self, del1, del2, del3):
+        del0 = 0.0
+        bearing = 0.0
+        dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
+        sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
+        sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])        
+        if sorted_dels == ('del2', 'del3', 'del0', 'del1'):
+            if del1 > -3.0 and del1 < 3.0:
+                bearing = 90.0
+            else:
+                bearing = 67.5  
+        elif sorted_dels == ('del2', 'del3', 'del1', 'del0'):                        
+            if del1 > -3.0 and del1 < 3.0:
+                bearing = 90.0
+            else:
+                bearing = 112.5              
+        elif sorted_dels == ('del2', 'del1', 'del3', 'del0'):
+            if abs(del1-del2) < 6.0:
+                bearing = 135            
+            else:
+                bearing = 112.5
+        elif sorted_dels == ('del1', 'del2', 'del3', 'del0'):          
+            if abs(del3-del2) < 6.0:
+                bearing = 180
+            else:                
+                bearing = 157.5
+        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'):
+            if abs(del2-del3) < 6.0:
+                bearing = 180
+            else:                            
+                bearing = 202.5
+        elif sorted_dels == ('del1', 'del3', 'del0', 'del2'):
+            if abs(del2) < 6.0:
+                bearing = 225.0
+            else:
+                bearing = 247.5
+        elif sorted_dels == ('del1', 'del0', 'del3', 'del2'):
+            if del1 > -3.0 and del1 < 3.0:
+                bearing = 270.0
+            else:
+                bearing = 247.5
+        elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):
+            if del1 > -3.0 and del1 < 3.0:
+                bearing = 270.0
+            else:
+                bearing = 292.5            
+        elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):
+            if abs(del1-del2) < 6.0:
+                bearing = 315.0
+            else:                            
+                bearing = 292.5            
+        elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):        
+            if abs(del1-del2) < 6.0:
+                bearing = 315.0
+            elif abs(del2-del3) < 6.0:
+                bearing = 0.0
+            else:                            
+                bearing = 337.5
+        elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):            
+            if abs(del2-del3) < 6.0:            
+                bearing = 0.0
+            else:
+                bearing = 22.5
+        elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):
+            bearing = 45.0
+
+
+
+        rospy.logerr(bearing)       
+        return bearing
+        
+        #print sorted_dels
 
     def calc_vals(self, data):
 
@@ -107,6 +181,8 @@ class solver():
         x3 = hydro3_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
         y3 = hydro3_xyz[1] #+ 0.75 #np.random.uniform(-1, 1)
         z3 = hydro3_xyz[2]
+
+        self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
 
         del1 = (data.calculated_time_stamps[1])*c #mm/uSec
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
