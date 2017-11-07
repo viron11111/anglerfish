@@ -10,7 +10,7 @@ from scipy import optimize
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from std_msgs.msg import UInt16
+from std_msgs.msg import UInt16, Float32
 #from pinger_tracker.msg import *
 
 from advantech_pci1714.srv import *
@@ -26,6 +26,13 @@ import math
 import pygame
 
 class plotter():
+    def cardinal_sub(self,data):
+        self.card_bearing = data.data
+    
+    def pol2cart(self, rho, phi):
+        x = rho * np.cos(phi)
+        y = rho * np.sin(phi)
+        return(x, y)        
 
     def position(self,data):
 
@@ -120,7 +127,7 @@ class plotter():
                        # if you want to use this module.
             myfont = pygame.font.SysFont('Comic Sans MS', 20)
             bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-            bhydro = myfont.render('Relative to reference hydrophone 0', False, (255, 255, 255))
+            bhydro = myfont.render('Cardinal', False, (255, 255, 255))
             #chydro = myfont.render('B', False, (255, 0, 0))
             #dhydro = myfont.render('A', False, (255, 0, 0))
             north  = myfont.render('0', False, (255, 255, 0))
@@ -131,7 +138,7 @@ class plotter():
            
             self.screen.fill((0,0,0))
 
-            self.screen.blit(bhydro,(50,250))
+            self.screen.blit(bhydro,(175,250))
             #self.screen.blit(chydro,(60,155))
             #self.screen.blit(dhydro,(130,155))          
 
@@ -183,6 +190,20 @@ class plotter():
             self.screen.blit(south,(90,195))
             self.screen.blit(heading_number,(10,30))
             self.screen.blit(declination,(220,30))        
+
+        rho = 100
+        phi = math.radians(self.card_bearing-102.5)
+        (x,y) = self.pol2cart(rho,phi)
+
+        rho = 100
+        phi = math.radians(self.card_bearing-77.5)
+        (x2,y2) = self.pol2cart(rho,phi)
+
+        pygame.draw.circle(self.screen, (255,255,0), (200, 380), rho, 1) #reference hydrophone 0  
+        pygame.draw.circle(self.screen, (255,255,255), (200, 380), 5, 0) #reference hydrophone 0      
+
+        pygame.draw.polygon(self.screen, (255,0,0), [[200, 380], [200+x, 380+y],[200+x2, 380+y2]], 0)    
+
 
         pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
         pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)              
@@ -320,9 +341,12 @@ class plotter():
         rospy.init_node('sonar_handler')
 
         rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.position)
+        rospy.Subscriber('/hydrophones/cardinal', Float32, self.cardinal_sub)
+
+        self.card_bearing = 0.0
 
         pygame.init()
-        self.screen = pygame.display.set_mode((400, 300))
+        self.screen = pygame.display.set_mode((400, 500))
         done = False   
 
         #self.pingpub = rospy.Publisher('/hydrophones/ping', , queue_size=1)
