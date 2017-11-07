@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import operator
 
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Float32
 from pinger_tracker.msg import *
 #from multilateration import Multilaterator, ReceiverArraySim, Pulse
 
@@ -115,12 +115,18 @@ class solver():
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):
             bearing = 45.0
 
+        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+        self.cardinal_pub.publish(Float32(bearing))
 
 
         rospy.logerr(bearing)       
         return bearing
         
         #print sorted_dels
+    def pol2cart(self, rho, phi):
+        x = rho * np.cos(phi)
+        y = rho * np.sin(phi)
+        return(x, y)        
 
     def calc_vals(self, data):
 
@@ -182,7 +188,7 @@ class solver():
         y3 = hydro3_xyz[1] #+ 0.75 #np.random.uniform(-1, 1)
         z3 = hydro3_xyz[2]
 
-        self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
+        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
 
         del1 = (data.calculated_time_stamps[1])*c #mm/uSec
         del2 = (data.calculated_time_stamps[2])*c #mm/uSec
@@ -293,14 +299,17 @@ class solver():
             rospy.loginfo("y2: %f" % (P2[1]))
             rospy.loginfo("z2: %f" % (P2[2]))'''
 
+        phi = math.radians(360-bearing)
+        rho = 500.0
+
 
         if (discr < 0):
             rospy.loginfo("no real solution was found; set garbage values for P1 and P2")
 
+            (x,y) = self.pol2cart(rho,phi)
+
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
-            x=0
-            y=0
             z=0
 
         else:
@@ -416,60 +425,17 @@ class solver():
                 y = P2[1]                
                 z = P2[2]
                 print "**P2**"
-                #rospy.loginfo("x2: %f" % (P2[0]))
-                #rospy.loginfo("y2: %f" % (P2[1]))
-                #rospy.loginfo("z2: %f" % (P2[2]))            
-
-            '''if measured1_list == measured2_list:
-                rospy.logwarn("CHECKFAILED: measured1_list = measured2_list")
-                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
-                #P1[0] = P1[1] = P1[2] = 0.0
-                #P2[0] = P2[1] = P2[2] = 0.0
-                #x=0
-                #y=0
-                #z=0
-                if P1sum > P2sum:
-                    x = -P1[0]
-                    y = -P1[1]
-                    z = P1[2]
-                    print "**P1**"
-                elif P2sum > P1sum:
-                    x = P2[0]
-                    y = P2[1]
-                    z = P2[2]
-                    print "**P2**"                    
-            elif measured1_list == dellist:
-                x = P1[0]
-                y = P1[1]
-                z = P1[2]
-                print "**P1**"
-                #rospy.loginfo("x1: %f" % (P1[0]))
-                #rospy.loginfo("y1: %f" % (P1[1]))
-                #rospy.loginfo("z1: %f" % (P1[2]))
-            elif measured2_list == dellist:
-                x = P2[0]
-                y = P2[1]                
-                z = P2[2]
-                print "**P2**"
-                #rospy.loginfo("x2: %f" % (P2[0]))
-                #rospy.loginfo("y2: %f" % (P2[1]))
-                #rospy.loginfo("z2: %f" % (P2[2]))            
             else:
-                rospy.logwarn("CHECKFAILED: measured1_list != dellist and measured2_list != dellist")
-                rospy.loginfo("no real solution was found; set garbage values for P1 and P2 and return 0")
-                P1[0] = P1[1] = P1[2] = 0.0
-                P2[0] = P2[1] = P2[2] = 0.0
-                x=0
-                y=0
-                z=0'''
+                (x,y) = self.pol2cart(rho,phi)
+
             
-            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-            self.crane_pub.publish(Crane_pos(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='Crane_pos_calc'),
-                x_pos=x,
-                y_pos=y,
-                z_pos=z))            
+        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+        self.crane_pub.publish(Crane_pos(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='Crane_pos_calc'),
+            x_pos=x,
+            y_pos=y,
+            z_pos=z))            
 
         #print "x: %f, y: %f, z: %f" % (x,y,z)
 
@@ -497,7 +463,7 @@ class solver():
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
         #self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_pos_service, self.crane_solver)
-        #self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
 
         rate = rospy.Rate(1)
 
