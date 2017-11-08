@@ -103,7 +103,6 @@ class solver():
             else:                            
                 bearing = 292.5
                 #rospy.logerr("P1 cardinal")
-
         elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):        
             if abs(del1-del2) < tolerance:
                 bearing = 315.0
@@ -120,6 +119,9 @@ class solver():
             #rospy.logerr("P2 cardinal")                
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):
             bearing = 45.0
+        else:
+            rospy.logerr("CARDINAL failed to find solution!")
+            bearing = -1
 
         if sorted_dels[3] == 'del0':
             self.ref_hydro = 0
@@ -301,9 +303,9 @@ class solver():
             y=0
             z=0           
 
-            p1_heading = np.pi/2 - np.arctan2(P1[0],P1[1]) - np.pi
+            p1_heading = np.arctan2(P1[0],P1[1]) - np.pi/2
             p1_heading = math.degrees(p1_heading)
-            p2_heading = np.pi/2 - np.arctan2(P2[0], P2[1]) - np.pi
+            p2_heading = np.arctan2(P2[0], P2[1]) - np.pi/2
             p2_heading = math.degrees(p2_heading)
 
             if p1_heading < 0:
@@ -316,29 +318,55 @@ class solver():
 
             if measured1_list == measured2_list:
                 rospy.logwarn("measured1_list == measured2_list")
+                p1_min = abs(p1_heading-bearing)
+                p2_min = abs(p1_heading-bearing)
 
-                (x,y) = self.pol2cart(rho,phi)
+                p_min = min(p1_min, p2_min)
+
+                if p_min < 20:
+                    if p1_min == p_min:
+                        x = P1[0]
+                        y = P1[1]
+                        z = P1[2]
+                        rospy.logwarn("**P1_Crane**")
+                    elif p2_min == p_min:
+                        x = P2[0]
+                        y = P2[1]
+                        z = P2[2]
+                        rospy.logwarn("**P2_Crane**")
+                else:
+                    (x,y) = self.pol2cart(rho,phi)
+                    rospy.logwarn("**cardinal**")
+
             elif measured1_list == dellist:# and p1sum > p2sum:
-                x = P1[0]
-                y = P1[1]
-                z = P1[2]
-                rospy.logwarn("**P1**")
+                if abs(p1_heading-bearing) < 20: 
+                    x = P1[0]
+                    y = P1[1]
+                    z = P1[2]
+                    rospy.logwarn("**P1_Crane**")
+                else:
+                    rospy.logwarn("**P1_cardinal**")
+                    (x,y) = self.pol2cart(rho,phi)
             elif measured2_list == dellist:# and p2sum > p1sum:
-                x = P2[0]
-                y = P2[1]                
-                z = P2[2]
-                rospy.logwarn("**P2**")
+                if abs(p2_heading-bearing) < 20: 
+                    x = P2[0]
+                    y = P2[1]
+                    z = P2[2]
+                    rospy.logwarn("**P2_Crane**")
+                else:
+                    rospy.logwarn("**P2_cardinal**")
+                    (x,y) = self.pol2cart(rho,phi)
             else:
                 (x,y) = self.pol2cart(rho,phi)
 
-            
-        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-        self.crane_pub.publish(Crane_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='Crane_pos_calc'),
-            x_pos=x,
-            y_pos=y,
-            z_pos=z))          
+        if bearing != -1:    
+            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+            self.crane_pub.publish(Crane_pos(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='Crane_pos_calc'),
+                x_pos=x,
+                y_pos=y,
+                z_pos=z))          
 
         return Crane_pos_serviceResponse(x, y, z)        
 

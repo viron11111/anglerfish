@@ -43,7 +43,7 @@ class condition():
         avg_offset = [0]*channels
         for b in range(channels):
             #use first 100 samples
-            l = self.signal[b][:100]
+            l = self.signal[b][:200]
             avg_offset[b] = sum(l) / float(len(l))
             self.signal[b] = [x-avg_offset[b] for x in self.signal[b]]
 
@@ -93,8 +93,8 @@ class condition():
             current_signal = 0
 
             #using same variable as above
-            #Buffering holder for keeping 3 periods of actual signal at 25 kHz
-            num_samples_save = int((1.5/25000.0)*sample_rate)
+            #Buffering holder for keeping X periods of actual signal at 25 kHz
+            num_samples_save = int((1.0/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
