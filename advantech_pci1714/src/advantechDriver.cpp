@@ -30,7 +30,7 @@ int32        startChannel = 0;
 const int32  channelCount = 4;
 const int32  intervalCount = 64; 
 
-double        samplingFrequency = 1000000;  //in Hz
+double        samplingFrequency = 2000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
 const int32  sampleCount =  4000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
