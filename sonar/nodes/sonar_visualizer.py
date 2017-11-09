@@ -59,31 +59,38 @@ class plotter():
         crane_heading = math.degrees(crane_heading)
         calculated_declination = math.degrees(calculated_declination)
 
-        rospy.loginfo("heading: %f deg, declination: %f deg" % (crane_heading, calculated_declination))
+        #rospy.loginfo("heading: %f deg, declination: %f deg" % (crane_heading, calculated_declination))
 
-        array = "equilateral"
-        array = "z-offset"
+        heading = float(crane_heading)
+        heading = 180-heading
+        if heading < 0:
+            heading = 360 + heading
+        pygame.font.init() # you have to call this at the start, 
+                   # if you want to use this module.
+        myfont = pygame.font.SysFont('Comic Sans MS', 20)
+        bigfont = pygame.font.SysFont('Comic Sans MS', 30)
+        bhydro = bigfont.render('Cardinal: %0.1f' % self.card_bearing, False, (255, 255, 255))
+        #chydro = myfont.render('B', False, (255, 0, 0))
+        #dhydro = myfont.render('A', False, (255, 0, 0))
+        north  = myfont.render('0', False, (255, 255, 0))
+        west  = myfont.render('270', False, (255, 255, 0))
+        east  = myfont.render('90', False, (255, 255, 0))
+        south  = myfont.render('180', False, (255, 255, 0))
 
-        #git test
+       
+        self.screen.fill((0,0,0))
 
-        if array == "equilateral":
-            pygame.font.init() # you have to call this at the start, 
-                       # if you want to use this module.
-            myfont = pygame.font.SysFont('Comic Sans MS', 20)
-            bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-            bhydro = myfont.render('B', False, (255, 0, 0))
-            chydro = myfont.render('C', False, (255, 0, 0))
-            dhydro = myfont.render('D', False, (255, 0, 0))
-            north  = myfont.render('180', False, (255, 255, 0))
-            west  = myfont.render('270', False, (255, 255, 0))
-            east  = myfont.render('90', False, (255, 255, 0))
-            south  = myfont.render('0', False, (255, 255, 0))
-            heading  = bigfont.render(('Bearing: %0.1f' % crane_heading), False, (255, 255, 255))
-            declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
-           
-            self.screen.fill((0,0,0))
+        self.screen.blit(bhydro,(80,250))
 
-            angle = crane_heading+180
+        if heading == 135.0 and calculated_declination == 0.0:
+            self.screen.fill((100,0,0))
+            badfix  = bigfont.render('!!BADFIX!!', False, (255, 0, 0))
+            self.screen.blit(badfix,(45,130))       
+            self.screen.blit(badfix,(225,130))     
+            heading_number  = bigfont.render(('Bearing: ---'), False, (255, 255, 255))
+            declination  = bigfont.render(('Declination: ---'), False, (255, 255, 255))  
+        else:
+            angle = crane_heading + 180
             pos = 100,150
 
             arrow=pygame.Surface((5,80))
@@ -95,24 +102,8 @@ class plotter():
             nar=pygame.transform.rotate(arrow,angle)
             nrect=nar.get_rect(center=pos)
             self.screen.blit(nar, nrect)
-            pygame.display.update()
-
-            self.screen.blit(bhydro,(95,105))
-            self.screen.blit(chydro,(60,155))
-            self.screen.blit(dhydro,(130,155))
-            self.screen.blit(north,(95,90))
-            self.screen.blit(east,(143,155))
-            self.screen.blit(west,(35,155))
-            self.screen.blit(south,(90,195))
-            self.screen.blit(heading,(10,30))
-            self.screen.blit(declination,(220,30))
-
-
-            pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0)
-            pygame.draw.circle(self.screen, (255,255,255), (100, 125), 5, 0)
-            pygame.draw.circle(self.screen, (255,255,255), (78, 163), 5, 0)
-            pygame.draw.circle(self.screen, (255,255,255), (122, 163), 5, 0)       
-
+            pygame.display.update()                
+            pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0) #reference hydrophone 0
             angle2 = calculated_declination-90
             pos2 = 220,90
 
@@ -125,97 +116,85 @@ class plotter():
             nar2=pygame.transform.rotate(arrow2,angle2)
             nrect2=nar2.get_rect(center=pos2)
             self.screen.blit(nar2, nrect2)
-            pygame.display.update()         
+            heading_number  = bigfont.render(('Bearing: %0.1f' % heading), False, (255, 255, 255))
+            declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
+            pygame.display.update()        
 
-        elif array == "z-offset":
-            heading = float(crane_heading)
-            heading = 180-heading
-            if heading < 0:
-                heading = 360 + heading
-            pygame.font.init() # you have to call this at the start, 
-                       # if you want to use this module.
-            myfont = pygame.font.SysFont('Comic Sans MS', 20)
-            bigfont = pygame.font.SysFont('Comic Sans MS', 30)
-            bhydro = bigfont.render('Cardinal: %0.1f' % self.card_bearing, False, (255, 255, 255))
-            #chydro = myfont.render('B', False, (255, 0, 0))
-            #dhydro = myfont.render('A', False, (255, 0, 0))
-            north  = myfont.render('0', False, (255, 255, 0))
-            west  = myfont.render('270', False, (255, 255, 0))
-            east  = myfont.render('90', False, (255, 255, 0))
-            south  = myfont.render('180', False, (255, 255, 0))
-
-           
-            self.screen.fill((0,0,0))
-
-            self.screen.blit(bhydro,(130,250))
-            #self.screen.blit(chydro,(60,155))
-            #self.screen.blit(dhydro,(130,155))          
-
-            if heading == 135.0 and calculated_declination == 0.0:
-                self.screen.fill((100,0,0))
-                badfix  = bigfont.render('!!BADFIX!!', False, (255, 0, 0))
-                self.screen.blit(badfix,(45,130))       
-                self.screen.blit(badfix,(225,130))     
-                heading_number  = bigfont.render(('Bearing: ---'), False, (255, 255, 255))
-                declination  = bigfont.render(('Declination: ---'), False, (255, 255, 255))  
-            else:
-                angle = crane_heading + 180
-                pos = 100,150
-
-                arrow=pygame.Surface((5,80))
-                arrow.fill((0,255,0))
-                pygame.draw.rect(arrow, (0,0,0), pygame.Rect(0, 40, 5, 80))
-                #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
-                arrow.set_colorkey((255,255,255))
-
-                nar=pygame.transform.rotate(arrow,angle)
-                nrect=nar.get_rect(center=pos)
-                self.screen.blit(nar, nrect)
-                pygame.display.update()                
-                pygame.draw.circle(self.screen, (255,255,0), (100, 150), 5, 0) #reference hydrophone 0
-                #pygame.draw.circle(self.screen, (255,255,255), (120, 110), 5, 0) #hydrophone 1
-                #pygame.draw.circle(self.screen, (255,255,255), (70, 150), 5, 0) #hydrophone 2
-                #pygame.draw.circle(self.screen, (255,255,255), (105, 150), 5, 0) #hydrophone 3 
-
-                angle2 = calculated_declination-90
-                pos2 = 220,90
-
-                arrow2=pygame.Surface((5,200))
-                arrow2.fill((0,255,0))
-                pygame.draw.rect(arrow2, (0,0,0), pygame.Rect(0, 100, 5, 200))
-                #pygame.draw.line(arrow, (0,0,0), (0,50), (25,25))
-                arrow2.set_colorkey((255,255,255))
-
-                nar2=pygame.transform.rotate(arrow2,angle2)
-                nrect2=nar2.get_rect(center=pos2)
-                self.screen.blit(nar2, nrect2)
-                heading_number  = bigfont.render(('Bearing: %0.1f' % heading), False, (255, 255, 255))
-                declination  = bigfont.render(('Declination: %0.1f' % calculated_declination), False, (255, 255, 255))
-                pygame.display.update()        
-
-            self.screen.blit(north,(100,90))
-            self.screen.blit(east,(143,145))
-            self.screen.blit(west,(35,145))
-            self.screen.blit(south,(90,195))
-            self.screen.blit(heading_number,(10,30))
-            self.screen.blit(declination,(220,30))        
+        self.screen.blit(north,(100,90))
+        self.screen.blit(east,(143,145))
+        self.screen.blit(west,(35,145))
+        self.screen.blit(south,(90,195))
+        self.screen.blit(heading_number,(10,30))
+        self.screen.blit(declination,(220,30))        
 
         rho = 100
         phi = math.radians(self.card_bearing-102.5)
         (x,y) = self.pol2cart(rho,phi)
 
-        rho = 100
         phi = math.radians(self.card_bearing-77.5)
         (x2,y2) = self.pol2cart(rho,phi)
 
-        pygame.draw.circle(self.screen, (255,255,0), (200, 380), rho, 1) #reference hydrophone 0  
-        pygame.draw.circle(self.screen, (255,255,255), (200, 380), 5, 0) #reference hydrophone 0      
+        x_cent = 150
 
-        pygame.draw.polygon(self.screen, (255,0,0), [[200, 380], [200+x, 380+y],[200+x2, 380+y2]], 0)    
+        pygame.draw.circle()
 
+        pygame.draw.circle(self.screen, (255,255,255), (x_cent, 380), rho, 1) #reference hydrophone 0  
+        pygame.draw.circle(self.screen, (255,255,255), (x_cent, 380), 5, 0) #reference hydrophone 0      
+
+        pygame.draw.polygon(self.screen, (255,0,0), [[x_cent, 380], [x_cent+x, 380+y],[x_cent+x2, 380+y2]], 1)    
+
+        p1_heading = np.arctan2(self.P1[1],self.P1[0]) + np.pi
+        p1_heading = math.degrees(p1_heading)
+        p1_heading = 180-p1_heading
+        if p1_heading < 0:
+            p1_heading = 360 + p1_heading
+
+        p2_heading = np.arctan2(self.P2[1],self.P2[0]) + np.pi
+        p2_heading = math.degrees(p2_heading)
+        p2_heading = 180-p2_heading
+        if p2_heading < 0:
+            p2_heading = 360 + p2_heading            
+
+        #rospy.loginfo("P1: %0.1f P2: %0.1f" % (p1_heading,p2_heading))
+
+        phi = math.radians(p1_heading-90.0)
+        (p1x,p1y) = self.pol2cart(rho,phi)
+
+        phi = math.radians(p2_heading-90.0)
+        (p2x,p2y) = self.pol2cart(rho,phi)        
+
+        pygame.draw.line(self.screen, (0,255,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
+        pygame.draw.line(self.screen, (0,0,255), [x_cent, 380], [x_cent+p2x, 380+p2y], 3)
 
         pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
-        pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)              
+        pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
+
+        first  = myfont.render('1st', False, (255, 255, 255)) 
+        self.screen.blit(first,(30,482))  
+        first  = myfont.render('last', False, (255, 255, 255)) 
+        self.screen.blit(first,(330,482)) 
+
+        #print self.dels
+        self.dels = self.dels[::-1]
+        #print self.dels
+        for x in range(len(self.dels)):
+            if self.dels[x] == 'del1':
+                pygame.draw.rect(self.screen, (255,0,0), [10+x*100, 500, 80, 30], 0)   
+                del1  = bigfont.render('Del1', False, (255, 255, 255)) 
+                self.screen.blit(del1,(30+x*100,505))     
+            elif self.dels[x] == 'del2':
+                pygame.draw.rect(self.screen, (0,255,0), [10+x*100, 500, 80, 30], 0)   
+                del2  = bigfont.render('Del2', False, (0, 0, 0)) 
+                self.screen.blit(del2,(30+x*100,505)) 
+            elif self.dels[x] == 'del3':
+                pygame.draw.rect(self.screen, (0,0,255), [10+x*100, 500, 80, 30], 0)   
+                del3  = bigfont.render('Del3', False, (255, 255, 255)) 
+                self.screen.blit(del3,(30+x*100,505)) 
+            elif self.dels[x] == 'del0':
+                pygame.draw.rect(self.screen, (255,255,255), [10+x*100, 500, 80, 30], 2)   
+                del0  = bigfont.render('Del0', False, (255, 255, 255)) 
+                self.screen.blit(del0,(30+x*100,505))                 
+
 
     def received(self,data):
         rospy.loginfo("Ping received")
@@ -302,22 +281,9 @@ class plotter():
         self.screen.blit(nar2, nrect2)
         pygame.display.update()        
 
+
         pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
         pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)  
-
-        '''ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
-    
-        ping = ping_service()
-
-        channels = ping.channels
-        samples = float(ping.samples/channels)
-        #print samples
-        sample_rate = ping.sample_rate
-        #print sample_rate
-        adc_bit = ping.adc_bit
-        data = ping.data        
-
-        print adc_bit'''
 
         return Ping_receivedResponse()
 
@@ -353,10 +319,15 @@ class plotter():
         rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.position)
         rospy.Subscriber('/hydrophones/cardinal', Float32, self.cardinal_sub)
 
+        self.P1 = [0,0,0]
+        self.P2 = [0,0,0]
+        self.cardinal = 0.0
+        self.dels = ['del0','del1','del3','del2']
+
         self.card_bearing = 0.0
 
         pygame.init()
-        self.screen = pygame.display.set_mode((400, 500))
+        self.screen = pygame.display.set_mode((400, 550))
         done = False   
 
         #self.pingpub = rospy.Publisher('/hydrophones/ping', , queue_size=1)
