@@ -17,6 +17,7 @@ from advantech_pci1714.srv import *
 from pinger_tracker.srv import *
 
 from pinger_tracker.msg import *
+from sonar.msg import *
 
 import time
 import scipy.fftpack
@@ -33,6 +34,12 @@ class plotter():
         x = rho * np.cos(phi)
         y = rho * np.sin(phi)
         return(x, y)        
+
+    def bearing_data(self, data):
+        self.P1 = data.p1
+        self.P2 = data.p2
+        self.cardinal = data.cardinal_bearing
+        self.dels = data.dels
 
     def position(self,data):
 
@@ -340,6 +347,7 @@ class plotter():
 
         rospy.init_node('sonar_handler')
 
+        rospy.Subscriber('/hydrophones/bearing_info', Bearing, self.bearing_data)
         rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.position)
         rospy.Subscriber('/hydrophones/cardinal', Float32, self.cardinal_sub)
 

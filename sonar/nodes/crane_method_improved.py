@@ -8,6 +8,7 @@ import operator
 
 from std_msgs.msg import Header, Float32
 from pinger_tracker.msg import *
+from sonar.msg import Bearing
 #from multilateration import Multilaterator, ReceiverArraySim, Pulse
 
 import sys
@@ -55,7 +56,8 @@ class solver():
         tolerance = 12.5
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
-        sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])        
+        sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
+        self.sorted_dels = sorted_dels   
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'):
             if del1 > -tolerance/2 and del1 < tolerance/2:
                 bearing = 90.0
@@ -118,7 +120,10 @@ class solver():
                 bearing = 22.5
             #rospy.logerr("P2 cardinal")                
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):
-            bearing = 45.0
+            if abs(del0-del3) < tolerance:
+                bearing = 60.0
+            else:
+                bearing = 45.0
         else:
             rospy.logerr("CARDINAL failed to find solution!")
             bearing = -1
@@ -359,7 +364,18 @@ class solver():
             else:
                 (x,y) = self.pol2cart(rho,phi)
 
-        if bearing != -1:    
+        if bearing != -1:  
+
+            self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
+            self.bearing_pub.publish(Bearing(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='bearing_info'),
+                p1 = P1,
+                p2 = P2,
+                cardinal_bearing = bearing, 
+                dels = self.sorted_dels
+                ))
+
             self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
             self.crane_pub.publish(Crane_pos(
                 header=Header(stamp=rospy.Time.now(),
