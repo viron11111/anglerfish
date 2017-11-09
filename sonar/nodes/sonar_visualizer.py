@@ -40,6 +40,7 @@ class plotter():
         self.P2 = data.p2
         self.cardinal = data.cardinal_bearing
         self.dels = data.dels
+        self.psolution = data.psolution
 
     def position(self,data):
 
@@ -81,10 +82,15 @@ class plotter():
         self.screen.fill((0,0,0))
 
         if self.P1 != (0,0,0) and self.P2 != (0,0,0):
-            P1_legend = bigfont.render('P1', False, (0, 255, 0))
+            P1_legend = bigfont.render('P1', False, (255, 165, 0))
             P2_legend = bigfont.render('P2', False, (255, 0, 255))
             self.screen.blit(P1_legend,(200,250))
             self.screen.blit(P2_legend,(230,250))
+            if self.psolution == 1:
+                pygame.draw.rect(self.screen, (0,255,0), [197, 247, 30, 25], 1)
+            elif self.psolution == 2:
+                pygame.draw.rect(self.screen, (0,255,0), [227, 247, 30, 25], 1)
+
         else:
             P1_legend = bigfont.render('**NOFIX**', False, (255, 0, 0))
             self.screen.blit(P1_legend,(200,250))
@@ -149,10 +155,10 @@ class plotter():
 
         x_cent = 150
 
-        pygame.draw.circle(self.screen, (255,255,255), (350, 410), 5, 0)
-        pygame.draw.circle(self.screen, (255, 0, 0), (350, 330), 5, 0)
-        pygame.draw.circle(self.screen, (0, 0, 255), (330, 370), 5, 0)
-        pygame.draw.circle(self.screen, (0, 255, 0), (285, 370), 5, 0)
+        pygame.draw.circle(self.screen, (0,0,255), (350, 410), 5, 0)
+        pygame.draw.circle(self.screen, (0, 255, 0), (350, 330), 5, 0)
+        pygame.draw.circle(self.screen, (0, 255, 255), (330, 370), 5, 0)
+        pygame.draw.circle(self.screen, (255, 0, 0), (285, 370), 5, 0)
 
         zero = myfont.render('0', False, (255, 255, 255)) 
         one = myfont.render('1', False, (255, 255, 255)) 
@@ -192,11 +198,11 @@ class plotter():
         (p2x,p2y) = self.pol2cart(rho,phi)        
 
         if self.P1 != (0,0,0) and self.P2 != (0,0,0):
-            pygame.draw.line(self.screen, (0,255,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
+            pygame.draw.line(self.screen, (255,165,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
             pygame.draw.line(self.screen, (255,0,255), [x_cent, 380], [x_cent+p2x, 380+p2y], 3)
 
-            pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
-            pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
+        pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
+        pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
 
         first  = myfont.render('1st', False, (255, 255, 255)) 
         self.screen.blit(first,(30,482))  
@@ -208,19 +214,19 @@ class plotter():
         #print self.dels
         for x in range(len(self.dels)):
             if self.dels[x] == 'del1':
-                pygame.draw.rect(self.screen, (255,0,0), [10+x*100, 500, 80, 30], 0)   
-                del1  = bigfont.render('Del1', False, (255, 255, 255)) 
+                pygame.draw.rect(self.screen, (0,255,0), [10+x*100, 500, 80, 30], 0)   
+                del1  = bigfont.render('Del1', False, (0, 0, 0)) 
                 self.screen.blit(del1,(30+x*100,505))     
             elif self.dels[x] == 'del2':
-                pygame.draw.rect(self.screen, (0,255,0), [10+x*100, 500, 80, 30], 0)   
+                pygame.draw.rect(self.screen, (255,0,0), [10+x*100, 500, 80, 30], 0)   
                 del2  = bigfont.render('Del2', False, (0, 0, 0)) 
                 self.screen.blit(del2,(30+x*100,505)) 
             elif self.dels[x] == 'del3':
-                pygame.draw.rect(self.screen, (0,0,255), [10+x*100, 500, 80, 30], 0)   
-                del3  = bigfont.render('Del3', False, (255, 255, 255)) 
+                pygame.draw.rect(self.screen, (0,255,255), [10+x*100, 500, 80, 30], 0)   
+                del3  = bigfont.render('Del3', False, (0, 0, 0)) 
                 self.screen.blit(del3,(30+x*100,505)) 
             elif self.dels[x] == 'del0':
-                pygame.draw.rect(self.screen, (255,255,255), [10+x*100, 500, 80, 30], 2)   
+                pygame.draw.rect(self.screen, (0,0,255), [10+x*100, 500, 80, 30], 0)   
                 del0  = bigfont.render('Del0', False, (255, 255, 255)) 
                 self.screen.blit(del0,(30+x*100,505))                 
 
