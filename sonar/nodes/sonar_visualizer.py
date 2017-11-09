@@ -64,6 +64,8 @@ class plotter():
         array = "equilateral"
         array = "z-offset"
 
+        #git test
+
         if array == "equilateral":
             pygame.font.init() # you have to call this at the start, 
                        # if you want to use this module.
