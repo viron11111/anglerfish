@@ -177,6 +177,12 @@ class plotter():
 
         pygame.draw.polygon(self.screen, (255,0,0), [[x_cent, 380], [x_cent+x, 380+y],[x_cent+x2, 380+y2]], 1)    
 
+        best_heading = np.arctan2(self.crane_y, self.crane_x) + np.pi
+        best_heading = math.degrees(best_heading)
+        best_heading = 180-best_heading
+        if best_heading < 0:
+            best_heading = 360 + best_heading        
+
         p1_heading = np.arctan2(self.P1[1],self.P1[0]) + np.pi
         p1_heading = math.degrees(p1_heading)
         p1_heading = 180-p1_heading
@@ -191,6 +197,9 @@ class plotter():
 
         #rospy.loginfo("P1: %0.1f P2: %0.1f" % (p1_heading,p2_heading))
 
+        phi = math.radians(best_heading-90.0)
+        (bestx,besty) = self.pol2cart(rho,phi)
+
         phi = math.radians(p1_heading-90.0)
         (p1x,p1y) = self.pol2cart(rho,phi)
 
@@ -200,6 +209,8 @@ class plotter():
         if self.P1 != (0,0,0) and self.P2 != (0,0,0):
             pygame.draw.line(self.screen, (255,165,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
             pygame.draw.line(self.screen, (255,0,255), [x_cent, 380], [x_cent+p2x, 380+p2y], 3)
+
+        pygame.draw.line(self.screen, (0,255,0), [x_cent, 380], [x_cent+bestx, 380+besty], 3)
 
         pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
         pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
@@ -231,7 +242,7 @@ class plotter():
                 self.screen.blit(del0,(30+x*100,505))                 
 
 
-    def received(self,data):
+    '''def received(self,data):
         rospy.loginfo("Ping received")
 
         ref = rospy.ServiceProxy('/hydrophones/crane_srv', Crane_pos_service)
@@ -320,7 +331,7 @@ class plotter():
         pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
         pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)  
 
-        return Ping_receivedResponse()
+        return Ping_receivedResponse()'''
 
     def location_service(self, data):
 

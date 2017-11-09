@@ -352,7 +352,50 @@ class solver():
             rospy.loginfo(p1_heading)
             rospy.loginfo(p2_heading)            
 
-            if measured1_list == measured2_list:
+
+            #corrections using dels lookup table.
+            rospy.logwarn(self.psolution)
+            if self.psolution == 1:
+                print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
+                if abs(p1_heading-bearing) < 20:
+                        x = P1[0]
+                        y = P1[1]
+                        z = P1[2]
+                        rospy.logerr("P1 normal")
+                else:
+                    p1_heading = 180 + p1_heading
+                    
+                    if p1_heading > 360:
+                        p1_heading = p1_heading - 360
+                    print "p1_heading else: %0.2f" % p1_heading                        
+                    if (p1_heading-bearing) < 20:
+                        x = -P1[0]
+                        y = -P1[1]
+                        z = P1[2]
+                        rospy.logerr("P1 sign flip")
+            if self.psolution == 2:
+                print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
+                if abs(p2_heading-bearing) < 20:
+                        x = P2[0]
+                        y = P2[1]
+                        z = P2[2]
+                        rospy.logerr("P2 normal")
+                else:
+                    p2_heading = 180 + p2_heading
+
+
+                    if p2_heading > 360:
+                        p2_heading = p2_heading - 360
+                    print "p2_heading else: %0.2f" % p2_heading
+                    if (p2_heading-bearing) < 20:
+                        x = -P2[0]
+                        y = -P2[1]
+                        z = P2[2]    
+                        rospy.logerr("P2 sign flip") 
+            else:
+                (x,y) = self.pol2cart(rho,phi)                   
+
+            '''if measured1_list == measured2_list:
                 rospy.logwarn("measured1_list == measured2_list")
                 p1_min = abs(p1_heading-bearing)
                 p2_min = abs(p1_heading-bearing)
@@ -393,7 +436,7 @@ class solver():
                     rospy.logwarn("**P2_cardinal**")
                     (x,y) = self.pol2cart(rho,phi)
             else:
-                (x,y) = self.pol2cart(rho,phi)
+                (x,y) = self.pol2cart(rho,phi)'''
 
         if bearing != -1:  
 
