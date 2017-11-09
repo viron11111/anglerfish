@@ -53,7 +53,7 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         bearing = 0.0
-        tolerance = 12.5
+        tolerance = 10
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
@@ -78,50 +78,54 @@ class solver():
                 bearing = 180
             else:                
                 bearing = 157.5
-        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'):
+        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'): #double checked
             if abs(del2-del3) < tolerance:
                 bearing = 180
+            elif abs(del2-del0) < tolerance:
+                bearing = 210
             else:                            
-                bearing = 202.5
-        elif sorted_dels == ('del1', 'del3', 'del0', 'del2'):
+                bearing = 200
+        elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
-                bearing = 225.0
+                bearing = 210.0
+            elif abs(del3-del0)<tolerance:
+                bearing = 240
             else:
-                bearing = 247.5
-        elif sorted_dels == ('del1', 'del0', 'del3', 'del2'):
-            if del1 > -tolerance/2 and del1 < tolerance/2:
+                bearing = 225
+        elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
+            if abs(del1-del0) < tolerance:
                 bearing = 270.0
             else:
-                bearing = 247.5
-        elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):
-            if del1 > -tolerance/2 and del1 < tolerance/2:
+                bearing = 255
+        elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):#double checked
+            if abs(del1-del0) < tolerance:
                 bearing = 270.0
             else:
-                bearing = 292.5            
-        elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):
+                bearing = 290
+        elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):#double checked
             if abs(del1-del2) < tolerance:
-                bearing = 315.0
-                #rospy.logerr("P2 cardinal (change signs on x and y)")
+                bearing = 330
+            elif abs(del1-del3) < tolerance:
+                bearing = 310
             else:                            
-                bearing = 292.5
-                #rospy.logerr("P1 cardinal")
-        elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):        
+                bearing = 320 
+        elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):#double checked 
             if abs(del1-del2) < tolerance:
-                bearing = 315.0
+                bearing = 330.0
             elif abs(del2-del3) < tolerance:
                 bearing = 0.0
             else:                            
-                bearing = 337.5
-            #rospy.logerr("P2 cardinal")
-        elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):            
+                bearing = 345.0
+        elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
             if abs(del2-del3) < tolerance:            
                 bearing = 0.0
             else:
-                bearing = 22.5
-            #rospy.logerr("P2 cardinal")                
-        elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):
+                bearing = 15.0               
+        elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):#double checked 
             if abs(del0-del3) < tolerance:
                 bearing = 60.0
+            if abs(del0-del2) < tolerance:
+                bearing = 30.0
             else:
                 bearing = 45.0
         else:

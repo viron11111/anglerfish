@@ -80,9 +80,22 @@ class plotter():
        
         self.screen.fill((0,0,0))
 
-        self.screen.blit(bhydro,(80,250))
+        if self.P1 != (0,0,0) and self.P2 != (0,0,0):
+            P1_legend = bigfont.render('P1', False, (0, 255, 0))
+            P2_legend = bigfont.render('P2', False, (255, 0, 255))
+            self.screen.blit(P1_legend,(200,250))
+            self.screen.blit(P2_legend,(230,250))
+        else:
+            P1_legend = bigfont.render('**NOFIX**', False, (255, 0, 0))
+            self.screen.blit(P1_legend,(200,250))
 
-        if heading == 135.0 and calculated_declination == 0.0:
+        hydro_legend = myfont.render('Hydrophone Layout', False, (255, 255, 255))
+
+        self.screen.blit(bhydro,(40,250))
+
+        self.screen.blit(hydro_legend,(260,300))
+
+        if heading == -1 and calculated_declination == 0.0:
             self.screen.fill((100,0,0))
             badfix  = bigfont.render('!!BADFIX!!', False, (255, 0, 0))
             self.screen.blit(badfix,(45,130))       
@@ -128,15 +141,30 @@ class plotter():
         self.screen.blit(declination,(220,30))        
 
         rho = 100
-        phi = math.radians(self.card_bearing-102.5)
+        phi = math.radians(self.card_bearing-109)
         (x,y) = self.pol2cart(rho,phi)
 
-        phi = math.radians(self.card_bearing-77.5)
+        phi = math.radians(self.card_bearing-71)
         (x2,y2) = self.pol2cart(rho,phi)
 
         x_cent = 150
 
-        pygame.draw.circle()
+        pygame.draw.circle(self.screen, (255,255,255), (350, 410), 5, 0)
+        pygame.draw.circle(self.screen, (255, 0, 0), (350, 330), 5, 0)
+        pygame.draw.circle(self.screen, (0, 0, 255), (330, 370), 5, 0)
+        pygame.draw.circle(self.screen, (0, 255, 0), (285, 370), 5, 0)
+
+        zero = myfont.render('0', False, (255, 255, 255)) 
+        one = myfont.render('1', False, (255, 255, 255)) 
+        two = myfont.render('2', False, (255, 255, 255)) 
+        three = myfont.render('3', False, (255, 255, 255)) 
+
+        self.screen.blit(zero,(348,415))
+        self.screen.blit(one,(347,335))
+        self.screen.blit(three,(327,375))
+        self.screen.blit(two,(282,375))
+
+        pygame.draw.rect(self.screen, (255,255,255), [275, 320, 100, 115], 1)        
 
         pygame.draw.circle(self.screen, (255,255,255), (x_cent, 380), rho, 1) #reference hydrophone 0  
         pygame.draw.circle(self.screen, (255,255,255), (x_cent, 380), 5, 0) #reference hydrophone 0      
@@ -163,11 +191,12 @@ class plotter():
         phi = math.radians(p2_heading-90.0)
         (p2x,p2y) = self.pol2cart(rho,phi)        
 
-        pygame.draw.line(self.screen, (0,255,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
-        pygame.draw.line(self.screen, (0,0,255), [x_cent, 380], [x_cent+p2x, 380+p2y], 3)
+        if self.P1 != (0,0,0) and self.P2 != (0,0,0):
+            pygame.draw.line(self.screen, (0,255,0), [x_cent, 380], [x_cent+p1x, 380+p1y], 3)    
+            pygame.draw.line(self.screen, (255,0,255), [x_cent, 380], [x_cent+p2x, 380+p2y], 3)
 
-        pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
-        pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
+            pygame.draw.line(self.screen,(255,255,255),(220,90),(220,220),2)  
+            pygame.draw.line(self.screen,(255,255,255),(220,220),(340,220),2)     
 
         first  = myfont.render('1st', False, (255, 255, 255)) 
         self.screen.blit(first,(30,482))  
