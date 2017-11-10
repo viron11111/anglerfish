@@ -53,7 +53,7 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         bearing = 0.0
-        tolerance = 8
+        tolerance = 12
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
@@ -91,14 +91,14 @@ class solver():
             else:                
                 bearing = 165.0
             self.psolution = 1
-        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'): #double checked
+        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'): #switching between 1 and 2
             if abs(del2-del3) < tolerance:
                 bearing = 180
             elif abs(del2-del0) < tolerance:
                 bearing = 210
             else:                            
                 bearing = 195
-            self.psolution = 2
+            self.psolution = 1
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
                 bearing = 210
@@ -138,7 +138,7 @@ class solver():
                 bearing = 0.0
             else:                            
                 bearing = 345.0
-            self.psolution = 1
+            self.psolution = 2
         elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
             if abs(del2-del3) < tolerance:            
                 bearing = 0.0
@@ -146,7 +146,7 @@ class solver():
                 bearing = 30.0
             else:
                 bearing = 15.0  
-            self.psolution = 2             
+            self.psolution = 2           
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):#double checked 
             if abs(del0-del3) < tolerance:
                 bearing = 60.0
@@ -188,10 +188,16 @@ class solver():
         #c = 0.343 #speed of sound in air     
 
         #experimental layout
+
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
         hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100]     
+        hydro3_xyz = [-86.6,  -50, -100] 
+
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [-168,   0,     0]
+        hydro2_xyz = [-86.6,  -149,     0]
+        hydro3_xyz = [-86.6,  -49, -100]  
 
         #experimental layout
              
@@ -204,9 +210,9 @@ class solver():
 
         #if self.ref_hydro == 0:
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-168,   0,     0]
-        hydro2_xyz = [-86.6,  -149,     0]
-        hydro3_xyz = [-86.6,  -49, -100]
+        hydro1_xyz = [-172.2,   0,     0]
+        hydro2_xyz = [-86.6,  -146,     0]
+        hydro3_xyz = [-86.6,  -53, -100]   
         del1 = del1i
         del2 = del2i
         del3 = del3i 
@@ -368,12 +374,15 @@ class solver():
                     if p1_heading > 360:
                         p1_heading = p1_heading - 360
                     print "p1_heading else: %0.2f" % p1_heading                        
-                    if (p1_heading-bearing) < 20:
+                    if abs(p1_heading-bearing) < 20 or abs((360-p1_heading)-bearing) < 20:
                         x = -P1[0]
                         y = -P1[1]
                         z = P1[2]
                         rospy.logerr("P1 sign flip")
-            if self.psolution == 2:
+                    else:
+                        (x,y) = self.pol2cart(rho,phi)
+                        rospy.logwarn("defaulting to cardinal")                                                 
+            elif self.psolution == 2:
                 print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
                 if abs(p2_heading-bearing) < 20:
                         x = P2[0]
@@ -387,13 +396,17 @@ class solver():
                     if p2_heading > 360:
                         p2_heading = p2_heading - 360
                     print "p2_heading else: %0.2f" % p2_heading
-                    if (p2_heading-bearing) < 20:
+                    if abs(p2_heading-bearing) < 20 or abs((360-p2_heading)-bearing) < 20:
                         x = -P2[0]
                         y = -P2[1]
                         z = P2[2]    
                         rospy.logerr("P2 sign flip") 
+                    else:
+                        (x,y) = self.pol2cart(rho,phi)
+                        rospy.logwarn("defaulting to cardinal")                         
             else:
-                (x,y) = self.pol2cart(rho,phi)                   
+                (x,y) = self.pol2cart(rho,phi)
+                rospy.logwarn("defaulting to cardinal")                  
 
             '''if measured1_list == measured2_list:
                 rospy.logwarn("measured1_list == measured2_list")
