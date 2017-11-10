@@ -42,7 +42,7 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.75;
+double        triggerLevel = 0.5;
 //double        triggerLevel = 1.5;  //1.5V to overcome pool pump
 int           triggerDelayCount = sampleCount/2.0;//1.25;
 
@@ -130,7 +130,7 @@ public:
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
-	  usleep(12000);  //Add delay to ensure we don't pick up same signal twice
+	  usleep(20000);  //Add delay to ensure we don't pick up same signal twice
 	  set_trigger();
 	  return;
 	}
