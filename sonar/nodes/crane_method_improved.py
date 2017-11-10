@@ -98,7 +98,7 @@ class solver():
                 bearing = 210
             else:                            
                 bearing = 195
-            self.psolution = 1
+            self.psolution = 2
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
                 bearing = 210
