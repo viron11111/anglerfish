@@ -23,6 +23,12 @@ import operator
 class plotter():
     def plot_ping(self,data):       
 
+        self.t = []
+        self.a = []
+        self.b = []
+        self.c = []
+        self.d = []
+
         channels = data.channels
         #samples = float(data.samples/channels)
         #print samples
@@ -160,6 +166,12 @@ class plotter():
             #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
 
             if len(self.t) == len(self.a):
+                xvalues = []
+                avalues = []
+                bvalues = []
+                cvalues = []
+                dvalues = []
+
                 xvalues = self.t
                 avalues = self.a
                 bvalues = self.b
