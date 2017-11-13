@@ -78,48 +78,14 @@ class plotter():
             self.c1[i] = self.c[i]*(0.25) + self.c[i+1]*(0.25) + self.c[i+2]*(0.25) + self.c[i+3]*(0.25)
             self.d1[i] = self.d[i]*(0.25) + self.d[i+1]*(0.25) + self.d[i+2]*(0.25) + self.d[i+3]*(0.25)'''
 
-
-        #print len(self.a)
-
-        signal = 'bad' 
-
         self.N = len(self.a)   #number of samples in channel1
         Fs = sample_rate
         Ts = 1.0/Fs    
         #x = np.linspace(0.0, N*Ts, N)    
         self.yf = scipy.fftpack.fft(self.a)
         index, value = max(enumerate(abs(self.yf)), key=operator.itemgetter(1))
-        '''print "**************************"
-        print "**************************"
-        print "**************************"
-        print "**************************"
-        print "length of whole list: ", len(self.yf)
-        print "index in whole list: ", index
-        print "max value in whole list: ", abs(value)
-        
-        front_half = self.a[:len(self.a)/2]
-        yf_1 = scipy.fftpack.fft(front_half)
-        indexf, value = max(enumerate(abs(yf_1)), key=operator.itemgetter(1))
-        print "**************************"
-        print "length of front_half: ", len(yf_1)
-        print "index in front_half: ", index
-        print "max value in front_half: ", abs(value)            
-        
-        back_half  = self.a[len(self.a)/2:]
-        yf_2 = scipy.fftpack.fft(back_half )
-        indexb, value = max(enumerate(abs(yf_2)), key=operator.itemgetter(1))
-        print "**************************"
-        print "length of back_half: ", len(yf_2)
-        print "index in back_half: ", index
-        print "max value in back_half: ", abs(value)
 
-        if indexf != indexb and index >= 25:
-            signal = 'good'
-            print "GOOD SIGNAL GOOD SIGNAL GOOD SIGNAL!!!!!!!"'''
-
-        #if signal == "good":
         self.xf = np.linspace(0.0, 1.0/(2.0*Ts), self.N/2)
-
 
         legends = [None]*channels  #set up ledgends for x channels
         wave = [None]*len(self.a)  #make empty list
@@ -129,7 +95,6 @@ class plotter():
         self.t = np.arange(0,n*Ts,Ts)  #resolution of sampling, ie 1 MS/s = 1*10^-6
 
         if len(self.t) > n:
-            #print t
             self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off            
 
 
@@ -161,8 +126,8 @@ class plotter():
             #ping = ping_service()
 
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
-            rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            #rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+            #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
+            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
             #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
 
             if len(self.t) == len(self.a):
@@ -192,7 +157,7 @@ class plotter():
                 self.ax[0].set_title("Actual Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[0].set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
-                #self.ax[0].set_ylim(-0.5,0.5)
+                #self.ax[0].set_ylim(-5,5)
                 self.ax[0].set_xlim(0,self.x_axis_length)
                 self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
                 self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
