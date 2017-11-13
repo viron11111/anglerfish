@@ -74,22 +74,36 @@ class condition():
 
         twodlist = list(zip(self.xf, 2.0/self.N * np.abs(self.yf[:self.N//2])))
 
-        #print twodlist[self.freq_pos]
+        condition_data = []
+
+        for i in range(len(self.signal[0])):
+            condition_data = np.append(condition_data,self.signal[0][i])
+            condition_data = np.append(condition_data,self.signal[1][i])
+            condition_data = np.append(condition_data,self.signal[2][i])
+            condition_data = np.append(condition_data,self.signal[3][i])
+
+        self.simulate_pub.publish(Pingdata(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='signal_conditioner'),
+            channels=channels,
+            samples=len(self.signal[0])*4,
+            data=condition_data,
+            adc_bit = 12,
+            sample_rate=sample_rate))        
 
 
-        #sp = np.fft.fft(np.sin(self.signal[3]))
-        #freq = np.fft.fftfreq(self.signal[3])            
-        #print max(sp)
-
-        if twodlist[self.freq_pos][1] > 0.3:  
+        if twodlist[self.freq_pos][1] > 0.1:  
             print twodlist[self.freq_pos][1]                      
 
             fs = sample_rate
-            lowcut = self.target_freq - 5000.0
-            highcut = self.target_freq + 5000.0
+            lowcut = self.target_freq - 1000.0
+            highcut = self.target_freq + 1000.0
 
-            #for i in range(channels):
-            #    self.signal[i] = self.butter_bandpass_filter(self.signal[i], lowcut, highcut, fs, order=1)
+            
+
+            for i in range(channels):
+                self.signal[i] = self.butter_bandpass_filter(self.signal[i], lowcut, highcut, fs, order=1)
+
 
             break_num = 0
 
@@ -106,7 +120,7 @@ class condition():
             break_num = [0]*channels
             for b in range(channels):
                 for i in range(samples/4):
-                    if self.signal[b][i] >= self.break_val:
+                    if self.signal[b][i] <= -self.break_val:
                         break_num[b] = i
                         break
             
@@ -114,27 +128,22 @@ class condition():
 
             #rejection statement for samples triggered in middle of transmission (no start point)
             
-            condition_data = []
+ 
+            print earliest_break_num
 
-            for i in range(len(self.signal[0])):
-                condition_data = np.append(condition_data,self.signal[0][i])
-                condition_data = np.append(condition_data,self.signal[1][i])
-                condition_data = np.append(condition_data,self.signal[2][i])
-                condition_data = np.append(condition_data,self.signal[3][i])
-
-
-            if earliest_break_num > 100:
+            if earliest_break_num > 50:
 
                 #Buffering holder (zeros) based on the time of 1 period at 25 kHz
                 num_samples_save = int((1.0/25000.0)*sample_rate)
-                zeros = [0]*num_samples_save        
+                zeros = [0]*num_samples_save   
+
 
                 #eliminate all information before first signal by adding zeros in front of signal
                 #appy to other 3 signals
                 for b in range(channels):
-                    self.signal[b] = self.signal[b][earliest_break_num-num_samples_save::]
+                    self.signal[b] = self.signal[b][abs(earliest_break_num-num_samples_save)::]
                     self.signal[b] = np.append(zeros,self.signal[b])
-                    
+
                 for b in range(channels):
                     #print "break_num: ",break_num[b]
                     #print "earliest_break_num ", earliest_break_num
@@ -142,7 +151,10 @@ class condition():
                         if i < break_num[b]-earliest_break_num: 
                             self.signal[b][i] = 0
                         else: 
-                            break                
+                            break            
+
+
+                                                           
                         
                 #holder for new signal length (still contains samples following initial signal)
                 final_length = len(self.signal[0])
@@ -157,6 +169,8 @@ class condition():
 
                 min_amp = [0]*channels
                 max_amp = [0]*channels
+
+                 
 
                 #find max value and min value in list for normalization purposes
                 #only use 3 periods of 25 kHz length
@@ -212,16 +226,9 @@ class condition():
                 #Allow 50 zeros passed the latest signal, crop all additional zeros following
                 for i in range(channels):
                     self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
-                #combine four signals back into one array
-        
-                self.simulate_pub.publish(Pingdata(
-                    header=Header(stamp=rospy.Time.now(),
-                                  frame_id='signal_conditioner'),
-                    channels=channels,
-                    samples=len(self.signal[0])*4,
-                    data=condition_data,
-                    adc_bit = 12,
-                    sample_rate=sample_rate))
+
+                    
+
 
 
     def __init__(self):

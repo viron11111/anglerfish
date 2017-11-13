@@ -34,7 +34,7 @@ double        samplingFrequency = 2000000;  //in Hz
 //float         sampleCount_dec = samplingFrequency*0.00330188679;
 const int32  sampleCount =  4000;//int32(sampleCount_dec)*channelCount; //2048   // for each channel, to decide the capacity of buffer in kernel.
 
-#define       SECTION_BUFFERE_SIZE   intervalCount*channelCount
+#define      SECTION_BUFFERE_SIZE   intervalCount*channelCount
 #define		 USER_BUFFER_SIZE    sampleCount*channelCount
 double       Data[USER_BUFFER_SIZE];
 
@@ -130,7 +130,7 @@ public:
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
-	  usleep(20000);  //Add delay to ensure we don't pick up same signal twice
+	  usleep(5000);  //Add delay to ensure we don't pick up same signal twice
 	  set_trigger();
 	  return;
 	}

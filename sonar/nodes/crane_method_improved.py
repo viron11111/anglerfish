@@ -361,7 +361,7 @@ class solver():
 
             #corrections using dels lookup table.
             rospy.logwarn(self.psolution)
-            if self.psolution == 1:
+            if self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
                 print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
                 if abs(p1_heading-bearing) < 20:
                         x = P1[0]
@@ -382,7 +382,7 @@ class solver():
                     else:
                         (x,y) = self.pol2cart(rho,phi)
                         rospy.logwarn("defaulting to cardinal")                                                 
-            elif self.psolution == 2:
+            elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
                 print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
                 if abs(p2_heading-bearing) < 20:
                         x = P2[0]
