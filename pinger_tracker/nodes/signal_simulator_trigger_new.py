@@ -197,7 +197,7 @@ class simulator():
         pos = pos()
         self.position = pos.actual_position         
 
-        #print self.position
+        print self.position
 
         pulse = Pulse(self.position[0], self.position[1], self.position[2], 0)
         tstamps = hydrophone_array.listen(pulse)
@@ -226,7 +226,7 @@ class simulator():
         self.sample_rate = sr.sample_rate
         #print self.sample_rate
 
-        #self.sample_rate = 10000
+        self.sample_rate = 2000
        
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
@@ -250,6 +250,14 @@ class simulator():
         tstamps = timestamps.actual_time_stamps
 
         print tstamps
+
+        self.tstamps_pub = rospy.Publisher("/hydrophones/actual_time_stamps", Actual_time_stamps, queue_size = 1)
+
+        self.tstamps_pub.publish(Actual_time_stamps(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='signal_simulator'),
+                actual_time_stamps=tstamps))       
+
       
         phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
         self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)             
@@ -462,7 +470,7 @@ class simulator():
 
         self.max_range = 10000
         distance_resolution = 5000
-        degree_angle_resolution = 5
+        degree_angle_resolution = 1
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -477,8 +485,8 @@ class simulator():
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
-                y = dis * np.sin(phi) 
-                print "x: -%f y: -%f" % (x,y)
+                y = dis * np.sin(phi)
+                print "x: %f y: %f" % (x,y)
 
                 self.calculate_error(x,y,z)
                 self.ping_service()

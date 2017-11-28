@@ -201,6 +201,7 @@ class phaser():
 
         cross_corr = np.correlate(reference, signal, mode='full')
         max_idx = cross_corr.argmax()
+        #print "prior: %0.2f best: %0.2f after: %0.2f" % (cross_corr[max_idx-1], cross_corr[max_idx], cross_corr[max_idx+1])
 
         #rospy.loginfo(len(cross_corr))
         #print len(reference)
@@ -210,7 +211,7 @@ class phaser():
 
 
         
-        phase_holder = max_idx - (len(reference) - 0)
+        phase_holder = max_idx - (len(reference) + 0)
         #print phase_holder
         
         return phase_holder*(1.0/self.sample_rate)        

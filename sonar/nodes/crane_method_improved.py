@@ -74,7 +74,7 @@ class solver():
                 bearing = 120
             else:
                 bearing = 105     
-            self.psolution = 1  #changed     
+            self.psolution = 1  #changed again
             #print "here1"  
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
@@ -208,11 +208,17 @@ class solver():
         #experimental layout
              
 
-        del1i = (data.calculated_time_stamps[1])*c #mm/uSec
+        '''del1i = (data.calculated_time_stamps[1])*c #mm/uSec
         del2i = (data.calculated_time_stamps[2])*c #mm/uSec
         del3i = (data.calculated_time_stamps[3])*c #mm/uSec         
 
-        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
+        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])'''
+
+        del1i = (data.actual_time_stamps[1])*c #mm/uSec
+        del2i = (data.actual_time_stamps[2])*c #mm/uSec
+        del3i = (data.actual_time_stamps[3])*c #mm/uSec         
+
+        bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
 
         #if self.ref_hydro == 0:
         hydro0_xyz = [0,      0,     0]
@@ -296,11 +302,13 @@ class solver():
         if (discr < 0):
             rospy.loginfo("no real solution was found; set garbage values for P1 and P2")
 
+            print discr
+
             (x,y) = self.pol2cart(rho,phi)
 
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
-            z=0
+            z=0         
 
         else:
 
@@ -492,8 +500,8 @@ class solver():
 
     def __init__(self):
         rospy.init_node('crane_method_service')
-        #rospy.Subscriber('/hydrophones/actualtimestamps', Actual_time_stamps, self.actu_vals)
-        rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
+        rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.calc_vals) #self.actu_vals)
+        #rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
         #self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_pos_service, self.crane_solver)
