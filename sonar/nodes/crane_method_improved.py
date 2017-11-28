@@ -53,7 +53,7 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         bearing = 0.0
-        tolerance = 12
+        tolerance = 15
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
@@ -74,7 +74,8 @@ class solver():
                 bearing = 120
             else:
                 bearing = 105     
-            self.psolution = 2         
+            self.psolution = 1  #changed     
+            #print "here1"  
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
                 bearing = 150         
@@ -98,7 +99,8 @@ class solver():
                 bearing = 210
             else:                            
                 bearing = 195
-            self.psolution = 2
+            self.psolution = 1
+            #print "here2" 
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
                 bearing = 210
@@ -107,6 +109,7 @@ class solver():
             else:
                 bearing = 225
             self.psolution = 2
+            #print "here3" 
         elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
             if abs(del1-del0) < tolerance:
                 bearing = 270.0
@@ -123,6 +126,7 @@ class solver():
             else:
                 bearing = 285.0
             self.psolution = 2
+            #print "here4" 
         elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):#double checked
             if abs(del1-del2) < tolerance:
                 bearing = 330
@@ -139,6 +143,7 @@ class solver():
             else:                            
                 bearing = 345.0
             self.psolution = 2
+            #print "here5" 
         elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
             if abs(del2-del3) < tolerance:            
                 bearing = 0.0
@@ -146,7 +151,7 @@ class solver():
                 bearing = 30.0
             else:
                 bearing = 15.0  
-            self.psolution = 2           
+            self.psolution = 2  
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):#double checked 
             if abs(del0-del3) < tolerance:
                 bearing = 60.0
@@ -155,6 +160,7 @@ class solver():
             else:
                 bearing = 45.0
             self.psolution = 2
+            #print "here6" 
         else:
             rospy.logerr("CARDINAL failed to find solution!")
             bearing = -1
@@ -241,8 +247,8 @@ class solver():
 
         #print "A1: %f" % A1
         
-        catch = (x1*x1-del1*del1)/(2.0*del1) if del1 != 0 else 0
         zero = (x2*x2 + y2*y2-del2*del2)/(2.0*del2) if del2 != 0 else 0
+        catch = (x1*x1-del1*del1)/(2.0*del1) if del1 != 0 else 0
 
         D1 = zero - catch
 
@@ -361,52 +367,62 @@ class solver():
 
             #corrections using dels lookup table.
             rospy.logwarn(self.psolution)
-            if self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
-                if abs(p1_heading-bearing) < 20:
-                        x = P1[0]
-                        y = P1[1]
-                        z = P1[2]
-                        rospy.logerr("P1 normal")
-                else:
-                    p1_heading = 180 + p1_heading
-                    
-                    if p1_heading > 360:
-                        p1_heading = p1_heading - 360
-                    print "p1_heading else: %0.2f" % p1_heading                        
-                    if abs(p1_heading-bearing) < 20 or abs((360-p1_heading)-bearing) < 20:
-                        x = -P1[0]
-                        y = -P1[1]
-                        z = P1[2]
-                        rospy.logerr("P1 sign flip")
+            #map(abs, myList)
+            if map(abs,measured1_list) == map(abs,dellist) or map(abs,measured2_list) == map(abs,dellist):
+
+                if self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
+                    print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
+                    if abs(p1_heading-bearing) < 30:
+                            x = P1[0]
+                            y = P1[1]
+                            z = P1[2]
+                            rospy.logerr("P1 normal")
                     else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logwarn("defaulting to cardinal")                                                 
-            elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
-                if abs(p2_heading-bearing) < 20:
-                        x = P2[0]
-                        y = P2[1]
-                        z = P2[2]
-                        rospy.logerr("P2 normal")
-                else:
-                    p2_heading = 180 + p2_heading
+                        rospy.logerr(p1_heading)
+                        if p1_heading > 180:
+                            p1_heading = p1_heading - 180
+                        else:
+                            p1_heading = 180 + p1_heading
+                        
+                        if p1_heading > 360:
+                            p1_heading = p1_heading - 360
+                        print "p1_heading else: %0.2f" % p1_heading                        
+                        if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
+                            x = -P1[0]
+                            y = -P1[1]
+                            z = P1[2]
+                            rospy.logerr("P1 sign flip")
+                        else:
+                            (x,y) = self.pol2cart(rho,phi)
+                            rospy.logwarn("defaulting to cardinal")                                                 
+                elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
+                    print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
+                    if abs(p2_heading-bearing) < 30:
+                            x = P2[0]
+                            y = P2[1]
+                            z = P2[2]
+                            rospy.logerr("P2 normal")
+                    else:
+                        p2_heading = 180 + p2_heading
 
 
-                    if p2_heading > 360:
-                        p2_heading = p2_heading - 360
-                    print "p2_heading else: %0.2f" % p2_heading
-                    if abs(p2_heading-bearing) < 20 or abs((360-p2_heading)-bearing) < 20:
-                        x = -P2[0]
-                        y = -P2[1]
-                        z = P2[2]    
-                        rospy.logerr("P2 sign flip") 
-                    else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logwarn("defaulting to cardinal")                         
+                        if p2_heading > 360:
+                            p2_heading = p2_heading - 360
+                        print "p2_heading else: %0.2f" % p2_heading
+                        if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
+                            x = -P2[0]
+                            y = -P2[1]
+                            z = P2[2]    
+                            rospy.logerr("P2 sign flip") 
+                        else:
+                            (x,y) = self.pol2cart(rho,phi)
+                            rospy.logwarn("defaulting to cardinal")                         
+                else:
+                    (x,y) = self.pol2cart(rho,phi)
+                    rospy.logwarn("defaulting to cardinal")     
             else:
                 (x,y) = self.pol2cart(rho,phi)
-                rospy.logwarn("defaulting to cardinal")                  
+                rospy.logwarn("defaulting to cardinal")                              
 
             '''if measured1_list == measured2_list:
                 rospy.logwarn("measured1_list == measured2_list")

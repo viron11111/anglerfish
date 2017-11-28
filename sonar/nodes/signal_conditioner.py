@@ -94,7 +94,7 @@ class condition():
 
             #using same variable as above
             #Buffering holder for keeping X periods of actual signal at 25 kHz
-            num_samples_save = int((0.75/25000.0)*sample_rate)
+            num_samples_save = int((2.0/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
@@ -119,8 +119,6 @@ class condition():
                 amplitude_ratio[i] = max_amplitude/amplitude[i]
 
             #print amplitude_ratio
-
-            #for testing purposes, git more headaches
 
             ######################
             self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]

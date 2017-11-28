@@ -102,7 +102,7 @@ class simulator():
         pre_signal = [(2**self.resolution)/2.0]*int(self.samples)  #dead period prior to signal
 
         if len(pre_signal) == len(self.noise[0:len(pre_signal)]):
-            pre_signal = pre_signal + self.noise[0:len(pre_signal)]*random.uniform(1.0,2) #add noise with noise multiplier
+            pre_signal = pre_signal #+ self.noise[0:len(pre_signal)]*random.uniform(1.0,2) #add noise with noise multiplier
 
         return pre_signal
 
@@ -197,7 +197,7 @@ class simulator():
         pos = pos()
         self.position = pos.actual_position         
 
-        print self.position
+        #print self.position
 
         pulse = Pulse(self.position[0], self.position[1], self.position[2], 0)
         tstamps = hydrophone_array.listen(pulse)
@@ -219,12 +219,14 @@ class simulator():
         
     def ping_service(self):
 
-        rospy.loginfo("start")
+        #rospy.loginfo("start")
 
         sr = rospy.ServiceProxy('hydrophones/sample_rate', Sample_rate)
         sr = sr()
         self.sample_rate = sr.sample_rate
         #print self.sample_rate
+
+        #self.sample_rate = 10000
        
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
@@ -246,6 +248,8 @@ class simulator():
         ref = rospy.ServiceProxy('/hydrophones/actual_time_stamps', Actual_time_stamps_service)
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
+
+        print tstamps
       
         phase_jitter = ((1.0/float(self.sample_rate*1000))/(1.0/(self.signal_freq*1000)))*np.pi
         self.phase_jitter = random.uniform(-phase_jitter/2,phase_jitter/2)             
@@ -264,7 +268,7 @@ class simulator():
 
         for i in range(0,4):  #for loop that creates and plots the four waves
         
-            self.amplitude_jitter = 1.0#random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
+            self.amplitude_jitter = 1.0 #random.uniform(0.5,1.0) #add amplitude jitter, for saturation, go above 1.0
             wave = self.create_wave(tstamps[i])
      
             if len(wave) == len(self.data)/4:
@@ -280,7 +284,7 @@ class simulator():
         self.simulate_pub = rospy.Publisher("/hydrophones/pingraw", Pingdata, queue_size = 1)
 
         fivev = [(x-(65536.0/2.0))/4096 for x in self.data]
-        print max(fivev)
+        #print max(fivev)
 
         self.simulate_pub.publish(Pingdata(
                 header=Header(stamp=rospy.Time.now(),
@@ -313,8 +317,6 @@ class simulator():
 
     def plot_grid_graph(self,x_list,y_list,z,z_list,typemeasure):
         # define grid.
-
-
 
         xi = np.linspace(-self.max_range/1000, self.max_range/1000, (self.max_range/1000)*2)
         yi = np.linspace(-self.max_range/1000, self.max_range/1000, (self.max_range/1000)*2)
@@ -441,14 +443,6 @@ class simulator():
 
         trigger = 0
 
-        #date_time = strftime("%y_%m_%d_%H_%M_%S", localtime())
-        #file_name = "/home/andy/catkin_ws/src/anglerfish/pinger_tracker/data/Sample_rate_results_%s.csv" % date_time
-
-        z = -2000
-
-        #self.file = csv.writer(open(file_name,'w'))
-        #self.file.writerow(["Sample Rate", "Heading Error (rad)", "Declination Error (rad)", "Distance Error percent", "Depth: %i mm" % z])
-
         samples = 0
         self.heading_error_sum = 0.0
         self.declination_error_sum = 0.0
@@ -484,7 +478,7 @@ class simulator():
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
                 y = dis * np.sin(phi) 
-                print "x: %f y: %f" % (x,y)
+                print "x: -%f y: -%f" % (x,y)
 
                 self.calculate_error(x,y,z)
                 self.ping_service()
@@ -493,63 +487,14 @@ class simulator():
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
-                time.sleep(1.0)
+                #print z_list
+                time.sleep(0.5)
+
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
         self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')       
 
         #****************polar coors**********************         
-
-                #print dis
-
-
-        '''for x in range(self.xdistancemin,self.xdistancemax+1,resolution):
-            for y in range(self.ydistancemin,self.ydistancemax+1,resolution):
-                self.sample_rate = 1000               
-
-                z = -1000 #depth of pinger
-                self.calculate_error(x,y,z)
-
-                print x
-
-                x_list = x_list + [x]
-                y_list = y_list + [y]
-                z_list = z_list + [self.head_error]
-                d_list = d_list + [self.declination_error]
-
-        self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
-        self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')'''
-
-
-        #while not rospy.is_shutdown():
-
-            #rate.sleep()
-
-
-
-
-        '''for j in range(100, 10000, 10):
-            #print j
-            for x in range(-20000,20001,resolution):
-                #print x
-                for y in range(-20000,20001,resolution):
-                    #print y
-                    self.sample_rate = j                
-                    #x = x*1000
-                    #y = y*1000
-                    z = -2000
-
-                    self.calculate_error(x,y,z)
-                    samples += 1
-            heading_error = self.heading_error_sum/samples
-            declination_error = self.declination_error_sum/samples
-            distance_error = self.distance_error_sum/samples
-            print "%i000 sampling rate, heading_error: %.2f rad, declination_error: %.2f rad, distance_error: %0.2f%% with %i samples" %(j,heading_error, declination_error, distance_error, samples)
-            self.file.writerow(["%i000" % j, "%.2f" % heading_error, "%.2f" % declination_error, "%.2f" % distance_error])            
-            samples = 0
-            self.heading_error_sum = 0.0
-            self.declination_error_sum = 0.0
-            self.distance_error_sum = 0.0 '''          
 
         os.system("rosnode kill acoustic_monte")            
 

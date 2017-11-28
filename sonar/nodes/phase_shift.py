@@ -210,7 +210,7 @@ class phaser():
 
 
         
-        phase_holder = max_idx - (len(reference) - 1)
+        phase_holder = max_idx - (len(reference) - 0)
         #print phase_holder
         
         return phase_holder*(1.0/self.sample_rate)        
