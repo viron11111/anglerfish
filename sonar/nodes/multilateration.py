@@ -278,7 +278,6 @@ class ReceiverArraySim(object):
     def __init__(self, hydrophone_locations, wave_propagation_speed_mps):
         self.c = wave_propagation_speed_mps
         self.hydrophone_locations = np.array([0, 0, 0])
-        rospy.logwarn(self.hydrophone_locations)
         for key in hydrophone_locations:
             sensor_location = np.array(
                 [hydrophone_locations[key]['x'], hydrophone_locations[key]['y'], hydrophone_locations[key]['z']])

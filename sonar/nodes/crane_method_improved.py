@@ -74,7 +74,7 @@ class solver():
                 bearing = 120
             else:
                 bearing = 105     
-            self.psolution = 1  #changed again
+            self.psolution = 1  #changed changed back
             #print "here1"  
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
@@ -195,15 +195,15 @@ class solver():
 
         #experimental layout
 
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-173.2,   0,     0]
-        hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100] 
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [-173.2,   0,     0]
+        #hydro2_xyz = [-86.6,  -150,     0]
+        #hydro3_xyz = [-86.6,  -50, -100] 
 
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-168,   0,     0]
-        hydro2_xyz = [-86.6,  -149,     0]
-        hydro3_xyz = [-86.6,  -49, -100]  
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [-168,   0,     0]
+        #hydro2_xyz = [-86.6,  -149,     0]
+        #hydro3_xyz = [-86.6,  -49, -100]  
 
         #experimental layout
              
@@ -216,15 +216,23 @@ class solver():
 
         del1i = (data.actual_time_stamps[1])*c #mm/uSec
         del2i = (data.actual_time_stamps[2])*c #mm/uSec
-        del3i = (data.actual_time_stamps[3])*c #mm/uSec         
+        del3i = (data.actual_time_stamps[3])*c #mm/uSec 
+
+        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
 
         bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
 
         #if self.ref_hydro == 0:
+        #calibrated data *save**
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [-172.2,   0,     0]
+        #hydro2_xyz = [-86.6,  -146,     0]
+        #hydro3_xyz = [-86.6,  -53, -100]   
+
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-172.2,   0,     0]
-        hydro2_xyz = [-86.6,  -146,     0]
-        hydro3_xyz = [-86.6,  -53, -100]   
+        hydro1_xyz = [-173.2,   0,     0]
+        hydro2_xyz = [-86.6,  -150,     0]
+        hydro3_xyz = [-86.6,  -50, -100]
         del1 = del1i
         del2 = del2i
         del3 = del3i 
