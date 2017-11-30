@@ -208,19 +208,19 @@ class solver():
         #experimental layout
              
 
-        '''del1i = (data.calculated_time_stamps[1])*c #mm/uSec
+        del1i = (data.calculated_time_stamps[1])*c #mm/uSec
         del2i = (data.calculated_time_stamps[2])*c #mm/uSec
         del3i = (data.calculated_time_stamps[3])*c #mm/uSec         
 
-        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])'''
+        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
 
-        del1i = (data.actual_time_stamps[1])*c #mm/uSec
-        del2i = (data.actual_time_stamps[2])*c #mm/uSec
-        del3i = (data.actual_time_stamps[3])*c #mm/uSec 
+        #del1i = (data.actual_time_stamps[1])*c #mm/uSec
+        #del2i = (data.actual_time_stamps[2])*c #mm/uSec
+        #del3i = (data.actual_time_stamps[3])*c #mm/uSec 
 
-        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
+        #print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
 
-        bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
+        #bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
 
         #if self.ref_hydro == 0:
         #calibrated data *save**
@@ -386,13 +386,32 @@ class solver():
             #map(abs, myList)
             if map(abs,measured1_list) == map(abs,dellist) or map(abs,measured2_list) == map(abs,dellist):
 
-                if self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
+                if measured1_list == measured2_list:
+                    print "P1 == P2"
+                    sum1 = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
+                    sum2 = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
+                    print "sum1: ", sum1
+                    print "sum2: ", sum2
+                    if sum1 > sum2:
+                        x = P1[0]
+                        y = P1[1]
+                        z = P1[2]
+                        self.psolution = 1
+                        rospy.loginfo("sum1 > sum2")
+                    elif sum2 > sum1:
+                        x = P2[0]
+                        y = P2[1]
+                        z = P2[2]
+                        self.psolution = 2
+                        rospy.loginfo("sum2 > sum1") 
+                elif measured1_list == dellist:
                     if abs(p1_heading-bearing) < 30:
-                            x = P1[0]
-                            y = P1[1]
-                            z = P1[2]
-                            rospy.logerr("P1 normal")
+                        x = P1[0]
+                        y = P1[1]
+                        z = P1[2]
+                        self.psolution = 1
+                        rospy.logerr("P1 normal")
+                        rospy.loginfo("measured1_list = dellist")      
                     else:
                         rospy.logerr(p1_heading)
                         if p1_heading > 180:
@@ -408,31 +427,70 @@ class solver():
                             y = -P1[1]
                             z = P1[2]
                             rospy.logerr("P1 sign flip")
-                        else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logwarn("defaulting to cardinal")                                                 
-                elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
-                    if abs(p2_heading-bearing) < 30:
+                        elif abs(p2_heading-bearing) < 30:
                             x = P2[0]
                             y = P2[1]
                             z = P2[2]
                             rospy.logerr("P2 normal")
+                        else:
+                            rospy.logerr(p2_heading)
+                            if p2_heading > 180:
+                                p2_heading = p2_heading - 180
+                            else:
+                                p2_heading = 180 + p2_heading
+                            
+                            if p2_heading > 360:
+                                p2_heading = p2_heading - 360
+                            print "p2_heading else: %0.2f" % p2_heading                        
+                            if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
+                                x = -P2[0]
+                                y = -P2[1]
+                                z = P2[2]
+                                rospy.logerr("P2 sign flip")  
+                              
+                elif measured2_list == dellist:
+                    if abs(p2_heading-bearing) < 30:
+                        x = P2[0]
+                        y = P2[1]
+                        z = P2[2]
+                        self.psolution = 2
+                        rospy.logerr("P2 normal")
+                        rospy.loginfo("measured2_list = dellist")      
                     else:
-                        p2_heading = 180 + p2_heading
-
-
+                        rospy.logerr(p2_heading)
+                        if p2_heading > 180:
+                            p2_heading = p2_heading - 180
+                        else:
+                            p2_heading = 180 + p2_heading
+                        
                         if p2_heading > 360:
                             p2_heading = p2_heading - 360
-                        print "p2_heading else: %0.2f" % p2_heading
+                        print "p2_heading else: %0.2f" % p2_heading                        
                         if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
                             x = -P2[0]
                             y = -P2[1]
-                            z = P2[2]    
-                            rospy.logerr("P2 sign flip") 
+                            z = P2[2]
+                            rospy.logerr("P2 sign flip")
+                        elif abs(p1_heading-bearing) < 30:
+                            x = P1[0]
+                            y = P1[1]
+                            z = P1[2]
+                            rospy.logerr("P1 normal")
                         else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logwarn("defaulting to cardinal")                         
+                            rospy.logerr(p1_heading)
+                            if p1_heading > 180:
+                                p1_heading = p1_heading - 180
+                            else:
+                                p1_heading = 180 + p1_heading
+                            
+                            if p1_heading > 360:
+                                p1_heading = p1_heading - 360
+                            print "p1_heading else: %0.2f" % p1_heading                        
+                            if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
+                                x = -P1[0]
+                                y = -P1[1]
+                                z = P1[2]
+                                rospy.logerr("P1 sign flip")    
                 else:
                     (x,y) = self.pol2cart(rho,phi)
                     rospy.logwarn("defaulting to cardinal")     
@@ -508,8 +566,8 @@ class solver():
 
     def __init__(self):
         rospy.init_node('crane_method_service')
-        rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.calc_vals) #self.actu_vals)
-        #rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
+        #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.calc_vals) #self.actu_vals)
+        rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
         #self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_pos_service, self.crane_solver)
@@ -571,3 +629,53 @@ if __name__ == '__main__':
         zsquared = -T2/T1 if T1 != 0 else 0
 
         z = -math.sqrt(abs(zsquared))'''
+
+
+'''
+               elif self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
+                    print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
+                    if abs(p1_heading-bearing) < 30:
+                            x = P1[0]
+                            y = P1[1]
+                            z = P1[2]
+                            rospy.logerr("P1 normal")
+                    else:
+                        rospy.logerr(p1_heading)
+                        if p1_heading > 180:
+                            p1_heading = p1_heading - 180
+                        else:
+                            p1_heading = 180 + p1_heading
+                        
+                        if p1_heading > 360:
+                            p1_heading = p1_heading - 360
+                        print "p1_heading else: %0.2f" % p1_heading                        
+                        if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
+                            x = -P1[0]
+                            y = -P1[1]
+                            z = P1[2]
+                            rospy.logerr("P1 sign flip")
+                        else:
+                            (x,y) = self.pol2cart(rho,phi)
+                            rospy.logwarn("defaulting to cardinal")                                                 
+                elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
+                    print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
+                    if abs(p2_heading-bearing) < 30:
+                            x = P2[0]
+                            y = P2[1]
+                            z = P2[2]
+                            rospy.logerr("P2 normal")
+                    else:
+                        p2_heading = 180 + p2_heading
+
+
+                        if p2_heading > 360:
+                            p2_heading = p2_heading - 360
+                        print "p2_heading else: %0.2f" % p2_heading
+                        if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
+                            x = -P2[0]
+                            y = -P2[1]
+                            z = P2[2]    
+                            rospy.logerr("P2 sign flip") 
+                        else:
+                            (x,y) = self.pol2cart(rho,phi)
+                            rospy.logwarn("defaulting to cardinal")        '''

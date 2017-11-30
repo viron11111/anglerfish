@@ -62,9 +62,9 @@ class simulator():
 
         #experimental layout
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  150,     0]
-        hydro3_xyz = [86.6,  50, -100] 
+        hydro1_xyz = [-173.2,   0,     0]
+        hydro2_xyz = [-86.6,  -150,     0]
+        hydro3_xyz = [-86.6,  -50, -100] 
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)    
 
@@ -468,8 +468,8 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 10000
-        distance_resolution = 5000
+        self.max_range = 20000
+        distance_resolution = 2000
         degree_angle_resolution = 1
         rad_resolution = math.radians(degree_angle_resolution)
 
