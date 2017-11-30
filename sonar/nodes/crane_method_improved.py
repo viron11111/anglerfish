@@ -53,7 +53,7 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         bearing = 0.0
-        tolerance = 15
+        tolerance = 10 #15
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
@@ -380,9 +380,15 @@ class solver():
             rospy.loginfo(p1_heading)
             rospy.loginfo(p2_heading)            
 
+            inv_bearing = bearing + 180            
+            inv_p1heading = p1_heading + 180
+            inv_p2heading = p2_heading + 180
+
+
+            #*********************************************
 
             #corrections using dels lookup table.
-            rospy.logwarn(self.psolution)
+            #rospy.logwarn(self.psolution)
             #map(abs, myList)
             if map(abs,measured1_list) == map(abs,dellist) or map(abs,measured2_list) == map(abs,dellist):
 
@@ -393,19 +399,62 @@ class solver():
                     print "sum1: ", sum1
                     print "sum2: ", sum2
                     if sum1 > sum2:
-                        x = P1[0]
-                        y = P1[1]
-                        z = P1[2]
-                        self.psolution = 1
-                        rospy.loginfo("sum1 > sum2")
+                        if abs(p1_heading-bearing) < 15:
+                            x = P1[0]
+                            y = P1[1]
+                            z = P1[2]
+                            self.psolution = 1
+                            rospy.loginfo("sum1 > sum2")
+                        elif abs(inv_p1heading-bearing) < 15:                            
+                            x = -P1[0]
+                            y = -P1[1]
+                            z = P1[2]
+                            self.psolution = 1
+                            rospy.loginfo("inverse")
+                            rospy.loginfo("sum1 > sum2")
+                        elif abs(p2_heading-bearing) < 15:
+                            x = P2[0]
+                            y = P2[1]
+                            z = P2[2]
+                            self.psolution = 2
+                            rospy.loginfo("sum2 > sum1")
+                        elif abs(inv_p2heading-bearing) < 15:                            
+                            x = -P2[0]
+                            y = -P2[1]
+                            z = P2[2]
+                            self.psolution = 2
+                            rospy.loginfo("inverse last")
+                            rospy.loginfo("sum2 > sum1")                            
                     elif sum2 > sum1:
-                        x = P2[0]
-                        y = P2[1]
-                        z = P2[2]
-                        self.psolution = 2
-                        rospy.loginfo("sum2 > sum1") 
+                        if abs(p2_heading-bearing) < 15:
+                            x = P2[0]
+                            y = P2[1]
+                            z = P2[2]
+                            self.psolution = 2
+                            rospy.loginfo("sum2 > sum1")
+                        elif abs(inv_p2heading-bearing) < 15:                            
+                            x = -P2[0]
+                            y = -P2[1]
+                            z = P2[2]
+                            self.psolution = 2
+                            rospy.loginfo("inverse")
+                            rospy.loginfo("sum2 > sum1")   
+                        elif abs(p1_heading-bearing) < 15:
+                            x = P1[0]
+                            y = P1[1]
+                            z = P1[2]
+                            self.psolution = 1
+                            rospy.loginfo("sum1 > sum2")
+                        elif abs(inv_p1heading-bearing) < 15:                            
+                            x = -P1[0]
+                            y = -P1[1]
+                            z = P1[2]
+                            self.psolution = 1
+                            rospy.loginfo("inverse last")
+                            rospy.loginfo("sum1 > sum2")
+ 
                 elif measured1_list == dellist:
-                    if abs(p1_heading-bearing) < 30:
+                    if abs(p1_heading-bearing) < 15:
                         x = P1[0]
                         y = P1[1]
                         z = P1[2]
@@ -422,15 +471,17 @@ class solver():
                         if p1_heading > 360:
                             p1_heading = p1_heading - 360
                         print "p1_heading else: %0.2f" % p1_heading                        
-                        if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
+                        if abs(p1_heading-bearing) < 15 or abs((360-p1_heading)-bearing) < 15:
                             x = -P1[0]
                             y = -P1[1]
                             z = P1[2]
+                            self.psolution = 1
                             rospy.logerr("P1 sign flip")
-                        elif abs(p2_heading-bearing) < 30:
+                        elif abs(p2_heading-bearing) < 25:
                             x = P2[0]
                             y = P2[1]
                             z = P2[2]
+                            self.psolution = 2
                             rospy.logerr("P2 normal")
                         else:
                             rospy.logerr(p2_heading)
@@ -442,14 +493,15 @@ class solver():
                             if p2_heading > 360:
                                 p2_heading = p2_heading - 360
                             print "p2_heading else: %0.2f" % p2_heading                        
-                            if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
+                            if abs(p2_heading-bearing) < 15 or abs((360-p2_heading)-bearing) < 15:
                                 x = -P2[0]
                                 y = -P2[1]
                                 z = P2[2]
+                                self.psolution = 2
                                 rospy.logerr("P2 sign flip")  
                               
                 elif measured2_list == dellist:
-                    if abs(p2_heading-bearing) < 30:
+                    if abs(p2_heading-bearing) < 15:
                         x = P2[0]
                         y = P2[1]
                         z = P2[2]
@@ -458,38 +510,57 @@ class solver():
                         rospy.loginfo("measured2_list = dellist")      
                     else:
                         rospy.logerr(p2_heading)
-                        if p2_heading > 180:
-                            p2_heading = p2_heading - 180
-                        else:
-                            p2_heading = 180 + p2_heading
+
+                        #if p2_heading > 180:
+                        #    p2_heading = p2_heading - 180
+                        #else:
+                        #    p2_heading = 180 + p2_heading
                         
-                        if p2_heading > 360:
-                            p2_heading = p2_heading - 360
-                        print "p2_heading else: %0.2f" % p2_heading                        
-                        if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
+                        #if p2_heading > 360:
+                        #    p2_heading = p2_heading - 360
+                        #print "p2_heading else: %0.2f" % p2_heading                        
+                        #if abs(p2_heading-bearing) < 15 or abs((360-p2_heading)-bearing) < 15:
+                        diff = abs(p2_heading - inv_bearing)
+                        if diff > 180 and inv_bearing < 180:
+                            diff = abs(p2_heading - (inv_bearing+360))
+                        elif diff > 180 and inv_bearing > 180:
+                            diff = abs(p2_heading - (inv_bearing-360))
+
+                        print "diff: ", diff
+
+                        if diff < 15:
+                            print "bearing: ", bearing
+                            print "p2_heading-bearing: ", p2_heading-bearing
+                            print "abs((360-p2_heading)-bearing): ", abs((360-p2_heading)-bearing)
                             x = -P2[0]
                             y = -P2[1]
                             z = P2[2]
+                            self.psolution = 2
                             rospy.logerr("P2 sign flip")
-                        elif abs(p1_heading-bearing) < 30:
+                        elif abs(p1_heading-bearing) < 15:
                             x = P1[0]
                             y = P1[1]
                             z = P1[2]
+                            self.psolution = 1
                             rospy.logerr("P1 normal")
                         else:
                             rospy.logerr(p1_heading)
-                            if p1_heading > 180:
-                                p1_heading = p1_heading - 180
-                            else:
-                                p1_heading = 180 + p1_heading
-                            
-                            if p1_heading > 360:
-                                p1_heading = p1_heading - 360
-                            print "p1_heading else: %0.2f" % p1_heading                        
-                            if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
+                            print "inv_bearing: ", inv_bearing
+                            diff = abs(p1_heading - inv_bearing)
+                            if diff > 180 and inv_bearing < 180:
+                                diff = abs(p1_heading - (inv_bearing+360))
+                            elif diff > 180 and inv_bearing > 180:
+                                diff = abs(p1_heading - (inv_bearing-360))
+
+                            print "diff: ", diff
+                            print "p1_heading else: %0.2f" % p1_heading 
+                            print "p1_heading - bearing: %f" % (p1_heading - bearing)     
+
+                            if diff < 15: #< 15 or abs((360-p1_heading)-bearing) < 15:
                                 x = -P1[0]
                                 y = -P1[1]
                                 z = P1[2]
+                                self.psolution = 1
                                 rospy.logerr("P1 sign flip")    
                 else:
                     (x,y) = self.pol2cart(rho,phi)
