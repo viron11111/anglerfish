@@ -218,7 +218,7 @@ class solver():
         #del2i = (data.actual_time_stamps[2])*c #mm/uSec
         #del3i = (data.actual_time_stamps[3])*c #mm/uSec 
 
-        #print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
+        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
 
         #bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
 
@@ -331,6 +331,9 @@ class solver():
             P1[2] = -(Q2a*P1[0]+Q2b)/Q1 if Q1 != 0 else 0
             P2[2] = -(Q2a*P2[0]+Q2b)/Q1 if Q1 != 0 else 0
 
+            d0_1 = -P1[0] * (x1 / del1) + (x1*x1 - del1*del1) / (2.0*del1)        
+            d0_2 = -P2[0] * (x1 / del1) + (x1*x1 - del1*del1) / (2.0*del1)
+
             rospy.loginfo("x1: %f" % (P1[0]))
             rospy.loginfo("y1: %f" % (P1[1]))
             rospy.loginfo("z1: %f" % (P1[2]))
@@ -384,6 +387,9 @@ class solver():
             inv_p1heading = p1_heading + 180
             inv_p2heading = p2_heading + 180
 
+
+            rospy.logwarn("do_1: %0.2f" % d0_1)
+            rospy.logwarn("do_2: %0.2f" % d0_2)
 
             #*********************************************
 
