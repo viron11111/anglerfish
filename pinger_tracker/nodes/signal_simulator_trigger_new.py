@@ -496,7 +496,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                time.sleep(0.5)
+                time.sleep(0.1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
