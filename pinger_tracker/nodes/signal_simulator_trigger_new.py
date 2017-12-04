@@ -4,6 +4,8 @@ import rosparam
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.mlab import griddata
+#from pylab import *
 
 from std_msgs.msg import Header, Bool
 from pinger_tracker.msg import *
@@ -197,7 +199,7 @@ class simulator():
         pos = pos()
         self.position = pos.actual_position         
 
-        print self.position
+        #print self.position
 
         pulse = Pulse(self.position[0], self.position[1], self.position[2], 0)
         tstamps = hydrophone_array.listen(pulse)
@@ -216,17 +218,29 @@ class simulator():
 
 
         return Actual_time_stamps_serviceResponse(actual_time_stamps)
-        
-    def ping_service(self):
 
-        #rospy.loginfo("start")
+    def crane_position(self,data):
+        self.crane_x = data.x_pos
+        self.crane_y = data.y_pos
+        self.crane_z = data.z_pos
+        
+    def ping_service(self,x,y,z):
+
+        self.position = [x,y,z]
+
+        ref2 = rospy.ServiceProxy('/hydrophones/actual_position', Actual_position)
+        ref2 = ref2()
+
+        self.actual_x = ref2.actual_position[0]
+        self.actual_y = ref2.actual_position[1]
+        self.actual_z = ref2.actual_position[2]    
 
         sr = rospy.ServiceProxy('hydrophones/sample_rate', Sample_rate)
         sr = sr()
         self.sample_rate = sr.sample_rate
         #print self.sample_rate
 
-        self.sample_rate = 2000
+        #self.sample_rate = 2000
        
         self.Fs = self.sample_rate*1000  # sampling rate
         self.Ts = 1.0/self.Fs # sampling interval
@@ -249,7 +263,7 @@ class simulator():
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
 
-        print tstamps
+        #print tstamps
 
         self.tstamps_pub = rospy.Publisher("/hydrophones/actual_time_stamps", Actual_time_stamps, queue_size = 1)
 
@@ -312,15 +326,73 @@ class simulator():
 
 
     def calculate_error(self, x, y, z):
-
         self.position = [x,y,z]
 
-        ref2 = rospy.ServiceProxy('/hydrophones/actual_position', Actual_position)
-        ref2 = ref2()
+        crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
 
-        self.actual_x = ref2.actual_position[0]
-        self.actual_y = ref2.actual_position[1]
-        self.actual_z = ref2.actual_position[2]  
+        actual_heading = np.arctan2(self.position[1],self.position[0])+ np.pi
+
+        print "crane: %f actual: %f" % (crane_heading, actual_heading)
+
+        if self.crane_x == 0 and self.crane_y == 0:
+            heading_error_radian = np.pi
+            heading_error_percent = 50.0
+        elif abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
+            heading_error_radian = abs(actual_heading-(crane_heading + 2*np.pi))
+            heading_error_percent = abs((actual_heading-(crane_heading + 2*np.pi))/(2*np.pi)*100)
+        else:
+            heading_error_radian = abs(actual_heading - crane_heading)
+            heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
+
+        print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+
+        self.head_error = heading_error_radian
+        if self.head_error >= 6.0:
+            print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+        #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+
+        crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
+        actual_horizontal_distance = np.sqrt(self.actual_x**2+self.actual_y**2)
+
+        if crane_horizontal_distance != 0:
+            calculated_declination = np.arctan(self.crane_z/crane_horizontal_distance)
+        else:
+            calculated_declination = 0.0
+
+        if actual_horizontal_distance != 0:
+            actual_declination = np.arctan(self.actual_z/actual_horizontal_distance)
+        else:
+            actual_declination = 0.0
+
+        declination_error_radian = abs(actual_declination - calculated_declination)
+        declination_error_percent = abs((actual_declination - calculated_declination)/(2*np.pi)*100)
+
+        #print declination_error_radian
+        self.declination_error = declination_error_radian
+        #declination_error_percent = abs((actual_declination-calculated_declination)/(2*np.pi)*100)
+        #declination_error_radian = abs(actual_declination - calculated_declination)
+        #print "{}\tdeclination_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (declination_error_radian, declination_error_percent)
+
+        crane_distance = np.sqrt(self.crane_x**2+self.crane_y**2+self.crane_z**2)
+        actual_distance = np.sqrt(self.actual_x**2+self.actual_y**2+self.actual_z**2)
+        #print "calculated_distance %f" % crane_distance
+        #print "actual_distance %f" % actual_distance
+
+        distance_difference = actual_distance-crane_distance
+        if actual_distance != 0.0:
+            if crane_distance >= 30000:
+                crane_distance = 0
+            distance_error = (1.0 - (crane_distance/actual_distance))*100
+            if distance_error > 100 or distance_error < -100:
+                print "diserr: %f, crane_distance: %f, actual_distance: %f" % (distance_error, crane_distance, actual_distance)
+        else:
+            distance_error = 0.0
+
+        self.heading_error_sum = self.heading_error_sum + heading_error_radian
+        self.declination_error_sum = self.declination_error_sum + declination_error_radian
+        self.distance_error_sum = self.distance_error_sum + distance_error
+
+ 
 
 
     def plot_grid_graph(self,x_list,y_list,z,z_list,typemeasure):
@@ -337,15 +409,16 @@ class simulator():
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
         zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
         # contour the gridded data, plotting dots at the nonuniform data points.
+        #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
-            levels = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0, 6.0, 6.28]
+            levels = [0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0]# 4.0, 5.0,6.0, 6.28]#, 2.0, 3.0, 4.0, 6.28]
         elif typemeasure == "Declination":
             levels = 15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
             #vmax = 1.04
-            vmax = 6.28
+            vmax = abs(zi).max()
             vmin = 0
         elif typemeasure == 'Declination':
             vmax=abs(zi).max()
@@ -390,12 +463,14 @@ class simulator():
 
         rospy.init_node('signal_simulator_trigger')
 
+        self.position = [0, 0, 0]  # in mm, default position        
+
         rospy.Service('hydrophones/sample_rate', Sample_rate, self.sampling_rate)
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
-
-        self.simulate_pub = rospy.Publisher("/hydrophones/pingraw", Pingdata, queue_size = 1)        
-
-        self.position = [0, 0, 0]  # in mm, default position 
+        rospy.Service('hydrophones/ping_sim', Ping_service, self.ping_service)
+        rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
+        rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
+        #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)        
 
         self.sample_rate = rospy.get_param('~sample_rate', 2000)  #ADC sampling rate
         self.frame = rospy.get_param('~frame', '/hydrophones')
@@ -406,19 +481,16 @@ class simulator():
         self.signal_length = rospy.get_param('signal_length', 0.0008)  #800 uSec from default paul board
 
         #signal.signal(signal.SIGINT, self.signal_handler)
-        srv = Server(SignalConfig, self.callback_signal)
+        srv = Server(SignalConfig, self.callback_signal)        
 
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
-        rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)        
+        rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)       
+        rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.crane_position) 
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
+        self.simulate_pub = rospy.Publisher("/hydrophones/pingraw", Pingdata, queue_size = 1)         
 
-        rospy.Service('hydrophones/ping_sim', Ping_service, self.ping_service)
-        rospy.Service('/hydrophones/actual_time_stamps', Actual_time_stamps_service, self.actual_time_stamps_service)
-        rospy.Service('hydrophones/actual_position', Actual_position, self.position_service)
-        #rospy.Service('/hydrophones/hydrophone_locations', Hydrophone_locations_service, self.hydro_locations)
 
-        self.sample_rate = 300
         self.signal_length = 0.0016
 
         rate = rospy.Rate(1)  #rate of signals, 5 Hz for Anglerfish
@@ -438,7 +510,6 @@ class simulator():
         self.P  = '\033[35m' # purple      
 
         self.position = [3000.0, 3000.0, -1000.0]
-        self.sample_rate = 1000
 
         self.head_error = 0
         self.declination_error = 0
@@ -468,35 +539,35 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 20000
-        distance_resolution = 2000
-        degree_angle_resolution = 1
+        self.max_range = 10000
+        distance_resolution = 1000
+        degree_angle_resolution = 10
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
         number_of_rings = self.max_range/distance_resolution
         total_samples = number_of_steps_per_rev * number_of_rings
 
-        print rad_resolution
-        print number_of_rings
-        print "total samples %i" % total_samples
+        #print rad_resolution
+        #print number_of_rings
+        #print "total samples %i" % total_samples
 
         for dis in range(distance_resolution,self.max_range+distance_resolution, distance_resolution):
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
                 y = dis * np.sin(phi)
-                print "x: %f y: %f" % (x,y)
-
-                self.calculate_error(x,y,z)
-                self.ping_service()
+                #print "x: %f y: %f" % (x,y)
+              
+                self.ping_service(x,y,z)
+                self.calculate_error(x,y,z) 
 
                 x_list = x_list + [x]
                 y_list = y_list + [y]
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                time.sleep(0.1)
+                #time.sleep(0.1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
@@ -504,7 +575,7 @@ class simulator():
 
         #****************polar coors**********************         
 
-        os.system("rosnode kill acoustic_monte")            
+        os.system("rosnode kill signal_simulator_trigger")            
 
 
 def main():
