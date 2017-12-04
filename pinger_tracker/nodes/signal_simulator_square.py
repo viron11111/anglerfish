@@ -71,8 +71,8 @@ class simulator():
         #Experiment test layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [100,   0,     0]
-        hydro2_xyz = [0,  -100,     0]
-        hydro3_xyz = [100,  -100, -100]          
+        hydro2_xyz = [0,  100,     0]
+        hydro3_xyz = [100,  100, -100]           
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)    
 
@@ -269,7 +269,7 @@ class simulator():
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
 
-        print tstamps
+        #print tstamps
 
         self.tstamps_pub = rospy.Publisher("/hydrophones/actual_time_stamps", Actual_time_stamps, queue_size = 1)
 
@@ -334,14 +334,16 @@ class simulator():
     def calculate_error(self, x, y, z):
         self.position = [x,y,z]
 
+        print "x: %f y: %f z: %f" % (self.crane_x, self.crane_y, self.crane_z)
+
         crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
 
         actual_heading = np.arctan2(self.position[1],self.position[0])+ np.pi
 
-        #print "crane: %f actual: %f" % (crane_heading, actual_heading)
+        print "crane: %f actual: %f" % (crane_heading, actual_heading)
 
         if self.crane_x == 0 and self.crane_y == 0:
-            heading_error_radian = np.pi
+            heading_error_radian = 3*np.pi
             heading_error_percent = 50.0
         elif abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
             heading_error_radian = abs(actual_heading-(crane_heading + 2*np.pi))
@@ -546,8 +548,8 @@ class simulator():
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 500
-        degree_angle_resolution = 1
+        distance_resolution = 1000
+        degree_angle_resolution = 2
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -567,6 +569,7 @@ class simulator():
                 #print "x: %f y: %f" % (x,y)
               
                 self.ping_service(x,y,z)
+                time.sleep(0.1)
                 self.calculate_error(x,y,z) 
 
                 x_list = x_list + [x]
@@ -574,7 +577,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                #time.sleep(0.25)
+                
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')

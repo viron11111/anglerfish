@@ -161,9 +161,6 @@ class solver():
                 bearing = 45.0
             self.psolution = 2
             #print "here6" 
-        else:
-            rospy.logerr("CARDINAL failed to find solution!")
-            bearing = -1
 
         if sorted_dels[3] == 'del0':
             self.ref_hydro = 0
@@ -238,8 +235,8 @@ class solver():
         #Experiment test layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [100,   0,     0]
-        hydro2_xyz = [0,  -50,     0]
-        hydro3_xyz = [100,  -50, -100] 
+        hydro2_xyz = [0,  100,     0]
+        hydro3_xyz = [100,  100, -100] 
         
         del1 = del1i
         del2 = del2i
@@ -427,64 +424,19 @@ class solver():
                         heading = p2_heading
                         self.psolution = 2
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                         
-
-                    angle_diff = abs(heading-bearing)
-                    inv_angle_diff = abs(heading - inv_bearing)
-
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
-
-                    if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
-                        x = solution[0]
-                        y = solution[1]
-                        z = solution[2]
-                        rospy.loginfo("vector standard")
-                    elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
-                        x = -solution[0]
-                        y = -solution[1]
-                        z = -solution[2]
-                        rospy.loginfo("vector inverted")
-                    else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")   
+                    x = solution[0]
+                    y = solution[1]
+                    z = solution[2]
 
                 elif measured1_list == dellist:
                     rospy.logwarn("measured1_list")
                     solution = P1
                     heading = p1_heading
-                    self.psolution = 1    
+                    self.psolution = 1  
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                      
-
-                    angle_diff = abs(heading-bearing)
-                    inv_angle_diff = abs(heading - inv_bearing)    
-
-                    print "bearing: %0.2f" % bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
-
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
-
-                    if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
-                        x = solution[0]
-                        y = solution[1]
-                        z = solution[2]
-                        rospy.loginfo("vector standard")
-                    elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
-                        x = -solution[0]
-                        y = -solution[1]
-                        z = -solution[2]
-                        rospy.loginfo("vector inverted")
-                    else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")
+                    x = solution[0]
+                    y = solution[1]
+                    z = solution[2]
 
                 elif measured2_list == dellist:
                     rospy.logwarn("measured2_list")
@@ -492,33 +444,9 @@ class solver():
                     heading = p2_heading
                     self.psolution = 2  
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                      
-
-                    angle_diff = abs(heading-bearing)
-                    inv_angle_diff = abs(heading - inv_bearing) 
-
-                    print "bearing: %0.2f" % bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
-
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff                          
-
-                    if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
-                        x = solution[0]
-                        y = solution[1]
-                        z = solution[2]
-                        rospy.loginfo("vector standard")
-                    elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
-                        x = -solution[0]
-                        y = -solution[1]
-                        z = -solution[2]
-                        rospy.loginfo("vector inverted")
-                    else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")                    
+                    x = solution[0]
+                    y = solution[1]
+                    z = solution[2]               
 
                 elif (measured1_list == measured2_list) and measured1_list != dellist:
                     rospy.logwarn("not equal")
@@ -536,33 +464,9 @@ class solver():
                         heading = p2_heading
                         self.psolution = 2
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360 
-
-                    angle_diff = abs(heading-bearing)
-                    inv_angle_diff = abs(heading - inv_bearing)
-
-                    print "bearing: %0.2f" % bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
-
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
-
-                    if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
-                        x = solution[0]
-                        y = solution[1]
-                        z = solution[2]
-                        rospy.loginfo("vector standard")
-                    elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
-                        x = -solution[0]
-                        y = -solution[1]
-                        z = -solution[2]
-                        rospy.loginfo("vector inverted")
-                    else:
-                        (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")                     
+                    x = solution[0]
+                    y = solution[1]
+                    z = solution[2]                  
 
                 else:
                     (x,y) = self.pol2cart(rho,phi)
@@ -571,69 +475,26 @@ class solver():
                 (x,y) = self.pol2cart(rho,phi)
                 rospy.logerr("defaulting to cardinal")                              
 
-            '''if measured1_list == measured2_list:
-                rospy.logwarn("measured1_list == measured2_list")
-                p1_min = abs(p1_heading-bearing)
-                p2_min = abs(p1_heading-bearing)
+ 
 
-                p_min = min(p1_min, p2_min)
+        self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
+        self.bearing_pub.publish(Bearing(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='bearing_info'),
+            p1 = P1,
+            p2 = P2,
+            cardinal_bearing = bearing, 
+            dels = self.sorted_dels,
+            psolution = self.psolution
+            ))
 
-                if p_min < 20:
-                    if p1_min == p_min:
-                        x = P1[0]
-                        y = P1[1]
-                        z = P1[2]
-                        rospy.logwarn("**P1_Crane**")
-                    elif p2_min == p_min:
-                        x = P2[0]
-                        y = P2[1]
-                        z = P2[2]
-                        rospy.logwarn("**P2_Crane**")
-                else:
-                    (x,y) = self.pol2cart(rho,phi)
-                    rospy.logwarn("**cardinal**")
-
-            elif measured1_list == dellist:# and p1sum > p2sum:
-                if abs(p1_heading-bearing) < 20: 
-                    x = P1[0]
-                    y = P1[1]
-                    z = P1[2]
-                    rospy.logwarn("**P1_Crane**")
-                else:
-                    rospy.logwarn("**P1_cardinal**")
-                    (x,y) = self.pol2cart(rho,phi)
-            elif measured2_list == dellist:# and p2sum > p1sum:
-                if abs(p2_heading-bearing) < 20: 
-                    x = P2[0]
-                    y = P2[1]
-                    z = P2[2]
-                    rospy.logwarn("**P2_Crane**")
-                else:
-                    rospy.logwarn("**P2_cardinal**")
-                    (x,y) = self.pol2cart(rho,phi)
-            else:
-                (x,y) = self.pol2cart(rho,phi)'''
-
-        if bearing != -1:  
-
-            self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
-            self.bearing_pub.publish(Bearing(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='bearing_info'),
-                p1 = P1,
-                p2 = P2,
-                cardinal_bearing = bearing, 
-                dels = self.sorted_dels,
-                psolution = self.psolution
-                ))
-
-            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-            self.crane_pub.publish(Crane_pos(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='Crane_pos_calc'),
-                x_pos=x,
-                y_pos=y,
-                z_pos=z))          
+        self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+        self.crane_pub.publish(Crane_pos(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='Crane_pos_calc'),
+            x_pos=x,
+            y_pos=y,
+            z_pos=z))          
 
         return Crane_pos_serviceResponse(x, y, z)        
 
