@@ -5,6 +5,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import operator
+import os
 
 from std_msgs.msg import Header, Float32
 from pinger_tracker.msg import *
@@ -70,7 +71,7 @@ class solver():
             else:
                 self.bearing = 75.0  
             self.psolution = 1
-        if sorted_dels == ('del3', 'del2', 'del0', 'del1'): #new
+        elif sorted_dels == ('del3', 'del2', 'del0', 'del1'): #new
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
             elif abs(del0-del3) < tolerance:
@@ -87,14 +88,13 @@ class solver():
                 self.bearing = 105     
             self.psolution = 1  #changed changed back
         elif sorted_dels == ('del3', 'del2', 'del1', 'del0'): #new
-            if abs(del1-del0) < tolerance:
-                self.bearing = 90.0
+            if abs(del1-del2) < tolerance:
+                self.bearing = 150         
             elif abs(del1-del3) < tolerance:
                 self.bearing = 120
             else:
-                self.bearing = 105     
-            self.psolution = 1  #changed changed back            
-            #print "here1"  
+                self.bearing = 135
+            self.psolution = 1
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
                 self.bearing = 150         
@@ -137,14 +137,13 @@ class solver():
                 self.bearing = 225
             self.psolution = 2
         elif sorted_dels == ('del3', 'del1', 'del0', 'del2'): #new
-            if abs(del2) < tolerance:
-                self.bearing = 210
-            elif abs(del3-del0)<tolerance:
-                self.bearing = 240
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 240.0
             else:
-                self.bearing = 225
-            self.psolution = 2            
-            #print "here3" 
+                self.bearing = 255.0
+            self.psolution = 1
         elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 270.0
@@ -186,7 +185,56 @@ class solver():
             else:                            
                 self.bearing = 345.0
             self.psolution = 2
-            #print "here5" 
+        elif sorted_dels == ('del0', 'del2', 'del1', 'del3'):#new bottom
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330.0
+            elif abs(del2-del3) < tolerance:
+                self.bearing = 0.0
+            else:                            
+                self.bearing = 345.0
+            self.psolution = 2            
+        elif sorted_dels == ('del0', 'del1', 'del2', 'del3'):#new bottom
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 300
+            else:                            
+                self.bearing = 315 
+            self.psolution = 1 
+        elif sorted_dels == ('del1', 'del0', 'del2', 'del3'):#new bottom
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 240.0
+            else:
+                self.bearing = 255.0
+            self.psolution = 1
+        elif sorted_dels == ('del1', 'del2', 'del0', 'del3'):#new bottom
+            if abs(del2-del3) < tolerance:
+                self.bearing = 180
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 210
+            else:                            
+                self.bearing = 195
+            self.psolution = 1    
+        elif sorted_dels == ('del2', 'del1', 'del0', 'del3'):#new bottom 
+            if abs(del3-del2) < tolerance:
+                self.bearing = 180
+            elif abs(del1-del2) < tolerance:
+                self.bearing = 150
+            else:                
+                self.bearing = 165.0
+            self.psolution = 1
+        elif sorted_dels == ('del2', 'del0', 'del1', 'del3'):#new bottom             
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            else:
+                self.bearing = 75.0  
+            self.psolution = 1  
+
+            
         elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
             if abs(del2-del3) < tolerance:            
                 self.bearing = 0.0
@@ -205,16 +253,17 @@ class solver():
             self.psolution = 2
             #print "here6" 
         elif sorted_dels == ('del3', 'del0', 'del2', 'del1'): #new
-            if abs(del1-del2) < tolerance:
-                self.bearing = 330.0
-            elif abs(del2-del3) < tolerance:
+            if abs(del2-del3) < tolerance:            
                 self.bearing = 0.0
-            else:                            
-                self.bearing = 345.0
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 30.0
+            else:
+                self.bearing = 15.0  
             self.psolution = 2           
 
         else:
             rospy.logerr("CARDINAL failed to find solution!")
+            os.system("rosnode kill crane_method_service")
             self.bearing = -1
 
         if sorted_dels[3] == 'del0':
@@ -406,7 +455,7 @@ class solver():
             #rospy.logwarn(self.psolution)
             #map(abs, myList)
 
-            angle_tolerance = 45
+            angle_tolerance = 89
 
             if map(abs,measured1_list) == map(abs,dellist) or map(abs,measured2_list) == map(abs,dellist):
                 sum1 = abs(P1[0]) + abs(P1[1]) + abs(P1[2])

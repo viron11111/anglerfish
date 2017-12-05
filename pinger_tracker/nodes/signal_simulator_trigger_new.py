@@ -561,7 +561,7 @@ class simulator():
         #print "total samples %i" % total_samples
 
         #for dis in range(distance_resolution,self.max_range+distance_resolution, distance_resolution):
-        for dis in range(1000,self.max_range+distance_resolution, distance_resolution):
+        for dis in range(2000,self.max_range+distance_resolution, distance_resolution):
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
@@ -576,7 +576,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                #time.sleep(0.57)
+                #time.sleep(0.1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
