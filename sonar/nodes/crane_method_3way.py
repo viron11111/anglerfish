@@ -55,12 +55,13 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         self.bearing = 0.0
-        tolerance = 15 #15
+        tolerance = 15
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
         self.sorted_dels = sorted_dels   
+        print self.sorted_dels
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
@@ -69,6 +70,14 @@ class solver():
             else:
                 self.bearing = 75.0  
             self.psolution = 1
+        if sorted_dels == ('del3', 'del2', 'del0', 'del1'): #new
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            else:
+                self.bearing = 75.0  
+            self.psolution = 1            
         elif sorted_dels == ('del2', 'del3', 'del1', 'del0'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
@@ -77,6 +86,14 @@ class solver():
             else:
                 self.bearing = 105     
             self.psolution = 1  #changed changed back
+        elif sorted_dels == ('del3', 'del2', 'del1', 'del0'): #new
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 120
+            else:
+                self.bearing = 105     
+            self.psolution = 1  #changed changed back            
             #print "here1"  
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
@@ -102,6 +119,14 @@ class solver():
             else:                            
                 self.bearing = 195
             self.psolution = 1
+        elif sorted_dels == ('del3', 'del1', 'del2', 'del0'): #new
+            if abs(del2-del3) < tolerance:
+                self.bearing = 180
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 210
+            else:                            
+                self.bearing = 195
+            self.psolution = 1            
             #print "here2" 
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
@@ -111,6 +136,14 @@ class solver():
             else:
                 self.bearing = 225
             self.psolution = 2
+        elif sorted_dels == ('del3', 'del1', 'del0', 'del2'): #new
+            if abs(del2) < tolerance:
+                self.bearing = 210
+            elif abs(del3-del0)<tolerance:
+                self.bearing = 240
+            else:
+                self.bearing = 225
+            self.psolution = 2            
             #print "here3" 
         elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
             if abs(del1-del0) < tolerance:
@@ -137,6 +170,14 @@ class solver():
             else:                            
                 self.bearing = 315 
             self.psolution = 1
+        elif sorted_dels == ('del3', 'del0', 'del1', 'del2'):#new
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 300
+            else:                            
+                self.bearing = 315 
+            self.psolution = 1            
         elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):#double checked 
             if abs(del1-del2) < tolerance:
                 self.bearing = 330.0
@@ -163,6 +204,15 @@ class solver():
                 self.bearing = 45.0
             self.psolution = 2
             #print "here6" 
+        elif sorted_dels == ('del3', 'del0', 'del2', 'del1'): #new
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330.0
+            elif abs(del2-del3) < tolerance:
+                self.bearing = 0.0
+            else:                            
+                self.bearing = 345.0
+            self.psolution = 2           
+
         else:
             rospy.logerr("CARDINAL failed to find solution!")
             self.bearing = -1
@@ -265,7 +315,7 @@ class solver():
 
 
         if (discr < 0):
-            rospy.loginfo("no real solution was found; set garbage values for P1 and P2")
+            rospy.logerr("no real solution was found; set garbage values for P1 and P2")
 
             print discr
 
@@ -359,6 +409,8 @@ class solver():
             angle_tolerance = 45
 
             if map(abs,measured1_list) == map(abs,dellist) or map(abs,measured2_list) == map(abs,dellist):
+                sum1 = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
+                sum2 = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
                 if measured1_list == measured2_list and measured1_list == dellist:
                     rospy.logwarn("P1 == P2 == dellist")
@@ -371,10 +423,12 @@ class solver():
                         solution = P1
                         heading = p1_heading
                         self.psolution = 1
+                        print "P1"
                     else:
                         solution = P2
                         heading = p2_heading
                         self.psolution = 2
+                        print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -401,11 +455,12 @@ class solver():
                         (x,y) = self.pol2cart(rho,phi)
                         rospy.logerr("defaulting to cardinal")   
 
-                elif measured1_list == dellist:
+                elif sum1 > sum2:
                     rospy.logwarn("measured1_list")
                     solution = P1
                     heading = p1_heading
                     self.psolution = 1    
+                    print "P1"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -435,11 +490,12 @@ class solver():
                         (x,y) = self.pol2cart(rho,phi)
                         rospy.logerr("defaulting to cardinal")
 
-                elif measured2_list == dellist:
+                elif sum2 > sum1:
                     rospy.logwarn("measured2_list")
                     solution = P2
                     heading = p2_heading
                     self.psolution = 2  
+                    print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -480,10 +536,12 @@ class solver():
                         solution = P1
                         heading = p1_heading
                         self.psolution = 1
+                        print "P1"
                     else:
                         solution = P2
                         heading = p2_heading
                         self.psolution = 2
+                        print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -546,30 +604,6 @@ class solver():
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 
-        '''if self.bearing != -1:  
-
-            self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
-            self.bearing_pub.publish(Bearing(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='bearing_info'),
-                p1 = P11,
-                p2 = P21,
-                cardinal_bearing = self.bearing, 
-                dels = self.sorted_dels,
-                psolution = self.psolution
-                ))
-
-            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-            self.crane_pub.publish(Crane_pos(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='Crane_pos_calc'),
-                x_pos=x1,
-                y_pos=y1,
-                z_pos=z1))'''
-
-        #time.sleep(1)
-
-
         P1 = [0,0,0]
         P2 = [0,0,0]
 
@@ -590,9 +624,15 @@ class solver():
 
         (x2,y2,z2,P12,P22) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz) 
 
+        #x2 = x2 - 173.2 - 173.2
+
         x = (x1+x2)/2
         y = (y1+y2)/2
         z = (z1+z2)/2       
+
+        #x = x2-173.2-173.2 #(x1+x2)/2
+        #y = y2 #(y1+y2)/2
+        #z = z2 #(z1+z2)/2       
 
         if self.bearing != -1:  
 

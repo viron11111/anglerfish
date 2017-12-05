@@ -415,18 +415,18 @@ class simulator():
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
-            levels = [0,0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0]# 4.0, 5.0,6.0, 6.28]#, 2.0, 3.0, 4.0, 6.28]
+            levels = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
         elif typemeasure == "Declination":
-            levels = 15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
+            levels = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
             #vmax = 1.04
-            vmax = abs(zi).max()
+            vmax = 0.28
             vmin = 0
         elif typemeasure == 'Declination':
             vmax=abs(zi).max()
@@ -443,11 +443,11 @@ class simulator():
         ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
         ref = ref()
 
-        plt.plot([ref.hydro0_xyz[0]/100, ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
-            [ref.hydro0_xyz[1]/100, ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'wo')
-        plt.plot([ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
-            [ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
-        plt.plot([ref.hydro0_xyz[0]/100], [ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
+        plt.plot([-ref.hydro0_xyz[0]/100, -ref.hydro1_xyz[0]/100, -ref.hydro2_xyz[0]/100, -ref.hydro3_xyz[0]/100], 
+            [-ref.hydro0_xyz[1]/100, -ref.hydro1_xyz[1]/100, -ref.hydro2_xyz[1]/100, -ref.hydro3_xyz[1]/100], 'wo')
+        plt.plot([-ref.hydro1_xyz[0]/100, -ref.hydro2_xyz[0]/100, -ref.hydro3_xyz[0]/100], 
+            [-ref.hydro1_xyz[1]/100, -ref.hydro2_xyz[1]/100, -ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
+        plt.plot([-ref.hydro0_xyz[0]/100], [-ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
 
         plt.xlim(-self.max_range/1000, self.max_range/1000)
         plt.ylim(-self.max_range/1000, self.max_range/1000)
@@ -548,7 +548,7 @@ class simulator():
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 500
+        distance_resolution = 1000
         degree_angle_resolution = 1
         rad_resolution = math.radians(degree_angle_resolution)
 
@@ -576,7 +576,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                #time.sleep(0.1)
+                #time.sleep(0.57)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
