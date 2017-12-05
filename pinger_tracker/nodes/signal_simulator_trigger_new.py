@@ -62,17 +62,19 @@ class simulator():
         #hydro2_xyz = [86.6,  150,     0]
         #hydro3_xyz = [86.6,  50, 0]
 
+        #Experiment test layout
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [100,   0,     0]
+        #hydro2_xyz = [0,  -100,     0]
+        #hydro3_xyz = [100,  -100, -100]          
+
         #Actual layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
         hydro2_xyz = [-86.6,  -150,     0]
         hydro3_xyz = [-86.6,  -50, -100] 
 
-        #Experiment test layout
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [100,   0,     0]
-        hydro2_xyz = [0,  -100,     0]
-        hydro3_xyz = [100,  -100, -100]          
+        
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)    
 
@@ -413,7 +415,7 @@ class simulator():
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
@@ -574,7 +576,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                #time.sleep(0.25)
+                #time.sleep(0.1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')

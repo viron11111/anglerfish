@@ -18,6 +18,8 @@ from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
 
+import time
+
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
 
@@ -52,7 +54,7 @@ class solver():
 
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
-        bearing = 0.0
+        self.bearing = 0.0
         tolerance = 15 #15
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
@@ -61,109 +63,109 @@ class solver():
         self.sorted_dels = sorted_dels   
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
-                bearing = 90.0
+                self.bearing = 90.0
             elif abs(del0-del3) < tolerance:
-                bearing = 60.0
+                self.bearing = 60.0
             else:
-                bearing = 75.0  
+                self.bearing = 75.0  
             self.psolution = 1
         elif sorted_dels == ('del2', 'del3', 'del1', 'del0'): #double checked
             if abs(del1-del0) < tolerance:
-                bearing = 90.0
+                self.bearing = 90.0
             elif abs(del1-del3) < tolerance:
-                bearing = 120
+                self.bearing = 120
             else:
-                bearing = 105     
+                self.bearing = 105     
             self.psolution = 1  #changed changed back
             #print "here1"  
         elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
             if abs(del1-del2) < tolerance:
-                bearing = 150         
+                self.bearing = 150         
             elif abs(del1-del3) < tolerance:
-                bearing = 120
+                self.bearing = 120
             else:
-                bearing = 135
+                self.bearing = 135
             self.psolution = 1
         elif sorted_dels == ('del1', 'del2', 'del3', 'del0'): #double checked
             if abs(del3-del2) < tolerance:
-                bearing = 180
+                self.bearing = 180
             elif abs(del1-del2) < tolerance:
-                bearing = 150
+                self.bearing = 150
             else:                
-                bearing = 165.0
+                self.bearing = 165.0
             self.psolution = 1
         elif sorted_dels == ('del1', 'del3', 'del2', 'del0'): #switching between 1 and 2
             if abs(del2-del3) < tolerance:
-                bearing = 180
+                self.bearing = 180
             elif abs(del2-del0) < tolerance:
-                bearing = 210
+                self.bearing = 210
             else:                            
-                bearing = 195
+                self.bearing = 195
             self.psolution = 1
             #print "here2" 
         elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
             if abs(del2) < tolerance:
-                bearing = 210
+                self.bearing = 210
             elif abs(del3-del0)<tolerance:
-                bearing = 240
+                self.bearing = 240
             else:
-                bearing = 225
+                self.bearing = 225
             self.psolution = 2
             #print "here3" 
         elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
             if abs(del1-del0) < tolerance:
-                bearing = 270.0
+                self.bearing = 270.0
             elif abs(del0-del3) < tolerance:
-                bearing = 240.0
+                self.bearing = 240.0
             else:
-                bearing = 255.0
+                self.bearing = 255.0
             self.psolution = 1
         elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):#double checked
             if abs(del1-del0) < tolerance:
-                bearing = 270.0
+                self.bearing = 270.0
             elif abs(del3-del1) < tolerance:
-                bearing = 300.0
+                self.bearing = 300.0
             else:
-                bearing = 285.0
+                self.bearing = 285.0
             self.psolution = 2
             #print "here4" 
         elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):#double checked
             if abs(del1-del2) < tolerance:
-                bearing = 330
+                self.bearing = 330
             elif abs(del1-del3) < tolerance:
-                bearing = 300
+                self.bearing = 300
             else:                            
-                bearing = 315 
+                self.bearing = 315 
             self.psolution = 1
         elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):#double checked 
             if abs(del1-del2) < tolerance:
-                bearing = 330.0
+                self.bearing = 330.0
             elif abs(del2-del3) < tolerance:
-                bearing = 0.0
+                self.bearing = 0.0
             else:                            
-                bearing = 345.0
+                self.bearing = 345.0
             self.psolution = 2
             #print "here5" 
         elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
             if abs(del2-del3) < tolerance:            
-                bearing = 0.0
+                self.bearing = 0.0
             elif abs(del2-del0) < tolerance:
-                bearing = 30.0
+                self.bearing = 30.0
             else:
-                bearing = 15.0  
+                self.bearing = 15.0  
             self.psolution = 2  
         elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):#double checked 
             if abs(del0-del3) < tolerance:
-                bearing = 60.0
+                self.bearing = 60.0
             if abs(del0-del2) < tolerance:
-                bearing = 30.0
+                self.bearing = 30.0
             else:
-                bearing = 45.0
+                self.bearing = 45.0
             self.psolution = 2
             #print "here6" 
         else:
             rospy.logerr("CARDINAL failed to find solution!")
-            bearing = -1
+            self.bearing = -1
 
         if sorted_dels[3] == 'del0':
             self.ref_hydro = 0
@@ -173,11 +175,11 @@ class solver():
             self.ref_hydro = 2
 
         self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
-        self.cardinal_pub.publish(Float32(bearing))
+        self.cardinal_pub.publish(Float32(self.bearing))
 
 
         #rospy.logerr(bearing)       
-        return bearing
+        return self.bearing
         
         #print sorted_dels
     def pol2cart(self, rho, phi):
@@ -185,79 +187,26 @@ class solver():
         y = rho * np.sin(phi)
         return(x, y)        
 
-    def calc_vals(self, data):
+    def crane_calc(self,del1i,del2i,del3i,hydro1,hydro2,hydro3):
 
-        P1 = [0,0,0]
-        P2 = [0,0,0]
-
-        c = 1.484 # speed of sound in 20 C water per uSec
-        #c = 0.343 #speed of sound in air     
-
-        #experimental layout
-
-        #hydro0_xyz = [0,      0,     0]
-        #hydro1_xyz = [-173.2,   0,     0]
-        #hydro2_xyz = [-86.6,  -150,     0]
-        #hydro3_xyz = [-86.6,  -50, -100] 
-
-        #hydro0_xyz = [0,      0,     0]
-        #hydro1_xyz = [-168,   0,     0]
-        #hydro2_xyz = [-86.6,  -149,     0]
-        #hydro3_xyz = [-86.6,  -49, -100]  
-
-        #experimental layout
-             
-
-        del1i = (data.calculated_time_stamps[1])*c #mm/uSec
-        del2i = (data.calculated_time_stamps[2])*c #mm/uSec
-        del3i = (data.calculated_time_stamps[3])*c #mm/uSec         
-
-        bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
-
-        #del1i = (data.actual_time_stamps[1])*c #mm/uSec
-        #del2i = (data.actual_time_stamps[2])*c #mm/uSec
-        #del3i = (data.actual_time_stamps[3])*c #mm/uSec 
-
-        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
-
-        #bearing = self.cardinal(data.actual_time_stamps[1],data.actual_time_stamps[2],data.actual_time_stamps[3])
-
-        #if self.ref_hydro == 0:
-        #calibrated data *save**
-        #hydro0_xyz = [0,      0,     0]
-        #hydro1_xyz = [-172.2,   0,     0]
-        #hydro2_xyz = [-86.6,  -146,     0]
-        #hydro3_xyz = [-86.6,  -53, -100]   
-
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-173.2,   0,     0]
-        hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100]
-
-
-        #Experiment test layout
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [100,   0,     0]
-        hydro2_xyz = [0,  -50,     0]
-        hydro3_xyz = [100,  -50, -100] 
-        
+        #print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)        
+       
         del1 = del1i
         del2 = del2i
         del3 = del3i 
-        #elif self.ref_hydro == 1:
-        #    del1 = 
 
-
-
-        x1 = hydro1_xyz[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
-        x2 = hydro2_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
-        y2 = hydro2_xyz[1] #+ 0.75 #np.random.uniform(-1, 1)
-        x3 = hydro3_xyz[0] #- 0.75 #np.random.uniform(-1, 1)
-        y3 = hydro3_xyz[1] #+ 0.75 #np.random.uniform(-1, 1)
-        z3 = hydro3_xyz[2]            
+        x1 = hydro1[0] #+ 0.75 #np.random.uniform(-1, 1)  #in mm
+        x2 = hydro2[0] #- 0.75 #np.random.uniform(-1, 1)
+        y2 = hydro2[1] #+ 0.75 #np.random.uniform(-1, 1)
+        x3 = hydro3[0] #- 0.75 #np.random.uniform(-1, 1)
+        y3 = hydro3[1] #+ 0.75 #np.random.uniform(-1, 1)
+        z3 = hydro3[2]            
 
 
         print "********"
+
+        P1 = [0,0,0]
+        P2 = [0,0,0]        
 
         left = x1/del1 if del1 != 0 else 0
         right = x2/del2 if del2 != 0 else 0
@@ -311,7 +260,7 @@ class solver():
 
         discr = BB*BB - 4.0*AA*CC ;
 
-        phi = math.radians(360-bearing)
+        phi = math.radians(360-self.bearing)
         rho = 500.0
 
 
@@ -391,7 +340,7 @@ class solver():
             rospy.loginfo("p1_heading: %0.2f" % p1_heading)
             rospy.loginfo("p2_heading: %0.2f" % p2_heading)
 
-            inv_bearing = bearing + 180   
+            inv_bearing = self.bearing + 180   
             if inv_bearing > 360:
                 inv_bearing = inv_bearing - 360         
             #inv_p1heading = p1_heading + 180
@@ -427,12 +376,12 @@ class solver():
                         heading = p2_heading
                         self.psolution = 2
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                         
+                    if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
+                        self.bearing = self.bearing - 360
+                    elif heading > 360-angle_tolerance and self.bearing < 0 + angle_tolerance:
+                        self.bearing = self.bearing + 360                         
 
-                    angle_diff = abs(heading-bearing)
+                    angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)
 
                     print "angle_diff: %0.2f" % angle_diff
@@ -458,15 +407,15 @@ class solver():
                     heading = p1_heading
                     self.psolution = 1    
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                      
+                    if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
+                        self.bearing = self.bearing - 360
+                    elif heading > 360-angle_tolerance and self.bearing < 0 + angle_tolerance:
+                        self.bearing = self.bearing + 360                      
 
-                    angle_diff = abs(heading-bearing)
+                    angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)    
 
-                    print "bearing: %0.2f" % bearing
+                    print "bearing: %0.2f" % self.bearing
                     print "inv_bearing: %0.2f" % inv_bearing
 
                     print "angle_diff: %0.2f" % angle_diff
@@ -492,15 +441,15 @@ class solver():
                     heading = p2_heading
                     self.psolution = 2  
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360                      
+                    if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
+                        self.bearing = self.bearing - 360
+                    elif heading > 360-angle_tolerance and self.bearing < 0 + angle_tolerance:
+                        self.bearing = self.bearing + 360                      
 
-                    angle_diff = abs(heading-bearing)
+                    angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing) 
 
-                    print "bearing: %0.2f" % bearing
+                    print "bearing: %0.2f" % self.bearing
                     print "inv_bearing: %0.2f" % inv_bearing
 
                     print "angle_diff: %0.2f" % angle_diff
@@ -536,15 +485,15 @@ class solver():
                         heading = p2_heading
                         self.psolution = 2
 
-                    if bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
-                        bearing = bearing - 360
-                    elif heading > 360-angle_tolerance and bearing < 0 + angle_tolerance:
-                        bearing = bearing + 360 
+                    if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
+                        self.bearing = self.bearing - 360
+                    elif heading > 360-angle_tolerance and self.bearing < 0 + angle_tolerance:
+                        self.bearing = self.bearing + 360 
 
-                    angle_diff = abs(heading-bearing)
+                    angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)
 
-                    print "bearing: %0.2f" % bearing
+                    print "bearing: %0.2f" % self.bearing
                     print "inv_bearing: %0.2f" % inv_bearing
 
                     print "angle_diff: %0.2f" % angle_diff
@@ -569,60 +518,91 @@ class solver():
                     rospy.logerr("defaulting to cardinal")     
             else:
                 (x,y) = self.pol2cart(rho,phi)
-                rospy.logerr("defaulting to cardinal")                              
+                rospy.logerr("defaulting to cardinal")   
 
-            '''if measured1_list == measured2_list:
-                rospy.logwarn("measured1_list == measured2_list")
-                p1_min = abs(p1_heading-bearing)
-                p2_min = abs(p1_heading-bearing)
+        return (x,y,z,P1,P2)     
 
-                p_min = min(p1_min, p2_min)
+    def calc_vals(self, data):
 
-                if p_min < 20:
-                    if p1_min == p_min:
-                        x = P1[0]
-                        y = P1[1]
-                        z = P1[2]
-                        rospy.logwarn("**P1_Crane**")
-                    elif p2_min == p_min:
-                        x = P2[0]
-                        y = P2[1]
-                        z = P2[2]
-                        rospy.logwarn("**P2_Crane**")
-                else:
-                    (x,y) = self.pol2cart(rho,phi)
-                    rospy.logwarn("**cardinal**")
+        c = 1.484 # speed of sound in 20 C water per uSec
+        #c = 0.343 #speed of sound in air 
 
-            elif measured1_list == dellist:# and p1sum > p2sum:
-                if abs(p1_heading-bearing) < 20: 
-                    x = P1[0]
-                    y = P1[1]
-                    z = P1[2]
-                    rospy.logwarn("**P1_Crane**")
-                else:
-                    rospy.logwarn("**P1_cardinal**")
-                    (x,y) = self.pol2cart(rho,phi)
-            elif measured2_list == dellist:# and p2sum > p1sum:
-                if abs(p2_heading-bearing) < 20: 
-                    x = P2[0]
-                    y = P2[1]
-                    z = P2[2]
-                    rospy.logwarn("**P2_Crane**")
-                else:
-                    rospy.logwarn("**P2_cardinal**")
-                    (x,y) = self.pol2cart(rho,phi)
-            else:
-                (x,y) = self.pol2cart(rho,phi)'''
+        self.bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])        
 
-        if bearing != -1:  
+        P1 = [0,0,0]
+        P2 = [0,0,0]
+
+        del1i = (data.calculated_time_stamps[1])*c #mm/uSec
+        del2i = (data.calculated_time_stamps[2])*c #mm/uSec
+        del3i = (data.calculated_time_stamps[3])*c #mm/uSec
+
+        print "*******************POSITION 1*******************"
+        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
+
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [-173.2,   0,     0]
+        hydro2_xyz = [-86.6,  -150,     0]
+        hydro3_xyz = [-86.6,  -50, -100]
+
+        (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
+
+        '''if self.bearing != -1:  
 
             self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
             self.bearing_pub.publish(Bearing(
                 header=Header(stamp=rospy.Time.now(),
                               frame_id='bearing_info'),
-                p1 = P1,
-                p2 = P2,
-                cardinal_bearing = bearing, 
+                p1 = P11,
+                p2 = P21,
+                cardinal_bearing = self.bearing, 
+                dels = self.sorted_dels,
+                psolution = self.psolution
+                ))
+
+            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
+            self.crane_pub.publish(Crane_pos(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='Crane_pos_calc'),
+                x_pos=x1,
+                y_pos=y1,
+                z_pos=z1))'''
+
+        #time.sleep(1)
+
+
+        P1 = [0,0,0]
+        P2 = [0,0,0]
+
+        #del0i = (data.calculated_time_stamps[0])*c #mm/uSec   0.0 - del1
+        del1i = (data.calculated_time_stamps[0]-data.calculated_time_stamps[1])*c #mm/uSec   2.0 -del1
+        del2i = (data.calculated_time_stamps[2]-data.calculated_time_stamps[1])*c #mm/uSec   3.0
+        del3i = (data.calculated_time_stamps[3]-data.calculated_time_stamps[1])*c #mm/uSec  -1.0    
+
+        self.bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
+
+        print "*******************POSITION 2*******************"
+        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
+
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [173.2,   0,     0]
+        hydro2_xyz = [86.6,  -150,     0]
+        hydro3_xyz = [86.6,  -50, -100]
+
+        (x2,y2,z2,P12,P22) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz) 
+
+        x = (x1+x2)/2
+        y = (y1+y2)/2
+        z = (z1+z2)/2       
+
+        if self.bearing != -1:  
+
+            self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
+            self.bearing_pub.publish(Bearing(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='bearing_info'),
+                p1 = P12,
+                p2 = P22,
+                cardinal_bearing = self.bearing, 
                 dels = self.sorted_dels,
                 psolution = self.psolution
                 ))
@@ -633,7 +613,9 @@ class solver():
                               frame_id='Crane_pos_calc'),
                 x_pos=x,
                 y_pos=y,
-                z_pos=z))          
+                z_pos=z)) 
+
+        (x,y,z) = (x1,y1,z1)         
 
         return Crane_pos_serviceResponse(x, y, z)        
 
