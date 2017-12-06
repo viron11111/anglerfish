@@ -583,9 +583,9 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 5000
-        distance_resolution = 100
-        degree_angle_resolution = 5
+        self.max_range = 10000
+        distance_resolution = 1000
+        degree_angle_resolution = 10
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -613,7 +613,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                time.sleep(1)
+                #time.sleep(1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
