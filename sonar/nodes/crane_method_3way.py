@@ -653,35 +653,35 @@ class solver():
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 
-        P1 = [0,0,0]
-        P2 = [0,0,0]
+        #P1 = [0,0,0]
+        #P2 = [0,0,0]
 
         #del0i = (data.calculated_time_stamps[0])*c #mm/uSec   0.0 - del1
-        del1i = (data.calculated_time_stamps[0]-data.calculated_time_stamps[1])*c #mm/uSec   2.0 -del1
-        del2i = (data.calculated_time_stamps[2]-data.calculated_time_stamps[1])*c #mm/uSec   3.0
-        del3i = (data.calculated_time_stamps[3]-data.calculated_time_stamps[1])*c #mm/uSec  -1.0    
+        #del1i = (data.calculated_time_stamps[0]-data.calculated_time_stamps[1])*c #mm/uSec   2.0 -del1
+        #del2i = (data.calculated_time_stamps[2]-data.calculated_time_stamps[1])*c #mm/uSec   3.0
+        #del3i = (data.calculated_time_stamps[3]-data.calculated_time_stamps[1])*c #mm/uSec  -1.0    
 
-        self.bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
+        #self.bearing = self.cardinal(data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3])
 
-        print "*******************POSITION 2*******************"
-        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
+        #print "*******************POSITION 2*******************"
+        #print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
 
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  -150,     0]
-        hydro3_xyz = [86.6,  -50, -100]
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [173.2,   0,     0]
+        #hydro2_xyz = [86.6,  -150,     0]
+        #hydro3_xyz = [86.6,  -50, -100]
 
-        (x2,y2,z2,P12,P22) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz) 
+        #(x2,y2,z2,P12,P22) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz) 
 
         #x2 = x2 - 173.2 - 173.2
 
-        x = (x1+x2)/2
-        y = (y1+y2)/2
-        z = (z1+z2)/2       
+        #x = (x1+x2)/2
+        #y = (y1+y2)/2
+        #z = (z1+z2)/2       
 
-        #x = x2-173.2-173.2 #(x1+x2)/2
-        #y = y2 #(y1+y2)/2
-        #z = z2 #(z1+z2)/2       
+        x = x1 #-173.2-173.2 #(x1+x2)/2
+        y = y1 #(y1+y2)/2
+        z = z1 #(z1+z2)/2       
 
         if self.bearing != -1:  
 
@@ -689,8 +689,8 @@ class solver():
             self.bearing_pub.publish(Bearing(
                 header=Header(stamp=rospy.Time.now(),
                               frame_id='bearing_info'),
-                p1 = P12,
-                p2 = P22,
+                p1 = P11,
+                p2 = P21,
                 cardinal_bearing = self.bearing, 
                 dels = self.sorted_dels,
                 psolution = self.psolution

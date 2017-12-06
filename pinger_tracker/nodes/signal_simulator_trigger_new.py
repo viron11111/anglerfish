@@ -17,6 +17,7 @@ from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
 from advantech_pci1714.msg import *
+from sonar.msg import *
 
 import signal
 import math
@@ -271,7 +272,7 @@ class simulator():
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
 
-        print tstamps
+        #print tstamps
 
         self.tstamps_pub = rospy.Publisher("/hydrophones/actual_time_stamps", Actual_time_stamps, queue_size = 1)
 
@@ -330,27 +331,60 @@ class simulator():
             self.data_points,
             self.sample_rate*1000,
             self.resolution,
-            self.data)           
+            self.data)   
 
+    def pol2cart(self, rho, phi):
+        x = rho * np.cos(phi)
+        y = rho * np.sin(phi)
+        return(x, y)         
+
+    def bearing_data(self, data):
+        self.P1 = data.p1
+        self.P2 = data.p2
+        self.cardinal = data.cardinal_bearing
+        self.dels = data.dels
+        self.psolution = data.psolution
 
     def calculate_error(self, x, y, z):
         self.position = [x,y,z]
 
-        crane_heading = np.arctan2(self.crane_y,self.crane_x) + np.pi
-
-        actual_heading = np.arctan2(self.position[1],self.position[0])+ np.pi
-
-        #print "crane: %f actual: %f" % (crane_heading, actual_heading)
-
         if self.crane_x == 0 and self.crane_y == 0:
-            heading_error_radian = np.pi
-            heading_error_percent = 50.0
-        elif abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
+            phi = math.radians(360-self.cardinal)
+            rho = 500.0
+            (self.crane_x,self.crane_y) = self.pol2cart(rho,phi)
+
+            #heading_error_radian = np.pi
+            #heading_error_percent = 50.0
+            rospy.logwarn("crane_x = 0, crane_y = 0")         
+
+        crane_heading = np.arctan2(self.crane_x,self.crane_y)  - np.pi/2
+
+        actual_heading = np.arctan2(self.position[0],self.position[1]) - np.pi/2
+
+        if crane_heading < 0:
+            crane_heading = crane_heading + 2*np.pi
+        if actual_heading < 0:
+            actual_heading = actual_heading + 2*np.pi            
+
+        if crane_heading > 4.8 and actual_heading < 1.5:
+            crane_heading = crane_heading - 2*np.pi
+        elif crane_heading < 1.5 and actual_heading > 4.8:
+            crane_heading = crane_heading + 2*np.pi
+
+        heading_error_radian = abs(actual_heading-crane_heading)
+        heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
+
+        print "crane: %f actual: %f dif: %f" % (crane_heading, actual_heading,heading_error_radian)       
+
+
+
+
+        '''elif abs(actual_heading-(crane_heading + 2*np.pi)) < abs(actual_heading - crane_heading):
             heading_error_radian = abs(actual_heading-(crane_heading + 2*np.pi))
             heading_error_percent = abs((actual_heading-(crane_heading + 2*np.pi))/(2*np.pi)*100)
         else:
             heading_error_radian = abs(actual_heading - crane_heading)
-            heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
+            heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)'''
 
         #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
@@ -471,7 +505,8 @@ class simulator():
 
         rospy.init_node('signal_simulator_trigger')
 
-        self.position = [0, 0, 0]  # in mm, default position        
+        self.position = [0, 0, 0]  # in mm, default position      
+        self.cardinal = 0
 
         rospy.Service('hydrophones/sample_rate', Sample_rate, self.sampling_rate)
         rospy.Service('hydrophones/hydrophone_position', Hydrophone_locations_service, self.location_service)
@@ -493,7 +528,8 @@ class simulator():
 
         rospy.Subscriber('hydrophones/simulated_position', Transmitter_position, self.get_pos)
         rospy.Subscriber('hydrophones/signal_trigger', Bool, self.trigger_func)       
-        rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.crane_position) 
+        rospy.Subscriber('/hydrophones/crane_pos', Crane_pos, self.crane_position)
+        rospy.Subscriber('/hydrophones/bearing_info', Bearing, self.bearing_data) 
 
         self.simulate_pub = rospy.Publisher('hydrophones/ping', Ping, queue_size = 1)
         self.simulate_pub = rospy.Publisher("/hydrophones/pingraw", Pingdata, queue_size = 1)         
@@ -547,9 +583,9 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 10000
-        distance_resolution = 1000
-        degree_angle_resolution = 1
+        self.max_range = 5000
+        distance_resolution = 100
+        degree_angle_resolution = 5
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -561,7 +597,7 @@ class simulator():
         #print "total samples %i" % total_samples
 
         #for dis in range(distance_resolution,self.max_range+distance_resolution, distance_resolution):
-        for dis in range(2000,self.max_range+distance_resolution, distance_resolution):
+        for dis in range(1500,self.max_range+distance_resolution, distance_resolution):
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
@@ -569,6 +605,7 @@ class simulator():
                 #print "x: %f y: %f" % (x,y)
               
                 self.ping_service(x,y,z)
+                time.sleep(0.03)
                 self.calculate_error(x,y,z) 
 
                 x_list = x_list + [x]
@@ -576,7 +613,7 @@ class simulator():
                 z_list = z_list + [self.head_error]
                 d_list = d_list + [self.declination_error]
                 #print z_list
-                #time.sleep(0.1)
+                time.sleep(1)
 
 
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
