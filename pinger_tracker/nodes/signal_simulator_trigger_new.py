@@ -453,7 +453,7 @@ class simulator():
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
-            levels = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
+            levels = 100#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
         elif typemeasure == "Declination":
             levels = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
@@ -583,9 +583,9 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 10000
-        distance_resolution = 1000
-        degree_angle_resolution = 10
+        self.max_range = 100000
+        distance_resolution = 5000
+        degree_angle_resolution = 1
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
