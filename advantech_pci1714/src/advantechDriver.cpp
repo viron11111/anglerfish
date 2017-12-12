@@ -40,9 +40,9 @@ double       Data[USER_BUFFER_SIZE];
 
 // Set trigger parameters
 TriggerAction triggerAction = DelayToStop;
-ActiveSignal  triggerEdge = RisingEdge;
+ActiveSignal  triggerEdge = FallingEdge;
 
-double        triggerLevel = 0.055;
+double        triggerLevel = 0.075;
 //double        triggerLevel = 1.5;  //1.5V to overcome pool pump
 int           triggerDelayCount = sampleCount/2.0;//1.25;
 
