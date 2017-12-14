@@ -10,7 +10,11 @@ def pol2cart(rho, phi):
     return(x, y) 
 
 def plot_grid_graph(x_list,y_list,z,z_list,typemeasure):
-    # define grid.
+
+    hydro0_xyz = [0,      0,     0]
+    hydro1_xyz = [-173.2,   0,     0]
+    hydro2_xyz = [-86.6,  -150.0,     0]
+    hydro3_xyz = [-86.6,  -50.0, -100.0]
 
     max_range = 10000
 
@@ -39,7 +43,19 @@ def plot_grid_graph(x_list,y_list,z,z_list,typemeasure):
                       vmax=vmax, vmin=vmin)
 
     cb = plt.colorbar()
-    cb.set_label(label='%s Error (Radians)' % typemeasure)#,size=18)
+    cb.set_label(label='%s Error (Degrees)' % typemeasure)#,size=18)
+
+    plt.xlim(-max_range/1000, max_range/1000)
+    plt.ylim(-max_range/1000, max_range/1000)
+    z = abs(z/1000)
+    plt.ylabel('Meters')#,size=18)
+    plt.xlabel('Meters')#,size=18)
+
+    plt.plot([-hydro0_xyz[0]/100, -hydro1_xyz[0]/100, -hydro2_xyz[0]/100, -hydro3_xyz[0]/100], 
+        [-hydro0_xyz[1]/100, -hydro1_xyz[1]/100, -hydro2_xyz[1]/100, -hydro3_xyz[1]/100], 'wo')
+    plt.plot([-hydro1_xyz[0]/100, -hydro2_xyz[0]/100, -hydro3_xyz[0]/100], 
+        [-hydro1_xyz[1]/100, -hydro2_xyz[1]/100, -hydro3_xyz[1]/100], 'ko', markersize = 3)
+    plt.plot([-hydro0_xyz[0]/100], [-hydro0_xyz[1]/100], 'yo', markersize = 3)
 
     plt.xlim(-max_range/1000, max_range/1000)
     plt.ylim(-max_range/1000, max_range/1000)
@@ -47,6 +63,13 @@ def plot_grid_graph(x_list,y_list,z,z_list,typemeasure):
     plt.ylabel('Meters')#,size=18)
     plt.xlabel('Meters')#,size=18)
     figure_title = 'Pinger Location VS %s Accuracy' % typemeasure
+    figure_sub_title = '%i k/S/s sample rate (%d points) at depth %i meter(s)' % (2000,npts,z)
+    
+
+    plt.suptitle('%s\n%s' % (figure_title,figure_sub_title), weight = 'bold', size = 14, x = 0.46, y = 1.01, horizontalalignment='center')
+
+    plt.savefig('Tshape_high_error_resolution_contours_%s_%i_d%i_s%i.png' % (typemeasure,2000,z,npts), dpi=300,
+                 orientation = 'landscape', bbox_inches='tight')    
 
     plt.show()
     plt.clf()
@@ -59,7 +82,7 @@ Y = []
 #levels = np.linspace(-1, 1, 40)
 
 for distance in range(2,11):
-    for bearing in range(0,360,10):
+    for bearing in range(360,0,-10):
         rad = math.radians(bearing)
         (x,y) = pol2cart(distance,rad)
         X.append(x)

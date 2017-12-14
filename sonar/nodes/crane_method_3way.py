@@ -648,8 +648,8 @@ class solver():
 
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
-        hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100]
+        hydro2_xyz = [-86.6,  -150.0,     0]
+        hydro3_xyz = [-86.6,  -50.0, -100.0]
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 
