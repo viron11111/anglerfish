@@ -72,8 +72,8 @@ class simulator():
         #Actual layout
         hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
-        hydro2_xyz = [-86.6,  -150,     0]
-        hydro3_xyz = [-86.6,  -50, -100] 
+        hydro2_xyz = [-86.6,  -150.0,     0]
+        hydro3_xyz = [-86.6,  -50.0, -100.0] 
 
         
 
@@ -374,7 +374,7 @@ class simulator():
         heading_error_radian = abs(actual_heading-crane_heading)
         heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
-        print "crane: %f actual: %f dif: %f" % (crane_heading, actual_heading,heading_error_radian)       
+        #print "crane: %f actual: %f dif: %f" % (crane_heading, actual_heading,heading_error_radian)       
 
 
 
@@ -453,14 +453,14 @@ class simulator():
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
-            levels = 100#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
+            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
         elif typemeasure == "Declination":
-            levels = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
+            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
             #vmax = 1.04
-            vmax = 0.28
+            vmax = 30
             vmin = 0
         elif typemeasure == 'Declination':
             vmax=abs(zi).max()
@@ -583,8 +583,8 @@ class simulator():
         self.sample_rate = 2000
         z = -1000 #depth of pinger
 
-        self.max_range = 100000
-        distance_resolution = 5000
+        self.max_range = 10000
+        distance_resolution = 500
         degree_angle_resolution = 1
         rad_resolution = math.radians(degree_angle_resolution)
 
@@ -597,7 +597,7 @@ class simulator():
         #print "total samples %i" % total_samples
 
         #for dis in range(distance_resolution,self.max_range+distance_resolution, distance_resolution):
-        for dis in range(1500,self.max_range+distance_resolution, distance_resolution):
+        for dis in range(2000,self.max_range+distance_resolution, distance_resolution):
             for deg in range(0,int(number_of_steps_per_rev)):
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
@@ -610,8 +610,8 @@ class simulator():
 
                 x_list = x_list + [x]
                 y_list = y_list + [y]
-                z_list = z_list + [self.head_error]
-                d_list = d_list + [self.declination_error]
+                z_list = z_list + [math.degrees(self.head_error)]
+                d_list = d_list + [math.degrees(self.declination_error)]
                 #print z_list
                 #time.sleep(1)
 
