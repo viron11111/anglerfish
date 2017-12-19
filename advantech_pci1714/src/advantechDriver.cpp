@@ -130,7 +130,9 @@ public:
 	  } 
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
-	  usleep(10000);  //Add delay to ensure we don't pick up same signal twice
+	  printf("SLEEPING\n");
+	  usleep(100000);  //Add delay to ensure we don't pick up same signal twice
+	  printf("READY\n");
 	  set_trigger();
 	  return;
 	}
