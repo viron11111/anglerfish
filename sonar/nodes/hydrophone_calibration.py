@@ -25,45 +25,79 @@ import time
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
 
 
-
 class solver():
 
     def run_calibration(self):
 
-        mm_range = 5 #mm
-        mm_resolution = 0.1 #mm
-
-
-        ninety = [0.00, -0.50, -96.00, -29.50]
-
-
-        run_stamps = ninety
-
-        self.bearing = self.cardinal(run_stamps[1],run_stamps[2],run_stamps[3])
-
-
+        c = 1.484 # speed of sound in 20 C water per uSec
+        #c = 0.343 #speed of sound in air
 
         #starting values
+        x1_orig = 173.2 #in mm
+        x2_orig = 86.6
+        y2_orig = -150.0
+        x3_orig = 86.6
+        y3_orig = -50.0
+        z3_orig = -100.0
 
-    def calc_vals (self, data):
-        x,y,z = self.crane_solver(data)
+        mm_range = 20 #mm 5 = +- 2.5
+        mm_resolution = 1 #mm
 
-        self.crane_pub.publish(Crane_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='Crane_pos_calc'),
-            x_pos=x,
-            y_pos=y,
-            z_pos=z))
+        number_of_iterations = mm_range/mm_resolution
 
-    def actu_vals (self, data):
-        x,y,z = self.crane_solver(data)
+        lowest_error = 10000
 
-        self.crane_pub.publish(Crane_pos(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='Crane_pos_actu'),
-            x_pos=x,
-            y_pos=y,
-            z_pos=z))        
+        #experimentally gathered
+        tstamps = [[0.00, 146.0, 88.0, 91.5], [10.0, 143.0, 70.75, 84.5], [20.0, 138.0, 52.0, 76.75], [30.0, 130.5, 33.75, 67.75],
+                    [40.0, 121.0,  15.0,  59.25], [50.0, 108.0, -4.75, 49.25], [60.0, 91.0, -24.0, 36.75],[70.0, 74.0, -71.5, 25.5], 
+                    [80.0, 55.0, -87.0, 14.5], [90.0, 34.0, -98.0, 3.5], [100.0, 11.0, -108.75, 7.25], [110.0, -4.5, -112.0, -13.5],
+                    [120.0, -22.5, -82.0, -20,.0], [130.0, -42.0, -81.0, -26.0], [140.0, -55.5, -75.5, -29.0], [150.0, -65.5, -67.0, -30.5],
+                    [160.0, -73.5, -57.0, -30.25], [170.0, -111.5,  -43.5, -28.25], [180.0, -115.5, -29.5, -24.75], [190.0, -115.0, -11.5, -19.0],
+                    [200.0, -110.0, 8.5, -11.0], [210.0, -131.0, -1.0, -32.5], [220.0, -122.0, 14.5, 6.5], [230.0, -72.75, 39.5, 21],
+                    [240.0, -57.5, 56.75, 32.0], [250.0, -41.25, 72.5, 43.5],[260.0, -18.0, 87.25, 55.0], [270.0, 1.0, 97.5, 64.5],
+                    [280.0, 18.5, 105.75, 74.0], [290.0, 39.75, 113.25, 85], [300.0, 57.0, 114.5, 91.25], [310.0, 73.0, 111.5, 94.5],
+                    [320.0, 117.5, 138.0, 130.0], [330.0, 96.5, 98.0, 98.0], [340.0, 107.0, 88.0, 98.75],[350.0, 112.5, 75.75, 96.0]]
+
+        for i in range(int(number_of_iterations)+1):
+            x1 = x1_orig - (mm_range/2.0) + (mm_resolution*i)
+            print x1
+            for j in range(int(number_of_iterations)+1):
+                x2 = x2_orig - (mm_range/2.0) + (mm_resolution*j)
+                for k in range(int(number_of_iterations)+1):
+                    y2 = y2_orig - (mm_range/2.0) + (mm_resolution*k)
+                    for l in range(int(number_of_iterations)+1):
+                        x3 = x3_orig - (mm_range/2.0) + (mm_resolution*l)
+                        for m in range(int(number_of_iterations)+1):
+                            y3 = y3_orig - (mm_range/2.0) + (mm_resolution*m)
+                            for n in range(int(number_of_iterations)+1):
+                                z3 = z3_orig - (mm_range/2.0) + (mm_resolution*n)
+                                
+                                error_sum = 0
+                                for o in range(len(tstamps)):
+                                        
+                                    hydro1 = [x1,      0,     0]
+                                    hydro2 = [x2,      y2,     0]
+                                    hydro3 = [x3,      y3,     z3]
+                                    
+                                    self.bearing = self.cardinal(tstamps[o][1],tstamps[o][2],tstamps[o][3])
+                                    
+                                    del1 = (tstamps[o][1])*c #mm/uSec
+                                    del2 = (tstamps[o][2])*c #mm/uSec
+                                    del3 = (tstamps[o][3])*c #mm/uSec
+
+                                    output = self.crane_calc(del1, del2, del3, hydro1, hydro2, hydro3)
+
+                                    error_sum = error_sum + abs(output-tstamps[o][0])                                
+
+                                if error_sum < lowest_error:
+                                    lowest_error = error_sum                                    
+                                    print "lowest_error: %0.2f" % lowest_error
+                                    print "hydro1: [%s] hydro2: [%s] hydro3: [%s]" % (', '.join(map(str, hydro1)),', '.join(map(str, hydro2)),', '.join(map(str, hydro3))) 
+
+                                #intsum = int(error_sum)
+                                #if intsum != 89:
+                                #   print intsum
+                                
 
     def crane_solutions(self, data):
         rospy.loginfo("service response crane_srv")
@@ -81,7 +115,7 @@ class solver():
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
         self.sorted_dels = sorted_dels   
-        print self.sorted_dels
+        #print self.sorted_dels
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
@@ -290,13 +324,7 @@ class solver():
         elif sorted_dels[3] == 'del1':
             self.ref_hydro = 1
         elif sorted_dels[3] == 'del2':
-            self.ref_hydro = 2
-
-        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
-        self.cardinal_pub.publish(Float32(self.bearing))
-
-
-        #rospy.logerr(bearing)       
+            self.ref_hydro = 2       
         return self.bearing
         
         #print sorted_dels
@@ -319,9 +347,6 @@ class solver():
         x3 = hydro3[0] #- 0.75 #np.random.uniform(-1, 1)
         y3 = hydro3[1] #+ 0.75 #np.random.uniform(-1, 1)
         z3 = hydro3[2]            
-
-
-        print "********"
 
         P1 = [0,0,0]
         P2 = [0,0,0]        
@@ -383,9 +408,9 @@ class solver():
 
 
         if (discr < 0):
-            rospy.logerr("no real solution was found; set garbage values for P1 and P2")
+            #rospy.logerr("no real solution was found; set garbage values for P1 and P2")
 
-            print discr
+            #print discr
 
             (x,y) = self.pol2cart(rho,phi)
 
@@ -394,6 +419,8 @@ class solver():
             z=0         
 
         else:
+
+            #print "worked"
 
             P1[0] = (-BB+math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
             P2[0] = (-BB-math.sqrt(discr))/(2.0*AA) if (2.0*AA) != 0 else 0
@@ -409,13 +436,13 @@ class solver():
             d0_1 = -P1[0] * (x1 / del1) + (x1*x1 - del1*del1) / (2.0*del1)        
             d0_2 = -P2[0] * (x1 / del1) + (x1*x1 - del1*del1) / (2.0*del1)
 
-            rospy.loginfo("x1: %f" % (P1[0]))
-            rospy.loginfo("y1: %f" % (P1[1]))
-            rospy.loginfo("z1: %f" % (P1[2]))
-            rospy.loginfo("**")
-            rospy.loginfo("x2: %f" % (P2[0]))
-            rospy.loginfo("y2: %f" % (P2[1]))
-            rospy.loginfo("z2: %f" % (P2[2]))
+            #rospy.loginfo("x1: %f" % (P1[0]))
+            #rospy.loginfo("y1: %f" % (P1[1]))
+            #rospy.loginfo("z1: %f" % (P1[2]))
+            #rospy.loginfo("**")
+            #rospy.loginfo("x2: %f" % (P2[0]))
+            #rospy.loginfo("y2: %f" % (P2[1]))
+            #rospy.loginfo("z2: %f" % (P2[2]))
 
             dellist = [del1, del2, del3]
 
@@ -437,9 +464,9 @@ class solver():
             measured2_list = [int(i) for i in measured2_list]
             dellist = [int(i) for i in dellist]
 
-            print "dellist:        ", dellist
-            print "measured1_list: ", measured1_list
-            print "measured2_list: ", measured2_list
+            #print "dellist:        ", dellist
+            #print "measured1_list: ", measured1_list
+            #print "measured2_list: ", measured2_list
 
             x=0
             y=0
@@ -455,8 +482,8 @@ class solver():
             if p2_heading < 0:
                 p2_heading = 360 + p2_heading                
 
-            rospy.loginfo("p1_heading: %0.2f" % p1_heading)
-            rospy.loginfo("p2_heading: %0.2f" % p2_heading)
+            #rospy.loginfo("p1_heading: %0.2f" % p1_heading)
+            #rospy.loginfo("p2_heading: %0.2f" % p2_heading)
 
             inv_bearing = self.bearing + 180   
             if inv_bearing > 360:
@@ -481,22 +508,22 @@ class solver():
                 sum2 = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
 
                 if measured1_list == measured2_list and measured1_list == dellist:
-                    rospy.logwarn("P1 == P2 == dellist")
+                    #rospy.logwarn("P1 == P2 == dellist")
                     sum1 = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
                     sum2 = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
-                    print "sum1: ", sum1
-                    print "sum2: ", sum2      
+                    #print "sum1: ", sum1
+                    #print "sum2: ", sum2      
                     solution = []
                     if sum1 > sum2:
                         solution = P1
                         heading = p1_heading
                         self.psolution = 1
-                        print "P1"
+                        #print "P1"
                     else:
                         solution = P2
                         heading = p2_heading
                         self.psolution = 2
-                        print "P2"
+                        #print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -506,29 +533,29 @@ class solver():
                     angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)
 
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
+                    #print "angle_diff: %0.2f" % angle_diff
+                    #print "inv_angle_diff: %0.2f" % inv_angle_diff
 
                     if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
                         x = solution[0]
                         y = solution[1]
                         z = solution[2]
-                        rospy.loginfo("vector standard")
+                        #rospy.loginfo("vector standard")
                     elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
                         x = -solution[0]
                         y = -solution[1]
                         z = -solution[2]
-                        rospy.loginfo("vector inverted")
+                        #rospy.loginfo("vector inverted")
                     else:
                         (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")   
+                        #rospy.logerr("defaulting to cardinal")   
 
                 elif sum1 > sum2:
-                    rospy.logwarn("measured1_list")
+                    #rospy.logwarn("measured1_list")
                     solution = P1
                     heading = p1_heading
                     self.psolution = 1    
-                    print "P1"
+                    #print "P1"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -538,32 +565,32 @@ class solver():
                     angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)    
 
-                    print "bearing: %0.2f" % self.bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
+                    #print "bearing: %0.2f" % self.bearing
+                    #print "inv_bearing: %0.2f" % inv_bearing
 
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
+                    #print "angle_diff: %0.2f" % angle_diff
+                    #print "inv_angle_diff: %0.2f" % inv_angle_diff
 
                     if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
                         x = solution[0]
                         y = solution[1]
                         z = solution[2]
-                        rospy.loginfo("vector standard")
+                        #rospy.loginfo("vector standard")
                     elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
                         x = -solution[0]
                         y = -solution[1]
                         z = -solution[2]
-                        rospy.loginfo("vector inverted")
+                        #rospy.loginfo("vector inverted")
                     else:
                         (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")
+                        #rospy.logerr("defaulting to cardinal")
 
                 elif sum2 > sum1:
-                    rospy.logwarn("measured2_list")
+                    #rospy.logwarn("measured2_list")
                     solution = P2
                     heading = p2_heading
                     self.psolution = 2  
-                    print "P2"
+                    #print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -573,43 +600,43 @@ class solver():
                     angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing) 
 
-                    print "bearing: %0.2f" % self.bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
+                    #print "bearing: %0.2f" % self.bearing
+                    #print "inv_bearing: %0.2f" % inv_bearing
 
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff                          
+                    #print "angle_diff: %0.2f" % angle_diff
+                    #print "inv_angle_diff: %0.2f" % inv_angle_diff                          
 
                     if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
                         x = solution[0]
                         y = solution[1]
                         z = solution[2]
-                        rospy.loginfo("vector standard")
+                        #rospy.loginfo("vector standard")
                     elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
                         x = -solution[0]
                         y = -solution[1]
                         z = -solution[2]
-                        rospy.loginfo("vector inverted")
+                        #rospy.loginfo("vector inverted")
                     else:
                         (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")                    
+                        #rospy.logerr("defaulting to cardinal")                    
 
                 elif (measured1_list == measured2_list) and measured1_list != dellist:
-                    rospy.logwarn("not equal")
+                    #rospy.logwarn("not equal")
                     sum1 = abs(P1[0]) + abs(P1[1]) + abs(P1[2])
                     sum2 = abs(P2[0]) + abs(P2[1]) + abs(P2[2])
-                    print "sum1: ", sum1
-                    print "sum2: ", sum2      
+                    #print "sum1: ", sum1
+                    #print "sum2: ", sum2      
                     solution = []
                     if sum1 > sum2:
                         solution = P1
                         heading = p1_heading
                         self.psolution = 1
-                        print "P1"
+                        #print "P1"
                     else:
                         solution = P2
                         heading = p2_heading
                         self.psolution = 2
-                        print "P2"
+                        #print "P2"
 
                     if self.bearing > 360-angle_tolerance and heading < 0 + angle_tolerance:
                         self.bearing = self.bearing - 360
@@ -619,34 +646,38 @@ class solver():
                     angle_diff = abs(heading-self.bearing)
                     inv_angle_diff = abs(heading - inv_bearing)
 
-                    print "bearing: %0.2f" % self.bearing
-                    print "inv_bearing: %0.2f" % inv_bearing
+                    #print "bearing: %0.2f" % self.bearing
+                    #print "inv_bearing: %0.2f" % inv_bearing
 
-                    print "angle_diff: %0.2f" % angle_diff
-                    print "inv_angle_diff: %0.2f" % inv_angle_diff
+                    #print "angle_diff: %0.2f" % angle_diff
+                    #print "inv_angle_diff: %0.2f" % inv_angle_diff
 
                     if angle_diff < inv_angle_diff and angle_diff < angle_tolerance:
                         x = solution[0]
                         y = solution[1]
                         z = solution[2]
-                        rospy.loginfo("vector standard")
+                        #rospy.loginfo("vector standard")
                     elif angle_diff > inv_angle_diff and inv_angle_diff < angle_tolerance:
                         x = -solution[0]
                         y = -solution[1]
                         z = -solution[2]
-                        rospy.loginfo("vector inverted")
+                        #rospy.loginfo("vector inverted")
                     else:
                         (x,y) = self.pol2cart(rho,phi)
-                        rospy.logerr("defaulting to cardinal")                     
+                        #rospy.logerr("defaulting to cardinal")                     
 
                 else:
                     (x,y) = self.pol2cart(rho,phi)
-                    rospy.logerr("defaulting to cardinal")     
+                    #rospy.logerr("defaulting to cardinal")     
             else:
                 (x,y) = self.pol2cart(rho,phi)
-                rospy.logerr("defaulting to cardinal")   
+                #rospy.logerr("defaulting to cardinal")   
 
-        return (x,y,z,P1,P2)     
+        return_heading = np.arctan2(x,y) - np.pi/2
+        return_heading = math.degrees(return_heading)
+        #print return_heading
+
+        return (return_heading)     
 
     def calc_vals(self, data):
 
@@ -702,22 +733,9 @@ class solver():
         return Crane_pos_serviceResponse(x, y, z)        
 
     def __init__(self):
-        rospy.init_node('crane_method_service')
-        #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.calc_vals) #self.actu_vals)
-        rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.calc_vals)
-        #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
-        #self.crane_serv = rospy.Service('hydrophones/crane_srv', Crane_pos_service, self.crane_solver)
-        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+        self.run_calibration()
 
-        self.ref_hydro = 0
-        self.psolution = 0
-
-        rate = rospy.Rate(1)
-
-        while not rospy.is_shutdown():
-
-            rate.sleep()
 
 def main():
     
@@ -733,86 +751,3 @@ def main():
 
 if __name__ == '__main__':
     main()              
-
-    '''
-
-        zz = (x1/del1) if del1 != 0 else 0
-        z = (x3/del3) if del3 != 0 else 0
-
-        A2 = zz - z   # eqn (14)
-
-        #print "A2: %f" % A2
-
-        B2 = -y3/del3 if del3 != 0 else 0
-
-        #print "B2: %f" % B2
-
-        holder = (x3*x3 + y3*y3-del3*del3)/(2.0*del3) if del3 != 0 else 0
-        holder2 = (x1*x1-del1*del1)/(2*del1) if del1 != 0 else 0
-
-        D2 = holder - holder2 
-
-        #print "D2: %f" % D2
-
-        x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
-        y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
-
-        myx = x 
-        myy = y        
-
-        T1 = -4*del1*del1
-        T2 =  4*(x1*x1-del1*del1)*myx*myx + 4*x1*(del1*del1-x1*x1)*myx + del1*del1*del1*del1 -2*del1*del1*x1*x1 -4*del1*del1*myy*myy + x1*x1*x1*x1
-
-        zsquared = -T2/T1 if T1 != 0 else 0
-
-        z = -math.sqrt(abs(zsquared))'''
-
-
-'''
-               elif self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
-                    if abs(p1_heading-bearing) < 30:
-                            x = P1[0]
-                            y = P1[1]
-                            z = P1[2]
-                            rospy.logerr("P1 normal")
-                    else:
-                        rospy.logerr(p1_heading)
-                        if p1_heading > 180:
-                            p1_heading = p1_heading - 180
-                        else:
-                            p1_heading = 180 + p1_heading
-                        
-                        if p1_heading > 360:
-                            p1_heading = p1_heading - 360
-                        print "p1_heading else: %0.2f" % p1_heading                        
-                        if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
-                            x = -P1[0]
-                            y = -P1[1]
-                            z = P1[2]
-                            rospy.logerr("P1 sign flip")
-                        else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logerr("defaulting to cardinal")                                                 
-                elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
-                    if abs(p2_heading-bearing) < 30:
-                            x = P2[0]
-                            y = P2[1]
-                            z = P2[2]
-                            rospy.logerr("P2 normal")
-                    else:
-                        p2_heading = 180 + p2_heading
-
-
-                        if p2_heading > 360:
-                            p2_heading = p2_heading - 360
-                        print "p2_heading else: %0.2f" % p2_heading
-                        if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
-                            x = -P2[0]
-                            y = -P2[1]
-                            z = P2[2]    
-                            rospy.logerr("P2 sign flip") 
-                        else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logerr("defaulting to cardinal")        '''
