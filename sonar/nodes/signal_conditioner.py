@@ -199,7 +199,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.1 #voltage in which threshold is triggered
+        self.break_val = 0.075 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 
