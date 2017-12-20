@@ -33,19 +33,19 @@ class solver():
         #c = 0.343 #speed of sound in air
 
         #starting values
-        x1_orig = 148.2  #149.7  #152.7  #158.7  #170.7  #173.2 #in mm
-        x2_orig = 51.6   #53.6   #58.6   #68.6   #83.6   #86.6
-        y2_orig = -165.5 #-165.5 #-165.5 #-165.5 #-150.0
-        x3_orig = 66.6   #65.6   #62.6   #62.6   #71.6   #86.6
-        y3_orig = -21.0  #-21.5  #-23.5  #-31.5  #-46.5  #-50.0
-        z3_orig = -138.5 #-139.5 #-136.5 #-134.5 #-119.5 #-100.0
+        x1_orig = 173.2 #in mm
+        x2_orig = 86.6
+        y2_orig = -150.0
+        x3_orig = 86.6
+        y3_orig = -50.0
+        z3_orig = -100.0
 
-        mm_range = 2.0 #mm 5 = +- 2.5
-        mm_resolution = .1 #mm
+        mm_range = 30 #mm 5 = +- 2.5
+        mm_resolution = 1 #mm
 
         number_of_iterations = mm_range/mm_resolution
 
-        lowest_error = 232.78
+        lowest_error = 232.22
 
         #experimentally gathered
         tstamps = [[0.00, 146.0, 88.0, 91.5], [10.0, 143.0, 70.75, 84.5], [20.0, 138.0, 52.0, 76.75], [30.0, 130.5, 33.75, 67.75],
@@ -75,7 +75,6 @@ class solver():
                                 z3 = z3_orig - (mm_range/2.0) + (mm_resolution*n)
                                 
                                 error_sum = 0
-
                                 for o in range(len(tstamps)):
                                         
                                     hydro1 = [x1,      0,     0]
@@ -90,14 +89,13 @@ class solver():
 
                                     output = self.crane_calc(del1, del2, del3, hydro1, hydro2, hydro3)
 
-                                    error_sum = error_sum + abs(output-tstamps[o][0]) 
-                                    #print error_sum                               
-
+                                    error_sum = error_sum + abs(output-tstamps[o][0])                                
+                                
                                 error = float(error_sum/len(tstamps))
                                 #print error
 
                                 if error < lowest_error:
-                                    lowest_error = error                                    
+                                    lowest_error = error                                     
                                     print "lowest_error: %0.2f" % lowest_error
                                     print "hydro1: [%s] hydro2: [%s] hydro3: [%s]" % (', '.join(map(str, hydro1)),', '.join(map(str, hydro2)),', '.join(map(str, hydro3))) 
 
