@@ -33,6 +33,14 @@ class solver():
         #c = 0.343 #speed of sound in air
 
         #starting values
+        '''x1_orig = 158.2  #158.0 #in mm
+        x2_orig = 82.6   #75.6
+        y2_orig = -182.0 #-145.7
+        x3_orig = 55.6   #102.0
+        y3_orig = -27.0  #-65.0
+        z3_orig = -101.0 #-105.0'''
+
+        #starting values
         x1_orig = 158.7 #in mm
         x2_orig = 82.1
         y2_orig = -181.5
@@ -40,8 +48,8 @@ class solver():
         y3_orig = -27.0
         z3_orig = -101.5
 
-        mm_range = 10 #mm 5 = +- 2.5
-        mm_resolution = 1 #mm
+        mm_range = .01 #mm 5 = +- 2.5
+        mm_resolution = .001 #mm
 
         number_of_iterations = mm_range/mm_resolution
 
@@ -93,7 +101,9 @@ class solver():
                                         #print "turn over error!!!!!!!!"
                                         output = output + 360
                                     elif output > 270 and tstamps[o][0] < 90:
-                                        output = tstamps[o][0] + 360                                    
+                                        output = tstamps[o][0] + 360
+
+                                    #print "output: %f actual: %f error: %f" % (output, tstamps[o][0], abs(output-tstamps[o][0]))                                        
 
                                     error_sum = error_sum + abs(output-tstamps[o][0])                                
 
@@ -101,7 +111,7 @@ class solver():
                                 #print error
 
                                 if error < lowest_error:
-                                    lowest_error = error                                      
+                                    lowest_error = error                                     
                                     print "lowest_error: %0.2f" % lowest_error
                                     print "hydro1: [%s] hydro2: [%s] hydro3: [%s]" % (', '.join(map(str, hydro1)),', '.join(map(str, hydro2)),', '.join(map(str, hydro3))) 
 
@@ -689,7 +699,8 @@ class solver():
         #print return_heading
 
         if return_heading < 0:
-            return_heading  = 360 + return_heading        
+            return_heading  = 360 + return_heading
+
 
         return (return_heading)     
 
