@@ -41,19 +41,19 @@ class solver():
         z3_orig = -101.0 #-105.0'''
 
         #starting values
-        x1_orig = 158.7 #in mm
+        x1_orig = 167.7 #in mm
         x2_orig = 82.1
-        y2_orig = -181.5
-        x3_orig = 55.2
-        y3_orig = -27.0
-        z3_orig = -101.5
+        y2_orig = -178.5
+        x3_orig = 46.2
+        y3_orig = -24.0
+        z3_orig = -89.5
 
         mm_range = .01 #mm 5 = +- 2.5
         mm_resolution = .001 #mm
 
         number_of_iterations = mm_range/mm_resolution
 
-        lowest_error = 12.50 #(11.152 or 16.64% error)
+        lowest_error = 12.26 #(11.152 or 16.64% error)
 
         #experimentally gathered
         tstamps = [[0.00, 146.0, 88.0, 91.5], [10.0, 143.0, 70.75, 84.5], [20.0, 138.0, 52.0, 76.75], [30.0, 130.5, 33.75, 67.75],
