@@ -646,10 +646,15 @@ class solver():
         print "*******************POSITION 1*******************"
         print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
 
-        hydro0_xyz = [0,      0,     0]
+        '''hydro0_xyz = [0,      0,     0]
         hydro1_xyz = [-173.2,   0,     0]
         hydro2_xyz = [-86.6,  -150.0,     0]
-        hydro3_xyz = [-86.6,  -50.0, -100.0]
+        hydro3_xyz = [-86.6,  -50.0, -100.0]'''
+
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [154.7,   0,     0]
+        hydro2_xyz = [77.1,  -180.5,     0]
+        hydro3_xyz = [57.2,  -26.0, -104.5]        
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 
@@ -740,86 +745,3 @@ def main():
 
 if __name__ == '__main__':
     main()              
-
-    '''
-
-        zz = (x1/del1) if del1 != 0 else 0
-        z = (x3/del3) if del3 != 0 else 0
-
-        A2 = zz - z   # eqn (14)
-
-        #print "A2: %f" % A2
-
-        B2 = -y3/del3 if del3 != 0 else 0
-
-        #print "B2: %f" % B2
-
-        holder = (x3*x3 + y3*y3-del3*del3)/(2.0*del3) if del3 != 0 else 0
-        holder2 = (x1*x1-del1*del1)/(2*del1) if del1 != 0 else 0
-
-        D2 = holder - holder2 
-
-        #print "D2: %f" % D2
-
-        x =  (B1*D2-B2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0  # eqn (15)
-        y = -(A1*D2-A2*D1)/(A1*B2-A2*B1) if (A1*B2-A2*B1) != 0 else 0
-
-        myx = x 
-        myy = y        
-
-        T1 = -4*del1*del1
-        T2 =  4*(x1*x1-del1*del1)*myx*myx + 4*x1*(del1*del1-x1*x1)*myx + del1*del1*del1*del1 -2*del1*del1*x1*x1 -4*del1*del1*myy*myy + x1*x1*x1*x1
-
-        zsquared = -T2/T1 if T1 != 0 else 0
-
-        z = -math.sqrt(abs(zsquared))'''
-
-
-'''
-               elif self.psolution == 1 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p1_head - bearing %0.2f" % abs(p1_heading -bearing)
-                    if abs(p1_heading-bearing) < 30:
-                            x = P1[0]
-                            y = P1[1]
-                            z = P1[2]
-                            rospy.logerr("P1 normal")
-                    else:
-                        rospy.logerr(p1_heading)
-                        if p1_heading > 180:
-                            p1_heading = p1_heading - 180
-                        else:
-                            p1_heading = 180 + p1_heading
-                        
-                        if p1_heading > 360:
-                            p1_heading = p1_heading - 360
-                        print "p1_heading else: %0.2f" % p1_heading                        
-                        if abs(p1_heading-bearing) < 30 or abs((360-p1_heading)-bearing) < 30:
-                            x = -P1[0]
-                            y = -P1[1]
-                            z = P1[2]
-                            rospy.logerr("P1 sign flip")
-                        else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logerr("defaulting to cardinal")                                                 
-                elif self.psolution == 2 and abs(del1)+abs(del2)+abs(del3) > 100.0:
-                    print "p2_head - bearing %0.2f" % abs(p2_heading -bearing)
-                    if abs(p2_heading-bearing) < 30:
-                            x = P2[0]
-                            y = P2[1]
-                            z = P2[2]
-                            rospy.logerr("P2 normal")
-                    else:
-                        p2_heading = 180 + p2_heading
-
-
-                        if p2_heading > 360:
-                            p2_heading = p2_heading - 360
-                        print "p2_heading else: %0.2f" % p2_heading
-                        if abs(p2_heading-bearing) < 30 or abs((360-p2_heading)-bearing) < 30:
-                            x = -P2[0]
-                            y = -P2[1]
-                            z = P2[2]    
-                            rospy.logerr("P2 sign flip") 
-                        else:
-                            (x,y) = self.pol2cart(rho,phi)
-                            rospy.logerr("defaulting to cardinal")        '''
