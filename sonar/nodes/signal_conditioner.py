@@ -62,7 +62,7 @@ class condition():
         if earliest_break_num > 100:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((1.0/25000.0)*sample_rate)
+            num_samples_save = int((5.0/25000.0)*sample_rate)
             zeros = [0]*num_samples_save        
 
             #eliminate all information before first signal by adding zeros in front of signal
@@ -94,7 +94,7 @@ class condition():
 
             #using same variable as above
             #Buffering holder for keeping X periods of actual signal at 25 kHz
-            num_samples_save = int((2.0/25000.0)*sample_rate)
+            num_samples_save = int((5.0/25000.0)*sample_rate)
 
 
             min_amp = [0]*channels
@@ -120,6 +120,8 @@ class condition():
 
             #print amplitude_ratio
 
+
+
             ######################
             self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]
             
@@ -142,7 +144,7 @@ class condition():
             #********* NORMALIZATION for weak signals **********
             for b in range(channels-1):
                 if amplitude_ratio[b+1] > 5:
-                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.5) for x in self.signal[b+1]]
+                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.25) for x in self.signal[b+1]]
                     phoneno = b+1
                     rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % phoneno)
 
@@ -199,7 +201,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.075 #voltage in which threshold is triggered
+        self.break_val = 0.07 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 

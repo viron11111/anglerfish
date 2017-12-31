@@ -252,7 +252,45 @@ class phaser():
         microseconds = [1e6,1e6,1e6,1e6]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        print ("before fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
+        self.calc1[0] = float(self.calc1[1])
+        self.calc1[1] = float(self.calc1[2])
+        self.calc1[2] = float(self.calc1[3])
+        self.calc1[3] = float(calculated[1])
+
+        calculated[1] = 0.25*self.calc1[0] + 0.25*self.calc1[1] + 0.25*self.calc1[2] + 0.25*self.calc1[3]
+
+        self.calc2[0] = float(self.calc2[1])
+        self.calc2[1] = float(self.calc2[2])
+        self.calc2[2] = float(self.calc2[3])
+        self.calc2[3] = float(calculated[2])
+
+        calculated[2] = 0.25*self.calc2[0] + 0.25*self.calc2[1] + 0.25*self.calc2[2] + 0.25*self.calc2[3]
+
+        self.calc3[0] = float(self.calc3[1])
+        self.calc3[1] = float(self.calc3[2])
+        self.calc3[2] = float(self.calc3[3])
+        self.calc3[3] = float(calculated[3])
+
+        #print self.calc1
+
+        calculated[3] = 0.25*self.calc3[0] + 0.25*self.calc3[1] + 0.25*self.calc3[2] + 0.25*self.calc3[3]
+
+        print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
+
+        #calculated[0] = calculated[0] - calculated[3]
+        #calculated[1] = calculated[1] - calculated[3]
+        #calculated[2] = calculated[2] - calculated[3]
+        #calculated[3] = calculated[3] - calculated[3]
+
+        #calculated[3] = calculated[0]
+        #calculated[0] = 0.0
+
+
+        #print ("after move: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
 
         #dels = {"del0": calculated[0], "del1": calculated[1], "del2": calculated[2], "del3": calculated[3]}
         #sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
@@ -273,6 +311,10 @@ class phaser():
         #self.timestamps = []
         #self.actual_stamps = []
         #self.actual_position = [0,0,0]
+
+        self.calc1 = [0,0,0,0]
+        self.calc2 = [0,0,0,0]
+        self.calc3 = [0,0,0,0]
 
         #self.hydro0 = [0,     0,     0]
         #self.hydro1 = [-25.4, 0,     0]
