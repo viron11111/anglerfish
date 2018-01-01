@@ -646,15 +646,17 @@ class solver():
         print "*******************POSITION 1*******************"
         print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
 
-        hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  150.0,     0]
-        hydro3_xyz = [86.6,  50.0, -100.0]
-
         #hydro0_xyz = [0,      0,     0]
-        #hydro1_xyz = [154.7,   0,     0]
-        #hydro2_xyz = [77.1,  -180.5,     0]
-        #hydro3_xyz = [57.2,  -26.0, -104.5]        
+        #hydro1_xyz = [173.2,   0,     0]
+        #hydro2_xyz = [86.6,  150.0,     0]
+        #hydro3_xyz = [86.6,  50.0, -100.0]      
+
+        #hydro1: [170.75, 0, 0] hydro2: [83.6, 147.65, 0] hydro3: [86.75, 42.4, -87.55] 
+
+        hydro0_xyz = [0,      0,     0]
+        hydro1_xyz = [170.75,   0,     0]
+        hydro2_xyz = [83.6,  147.65,     0]
+        hydro3_xyz = [86.75,  42.4, -87.55]        
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 

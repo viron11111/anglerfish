@@ -252,7 +252,7 @@ class phaser():
         microseconds = [1e6,1e6,1e6,1e6]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        print ("before fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        '''print ("before fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
         self.calc1[0] = float(self.calc1[1])
         self.calc1[1] = float(self.calc1[2])
@@ -277,7 +277,8 @@ class phaser():
 
         calculated[3] = 0.25*self.calc3[0] + 0.25*self.calc3[1] + 0.25*self.calc3[2] + 0.25*self.calc3[3]
 
-        print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))'''
+        print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
 
         #calculated[0] = calculated[0] - calculated[3]

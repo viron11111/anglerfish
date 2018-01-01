@@ -69,11 +69,11 @@ class simulator():
         #hydro2_xyz = [0,  -100,     0]
         #hydro3_xyz = [100,  -100, -100]          
 
-        #Actual layout
+        #Actual layout (calibrated)
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [-173.2,   0,     0]
-        hydro2_xyz = [-86.6,  -150.0,     0]
-        hydro3_xyz = [-86.6,  -50.0, -100.0] 
+        hydro1_xyz = [170.75,   0,     0]
+        hydro2_xyz = [83.6,  147.65,     0]
+        hydro3_xyz = [86.75,  42.4, -87.55] 
 
         
 
@@ -272,7 +272,11 @@ class simulator():
         timestamps = ref()
         tstamps = timestamps.actual_time_stamps
 
-        #print tstamps
+        tstamps = list(tstamps)
+
+        tstamps[1] = -tstamps[1]
+        tstamps[2] = -tstamps[2]
+        tstamps[3] = -tstamps[3]
 
         self.tstamps_pub = rospy.Publisher("/hydrophones/actual_time_stamps", Actual_time_stamps, queue_size = 1)
 
@@ -348,33 +352,62 @@ class simulator():
     def calculate_error(self, x, y, z):
         self.position = [x,y,z]
 
-        if self.crane_x == 0 and self.crane_y == 0:
-            phi = math.radians(360-self.cardinal)
-            rho = 500.0
-            (self.crane_x,self.crane_y) = self.pol2cart(rho,phi)
+        #print self.position
+
+
+        crane_heading = np.arctan2(self.crane_x,self.crane_y) - np.pi/2       
+
+
+        crane_heading = math.degrees(crane_heading)
+
+
+        heading = float(crane_heading)
+        if heading < 0:
+            heading = 360 + heading
+
+        #time.sleep (0.05)
+
+
+        #if self.crane_x == 0 and self.crane_y == 0:
+        #    phi = math.radians(360-self.cardinal)
+        #    rho = 500.0
+        #    (self.crane_x,self.crane_y) = self.pol2cart(rho,phi)
 
             #heading_error_radian = np.pi
             #heading_error_percent = 50.0
-            rospy.logwarn("crane_x = 0, crane_y = 0")         
+        #    rospy.logwarn("crane_x = 0, crane_y = 0")         
 
-        crane_heading = np.arctan2(self.crane_x,self.crane_y)  - np.pi/2
+        #crane_heading = math.degrees(np.arctan2(self.crane_x,self.crane_y)) - 90.0
 
-        actual_heading = np.arctan2(self.position[0],self.position[1]) - np.pi/2
+        #print "cranex: %f craney: %f" % (self.crane_x, self.crane_y)
 
-        if crane_heading < 0:
-            crane_heading = crane_heading + 2*np.pi
+
+
+        actual_heading = math.degrees(np.arctan2(self.position[0],self.position[1])) - 90.0
+
         if actual_heading < 0:
-            actual_heading = actual_heading + 2*np.pi            
+            actual_heading = actual_heading + 360
 
-        if crane_heading > 4.8 and actual_heading < 1.5:
-            crane_heading = crane_heading - 2*np.pi
-        elif crane_heading < 1.5 and actual_heading > 4.8:
-            crane_heading = crane_heading + 2*np.pi
+        if heading > 270 and actual_heading < 90:
+            actual_heading = actual_heading + 360
+        elif actual_heading > 270 and heading < 90:
+            heading = heading + 360
 
-        heading_error_radian = abs(actual_heading-crane_heading)
+        heading_error = abs(actual_heading-heading)
+
         heading_error_percent = abs((actual_heading-crane_heading)/(2*np.pi)*100)
 
-        #print "crane: %f actual: %f dif: %f" % (crane_heading, actual_heading,heading_error_radian)       
+        if heading_error > 10.0:
+            
+            crane_heading = np.arctan2(self.crane_x,self.crane_y) - np.pi/2 
+
+            crane_heading = math.degrees(crane_heading)
+
+            heading = float(crane_heading)
+            if heading < 0:
+                heading = 360 + heading   
+                         
+            print "crane: %f actual: %f dif: %f" % (heading, actual_heading, heading_error)       
 
 
 
@@ -388,9 +421,9 @@ class simulator():
 
         #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
-        self.head_error = heading_error_radian
-        if self.head_error >= 6.0:
-            print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
+        self.head_error = heading_error
+        #if self.head_error >= 6.0:
+         #   print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
         #print "{}\theading_error: %0.4f radians {}%f%%{}".format(self.W,self.O,self.W) % (heading_error_radian, heading_error_percent)
 
         crane_horizontal_distance = np.sqrt(self.crane_x**2+self.crane_y**2)
@@ -430,7 +463,7 @@ class simulator():
         else:
             distance_error = 0.0
 
-        self.heading_error_sum = self.heading_error_sum + heading_error_radian
+        self.heading_error_sum = self.heading_error_sum + heading_error
         self.declination_error_sum = self.declination_error_sum + declination_error_radian
         self.distance_error_sum = self.distance_error_sum + distance_error
 
@@ -449,13 +482,13 @@ class simulator():
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
-            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
+            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]
         elif typemeasure == "Declination":
-            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
+            levels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]#[0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28]#15#[-1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.75,1.0,6.30]
         CS = plt.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
 
         if typemeasure == 'Heading':
@@ -471,17 +504,17 @@ class simulator():
                           #vmax=abs(zi).max(), vmin=-abs(zi).max())
 
         cb = plt.colorbar()
-        cb.set_label(label='%s Error (Radians)' % typemeasure)#,size=18)
+        cb.set_label(label='%s Error (Degrees)' % typemeasure)#,size=18)
         # plot data points.
         #plt.scatter(x, y, marker='o', s=5, zorder=10)
         ref = rospy.ServiceProxy('/hydrophones/hydrophone_position', Hydrophone_locations_service)
         ref = ref()
 
-        plt.plot([-ref.hydro0_xyz[0]/100, -ref.hydro1_xyz[0]/100, -ref.hydro2_xyz[0]/100, -ref.hydro3_xyz[0]/100], 
-            [-ref.hydro0_xyz[1]/100, -ref.hydro1_xyz[1]/100, -ref.hydro2_xyz[1]/100, -ref.hydro3_xyz[1]/100], 'wo')
-        plt.plot([-ref.hydro1_xyz[0]/100, -ref.hydro2_xyz[0]/100, -ref.hydro3_xyz[0]/100], 
-            [-ref.hydro1_xyz[1]/100, -ref.hydro2_xyz[1]/100, -ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
-        plt.plot([-ref.hydro0_xyz[0]/100], [-ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
+        plt.plot([ref.hydro0_xyz[0]/100, ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
+            [ref.hydro0_xyz[1]/100, ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'wo')
+        plt.plot([ref.hydro1_xyz[0]/100, ref.hydro2_xyz[0]/100, ref.hydro3_xyz[0]/100], 
+            [ref.hydro1_xyz[1]/100, ref.hydro2_xyz[1]/100, ref.hydro3_xyz[1]/100], 'ko', markersize = 3)
+        plt.plot([ref.hydro0_xyz[0]/100], [ref.hydro0_xyz[1]/100], 'yo', markersize = 3)
 
         plt.xlim(-self.max_range/1000, self.max_range/1000)
         plt.ylim(-self.max_range/1000, self.max_range/1000)
@@ -584,8 +617,8 @@ class simulator():
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 500
-        degree_angle_resolution = 1
+        distance_resolution = 1000
+        degree_angle_resolution = 10
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -602,20 +635,22 @@ class simulator():
                 phi = deg*rad_resolution
                 x = dis * np.cos(phi)
                 y = dis * np.sin(phi)
-                #print "x: %f y: %f" % (x,y)
+                #print "x: %5.2f y: %5.2f" % (x,y)
               
                 self.ping_service(x,y,z)
-                time.sleep(0.03)
+                time.sleep(0.1)
                 self.calculate_error(x,y,z) 
 
                 x_list = x_list + [x]
                 y_list = y_list + [y]
-                z_list = z_list + [math.degrees(self.head_error)]
+                z_list = z_list + [self.head_error]
                 d_list = d_list + [math.degrees(self.declination_error)]
                 #print z_list
                 #time.sleep(1)
 
-
+        print z_list
+        print "************* mean *************"
+        print np.mean(z_list)
         self.plot_grid_graph(x_list,y_list,z,z_list,'Heading')
         self.plot_grid_graph(x_list,y_list,z,d_list,'Declination')       
 

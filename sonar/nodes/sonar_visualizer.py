@@ -268,11 +268,11 @@ class plotter():
         #hydro2_xyz = [-50,  86.6,     0]
         #hydro3_xyz = [-50,  -86.6, 0]
 
-        #experimental layout
+        #Actual layout (calibrated)
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [173.2,   0,     0]
-        hydro2_xyz = [86.6,  -150,     0]
-        hydro3_xyz = [86.6,  -50, -100]
+        hydro1_xyz = [170.75,   0,     0]
+        hydro2_xyz = [83.6,  147.65,     0]
+        hydro3_xyz = [86.75,  42.4, -87.55] 
 
         return Hydrophone_locations_serviceResponse(hydro0_xyz, hydro1_xyz, hydro2_xyz ,hydro3_xyz)
 
