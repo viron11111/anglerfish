@@ -56,7 +56,7 @@ class solver():
     def cardinal(self, del1, del2, del3):
         del0 = 0.0
         self.bearing = 0.0
-        tolerance = 15
+        tolerance = 16
         self.psolution = 0
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
@@ -440,7 +440,7 @@ class solver():
             rospy.loginfo("p2_heading: %0.2f" % p2_heading)
 
             inv_bearing = self.bearing + 180   
-            if inv_bearing > 360:
+            if inv_bearing >= 360:
                 inv_bearing = inv_bearing - 360         
             #inv_p1heading = p1_heading + 180
             #inv_p2heading = p2_heading + 180
