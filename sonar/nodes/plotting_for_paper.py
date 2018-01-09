@@ -139,8 +139,8 @@ class plotter():
         wave = [None]*len(self.a)  #make empty list
         
 
-        #n = len(self.a)   #length of samples (samplecount/4 from AdvanTech driver c++)
-        n = len(self.bc)   #length of samples (samplecount/4 from AdvanTech driver c++)
+        n = len(self.a)   #length of samples (samplecount/4 from AdvanTech driver c++)
+        
 
         self.t = np.arange(0,n*Ts,Ts)  #resolution of sampling, ie 1 MS/s = 1*10^-6
 
@@ -174,7 +174,7 @@ class plotter():
         self.dc  = [0]*2873
 
         plt.ion()
-        self.ax = plt.plot()         
+        plt.plot()         
         #fig, self.ax = plt.subplots(1, 1)  
 
         while not rospy.is_shutdown():
@@ -186,19 +186,19 @@ class plotter():
             rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
             #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
 
-            if len(self.t) == len(self.bc): #len(self.a):
+            if len(self.t) == len(self.a):
                 xvalues = []
                 avalues = []
                 bvalues = []
                 cvalues = []
                 dvalues = []
 
-                self.t = self.t[800:]
+                self.t = self.t
                 xvalues = self.t
                 avalues = self.a
-                bvalues = self.bc[800:] #self.b
-                cvalues = self.cc[800:] #self.c
-                dvalues = self.dc[800:] #self.d
+                bvalues = self.b
+                cvalues = self.c
+                dvalues = self.d
                 Nval = self.N
                 xfval = self.xf
                 yfval = self.yf
@@ -208,13 +208,13 @@ class plotter():
 
                 plt.cla()
                 #print "%i, %i" % (len(self.t), len(self.a))
-                #plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
+                plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
                 plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
                 plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
                 plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
                 plt.legend(loc="upper left", fontsize=25)
-                plt.title("Raw Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)

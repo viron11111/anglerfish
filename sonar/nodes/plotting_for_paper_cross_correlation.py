@@ -108,6 +108,14 @@ class plotter():
         self.cc = self.determine_phase(self.a, self.c)
         self.dc = self.determine_phase(self.a, self.d)
 
+        self.bc = self.bc#[100:]
+        self.cc = self.cc#[100:]
+        self.dc = self.dc#[100:]
+
+        #print len(self.bc)
+        #print len(self.cc)
+        #print len(self.dc)
+
         #print len(self.b)
 
         #print len(self.a1)
@@ -145,7 +153,7 @@ class plotter():
         self.t = np.arange(0,n*Ts,Ts)  #resolution of sampling, ie 1 MS/s = 1*10^-6
 
         if len(self.t) > n:
-            self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off     
+            self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off
 
         #print self.t       
 
@@ -169,13 +177,13 @@ class plotter():
         self.N = 1
         self.yf = [0]
 
-        self.bc  = [0]*2873
-        self.cc  = [0]*2873
-        self.dc  = [0]*2873
+        self.bc  = [0]
+        self.cc  = [0]
+        self.dc  = [0]
 
         plt.ion()
         self.ax = plt.plot()         
-        fig, self.ax = plt.subplots(1, 3)  
+        fig, self.ax = plt.subplots(3)  
 
         while not rospy.is_shutdown():
             #ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
@@ -193,12 +201,12 @@ class plotter():
                 cvalues = []
                 dvalues = []
 
-                self.t = self.t[800:]
+                self.t = self.t
                 xvalues = self.t
                 avalues = self.a
-                bvalues = self.bc[800:] #self.b
-                cvalues = self.cc[800:] #self.c
-                dvalues = self.dc[800:] #self.d
+                bvalues = self.bc #self.b
+                cvalues = self.cc #self.c
+                dvalues = self.dc #self.d
                 Nval = self.N
                 xfval = self.xf
                 yfval = self.yf
@@ -206,23 +214,55 @@ class plotter():
                 #print len(xvalues)
                 #print len(bvalues)
 
-                plt.cla()
+                self.ax[0].cla()
                 #print "%i, %i" % (len(self.t), len(self.a))
                 #plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
-                plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
-                plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
-                plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
+                self.ax[0].plot(xvalues,bvalues, linewidth=3.0, label='A and B correlation')
+                #self.ax[0].plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
+                #self.ax[0].plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
-                plt.legend(loc="upper left", fontsize=25)
-                plt.title("Raw Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
-                plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
-                plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
+                self.ax[0].legend(loc="upper left", fontsize=25)
+                self.ax[0].set_title("Correlations", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                #self.ax[0].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                self.ax[0].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)
-                plt.xlim(0,self.x_axis_length)
-                plt.tick_params(axis='both', which='major', labelsize=25, pad=20)
-                plt.tick_params(axis='both', which='minor', labelsize=25, pad=20)
+                self.ax[0].set_xlim(0.0,0.0005)
+                self.ax[0].tick_params(axis='both', which='major', labelsize=15, pad=10)
+                self.ax[0].tick_params(axis='both', which='minor', labelsize=15, pad=10)
                 #plt.xaxis.labelpad = 20
                 #plt.yaxis.labelpad = 20
+
+                self.ax[1].cla()
+                #print "%i, %i" % (len(self.t), len(self.a))
+                #plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
+                #self.ax[0].plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
+                self.ax[1].plot(xvalues,cvalues, linewidth=3.0, label='A and C correlation', color='g')
+                #self.ax[0].plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
+
+                self.ax[1].legend(loc="upper left", fontsize=25)
+                #self.ax[1].set_title("Correlations", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                #self.ax[1].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                self.ax[1].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
+                #self.ax[0].set_ylim(-5,5)
+                self.ax[1].set_xlim(0.0,0.0005)
+                self.ax[1].tick_params(axis='both', which='major', labelsize=15, pad=10)
+                self.ax[1].tick_params(axis='both', which='minor', labelsize=15, pad=10)
+
+                self.ax[2].cla()
+                #print "%i, %i" % (len(self.t), len(self.a))
+                #plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
+                #self.ax[2].plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
+                #self.ax[0].plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
+                self.ax[2].plot(xvalues,dvalues, linewidth=3.0, label='A and D correlation', color='r')
+
+                self.ax[2].legend(loc="upper left", fontsize=25)
+                #self.ax[2].set_title("Correlations", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                self.ax[2].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                self.ax[2].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
+                #self.ax[0].set_ylim(-5,5)
+                self.ax[2].set_xlim(0.0,0.0005)
+                self.ax[2].tick_params(axis='both', which='major', labelsize=15, pad=10)
+                self.ax[2].tick_params(axis='both', which='minor', labelsize=15, pad=10)                
 
 
                 '''self.ax[1].cla()
