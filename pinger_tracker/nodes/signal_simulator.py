@@ -275,14 +275,27 @@ class simulator():
 
                     self.data[i::self.number_of_hydrophones] = wave  #storage variable to send data through ROS
 
+                    wave = [((x - 32768.0)/65536.0)*5.0 for x in wave ]
+
                     n = len(wave)
                     t = np.arange(0,n*self.Ts,self.Ts)
                     if len(t) == len(wave):
                         '''ax[0].plot(t,wave)
                         ax[1].plot(t,wave)'''
-                        legends[i], = ax.plot(t,wave,linewidth=2.0, label='Hydrophone %i' % i)
+                        if i == 0:
+                            phone = 'A'
+                        elif i == 1:
+                            phone = 'B'
+                        elif i == 2:
+                            phone = 'C'
+                        else:
+                            phone = 'D'
+
+                        legends[i], = ax.plot(t,wave,linewidth=3.0, label='Hydrophone %s' % phone)
                         
-                        
+                
+
+
                 else:
                     wave = []
 
@@ -313,13 +326,13 @@ class simulator():
                 ax[1].set_ylabel('Amplitude')        '''
 
                 ax.legend(loc="upper left", fontsize=25)
-                ax.set_title("Simulated Received Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
-                ax.set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
-                ax.set_ylabel('Amplitude', size = 25, weight = 'bold', x = 0, y = 0.5)
+                ax.set_title("Simulated Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                ax.set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
+                ax.set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 ax.tick_params(axis='both', which='major', labelsize=25, pad=20)
                 ax.tick_params(axis='both', which='minor', labelsize=25, pad=20)
-                ax.xaxis.labelpad = 20
-                ax.yaxis.labelpad = 20
+                #ax.xaxis.labelpad = 20
+                #ax.yaxis.labelpad = 20
 
                 '''ax[2].cla()
                 #ax[2].set_title("FFT On Channel One")
@@ -334,15 +347,17 @@ class simulator():
                 self.data = list(map(int, self.data))
                 #print self.data
 
+                #self.data = [((x - 32768.0)/65536.0)*5.0 for x in self.data ]
+
                 self.simulate_pub.publish(Ping(
                     header=Header(stamp=rospy.Time.now(),
                                   frame_id=self.frame),
                     channels=self.number_of_hydrophones,
                     samples=self.data_points,
                     data=self.data,
-                    sample_rate=self.sample_rate*1000,
-                    adc_bit=self.resolution,
-                    actual_position=self.position))
+                    sample_rate=self.sample_rate*1000))#,
+                    #adc_bit=self.resolution))#,
+                    #actual_position=self.position))
             
             if self.signal_trigger == 'False':
                 rate.sleep()

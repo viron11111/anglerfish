@@ -16,11 +16,14 @@ from std_msgs.msg import UInt16
 from advantech_pci1714.srv import *
 from advantech_pci1714.msg import *
 
+
+
 import time
 import scipy.fftpack
 import operator
 
 class plotter():
+
     def plot_ping(self,data):       
 
         self.t = []
@@ -128,7 +131,7 @@ class plotter():
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
             #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
             rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
-            #rospy.Subscriber('hydrophones/ping', Ping, self.actual_position)
+
 
             if len(self.t) == len(self.a):
                 xvalues = []
