@@ -482,7 +482,7 @@ class simulator():
 
         # grid the data.
         #print "x_list: %i y_list: %i xi: %i yi: %i" %(len(x_list), len(y_list), len(xi), len(yi))
-        zi = griddata(x_list, y_list, z_list, xi, yi, interp='linear')
+        zi = griddata(x_list, y_list, z_list, xi, yi, interp='nn')
         # contour the gridded data, plotting dots at the nonuniform data points.
         #0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0,2.0, 3.0, 4.0, 5.0,6.0, 6.28
         if typemeasure == 'Heading':
@@ -617,8 +617,8 @@ class simulator():
         z = -1000 #depth of pinger
 
         self.max_range = 10000
-        distance_resolution = 1000
-        degree_angle_resolution = 10
+        distance_resolution = 500
+        degree_angle_resolution = 5
         rad_resolution = math.radians(degree_angle_resolution)
 
         number_of_steps_per_rev = 360.0/degree_angle_resolution
@@ -638,7 +638,7 @@ class simulator():
                 #print "x: %5.2f y: %5.2f" % (x,y)
               
                 self.ping_service(x,y,z)
-                time.sleep(0.1)
+                time.sleep(0.15)
                 self.calculate_error(x,y,z) 
 
                 x_list = x_list + [x]
