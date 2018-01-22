@@ -1,0 +1,17 @@
+<launch>
+  <node pkg="sonar" type="signal_conditioner.py" name="signal_calibration" respawn="true">
+  </node>
+
+  <node pkg="sonar" type="phase_shift.py" name="phase_shift" respawn="true">
+  </node>
+
+  <node pkg="sonar" type="crane_method_3way.py" name="crane_localization" respawn="true">
+  </node>
+
+  <node pkg="sonar" type="ping_plotter.py" name="signal_plotter" respawn="true">
+  </node>
+
+  <node pkg="sonar" type="sonar_visualizer.py" name="sonar_direction_viewer" respawn="true">
+  </node>  
+
+</launch>
