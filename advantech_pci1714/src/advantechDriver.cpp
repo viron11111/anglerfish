@@ -42,9 +42,9 @@ double       Data[USER_BUFFER_SIZE];
 TriggerAction triggerAction = DelayToStop;
 ActiveSignal  triggerEdge = RisingEdge;
 
-double        triggerLevel = 0.01;
+double        triggerLevel = 0.06; //0.06 determined experimentally from oscope;
 //double        triggerLevel = 1.5;  //1.5V to overcome pool pump
-int           triggerDelayCount = sampleCount/4.0;//1.25;
+int           triggerDelayCount = sampleCount/2.0;//1.25;
 
 BufferedAiCtrl * bfdAiCtrl = AdxBufferedAiCtrlCreate();
 
@@ -131,7 +131,7 @@ public:
 	  //delete bufferedAiCtrl;
 	  stop_trigger();
 	  printf("SLEEPING\n");
-	  usleep(100000);  //Add delay to ensure we don't pick up same signal twice
+	  usleep(500000);  //Add delay to ensure we don't pick up same signal twice
 	  printf("READY\n");
 	  set_trigger();
 	  return;
