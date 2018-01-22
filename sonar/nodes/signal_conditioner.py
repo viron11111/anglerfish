@@ -59,7 +59,7 @@ class condition():
                     #print break_num[b]
                     break
 
-        #print break_num
+        
         
         earliest_break_num = min(break_num)
 
@@ -196,8 +196,20 @@ class condition():
                 sample_rate=sample_rate))     
 
         else:
-            rospy.logwarn("Missed beginning of signal, triggered late")
-            rospy.logwarn("Interference or weak channel")
+            hydro = '*you should not see this*'
+            #rospy.logwarn("Missed beginning of signal, triggered late")
+            #ospy.logwarn("Interference or weak channel")
+            for i in range(4):
+                if break_num[i] == earliest_break_num:
+                    if i == 0:
+                        hydro = 'A'
+                    elif i == 1:
+                        hydro = 'B'
+                    elif i == 2:
+                        hydro = 'C'
+                    elif i == 3:
+                        hydro = 'D'
+                    rospy.logerr("Problem with hydrophone %c.  break_num = %s." % (hydro, break_num))
 
 
     def __init__(self):
@@ -208,7 +220,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.06 #voltage in which threshold is triggered
+        self.break_val = 0.025 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 
