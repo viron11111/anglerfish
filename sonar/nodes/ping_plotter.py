@@ -129,8 +129,8 @@ class plotter():
             #ping = ping_service()
 
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
-            rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            #rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+            #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
+            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
 
 
             if len(self.t) == len(self.a):

@@ -50,7 +50,7 @@ class condition():
         #find the first signal
         #looks for first signal to go above self.break_val value
         break_num = [0]*channels
-        print self.break_val
+        #print self.break_val
         for b in range(channels):
             for i in range(samples/4):
                 if self.signal[b][i] >= self.break_val:
@@ -59,7 +59,7 @@ class condition():
                     #print break_num[b]
                     break
 
-        print break_num
+        #print break_num
         
         earliest_break_num = min(break_num)
 
@@ -153,7 +153,7 @@ class condition():
                 if amplitude_ratio[b+1] > 5:
                     self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.25) for x in self.signal[b+1]]
                     phoneno = b+1
-                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal no hydrophone %i. Applying normalization " % phoneno)
+                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal on hydrophone %i. Applying normalization " % phoneno)
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
