@@ -50,15 +50,21 @@ class condition():
         #find the first signal
         #looks for first signal to go above self.break_val value
         break_num = [0]*channels
+        print self.break_val
         for b in range(channels):
             for i in range(samples/4):
                 if self.signal[b][i] >= self.break_val:
+                    #print self.signal[b][i]
                     break_num[b] = i
+                    #print break_num[b]
                     break
+
+        print break_num
         
         earliest_break_num = min(break_num)
 
         #rejection statement for samples triggered in middle of transmission (no start point)
+        #print earliest_break_num
         if earliest_break_num > 100:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
@@ -202,7 +208,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.02 #voltage in which threshold is triggered
+        self.break_val = 0.01 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 
