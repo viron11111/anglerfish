@@ -264,8 +264,8 @@ class plotter():
 
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
             #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            #rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
-            rospy.Subscriber('hydrophones/ping', Ping, self.robotx)
+            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+            #rospy.Subscriber('hydrophones/ping', Ping, self.robotx)
 
             if len(self.t) == len(self.a):
                 xvalues = []
@@ -295,7 +295,7 @@ class plotter():
                 plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
                 plt.legend(loc="upper left", fontsize=25)
-                plt.title("Actual Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+                plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)

@@ -68,15 +68,15 @@ class condition():
         if earliest_break_num > 100:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((4.0/25000.0)*sample_rate)
+            num_samples_save = int((10.0/25000.0)*sample_rate)
             #num_samples_save = int((1.0/25000.0)*sample_rate)
-            zeros = [0]*num_samples_save        
+            zeros = [0]*(num_samples_save/4)
 
             #eliminate all information before first signal by adding zeros in front of signal
             #appy to other 3 signals
             for b in range(channels):
-                self.signal[b] = self.signal[b][earliest_break_num-num_samples_save::]
-                self.signal[b] = np.append(zeros,self.signal[b])
+                self.signal[b] = self.signal[b][earliest_break_num-num_samples_save::]#::]
+                #self.signal[b] = np.append(zeros,self.signal[b])
                 
             for b in range(channels):
                 #print "break_num: ",break_num[b]
