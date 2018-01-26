@@ -654,9 +654,9 @@ class solver():
         #hydro1: [170.75, 0, 0] hydro2: [83.6, 147.65, 0] hydro3: [86.75, 42.4, -87.55] 
 
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [162.5,   0,     0]  #[170.75, 0, 0]
+        hydro1_xyz = [170.75,   0,     0]  #[170.75, 0, 0]
         hydro2_xyz = [81.6,  147.65,     0]
-        hydro3_xyz = [81.0,  42.4, -87.55]#[86.75, 42.4, -87.55]        
+        hydro3_xyz = [86.75,  42.4, -87.55]#[86.75, 42.4, -87.55]        
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)
 
