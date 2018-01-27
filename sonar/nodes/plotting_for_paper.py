@@ -263,8 +263,8 @@ class plotter():
             #ping = ping_service()
 
             #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
-            #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+            rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
+            #rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
             #rospy.Subscriber('hydrophones/ping', Ping, self.robotx)
 
             if len(self.t) == len(self.a):
@@ -289,12 +289,12 @@ class plotter():
 
                 plt.cla()
                 #print "%i, %i" % (len(self.t), len(self.a))
-                plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
-                plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
-                plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
-                plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
+                line_a = plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
+                line_b = plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
+                line_c = plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
+                line_d = plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
-                plt.legend(loc="upper left", fontsize=25)
+                plt.legend(loc="upper left")#, fontsize=25)
                 plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)

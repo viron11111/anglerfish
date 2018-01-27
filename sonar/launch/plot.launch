@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="sonar" type="ping_plotter.py" name="signal_plotter" respawn="true">
+  </node> 
+
+</launch>
