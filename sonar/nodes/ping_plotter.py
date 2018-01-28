@@ -269,7 +269,7 @@ class plotter():
                 self.ax[0].xaxis.labelpad = 20
                 self.ax[0].yaxis.labelpad = 20
 
-                '''self.ax[1].cla()
+                self.ax[1].cla()
                 #print "%i, %i" % (len(self.t), len(self.a))
                 self.ax[1].plot(xvalues2,avalues2, linewidth=2.0, label='Hydrophone A')
                 self.ax[1].plot(xvalues2,bvalues2, linewidth=2.0, label='Hydrophone B')
@@ -285,7 +285,7 @@ class plotter():
                 #self.ax[1].tick_params(axis='both', which='major', labelsize=25, pad=20)
                 #self.ax[1].tick_params(axis='both', which='minor', labelsize=25, pad=20)
                 self.ax[1].xaxis.labelpad = 20
-                self.ax[1].yaxis.labelpad = 20    '''            
+                self.ax[1].yaxis.labelpad = 20            
 
 
                 self.ax[2].cla()

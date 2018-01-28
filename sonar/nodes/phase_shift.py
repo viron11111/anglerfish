@@ -278,9 +278,19 @@ class phaser():
         calculated[3] = 0.25*self.calc3[0] + 0.25*self.calc3[1] + 0.25*self.calc3[2] + 0.25*self.calc3[3]
 
         print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))'''
-        print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        
 
+        error = 0
 
+        i = 0
+        for i in range(4):
+            if calculated[i] > 155 or calculated[i] < -155:
+                rospy.logerr("Time difference %i not possible.  Time difference %i: %f" % (i, i, calculated[i]))
+                if calculated[i] < - 155:
+                    rospy.logwarn("recommend increasing voltage threshold")
+                elif calculated[i] > 155:
+                    rospy.logwarn("recommend decreasing voltage threshold")
+                error = 1
         #calculated[0] = calculated[0] - calculated[3]
         #calculated[1] = calculated[1] - calculated[3]
         #calculated[2] = calculated[2] - calculated[3]
@@ -297,11 +307,14 @@ class phaser():
         #sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         #print (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])
 
-        self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
-        self.calc_stamps_pub.publish(Calculated_time_stamps(
-            header=Header(stamp=rospy.Time.now(),
-                          frame_id='phase_shift'),
-            calculated_time_stamps=calculated))
+        if error == 0:
+            print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+
+            self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+            self.calc_stamps_pub.publish(Calculated_time_stamps(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='phase_shift'),
+                calculated_time_stamps=calculated))
 
     def __init__(self):
 

@@ -226,7 +226,7 @@ class plotter():
                 #self.ax[0].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[0].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)
-                self.ax[0].set_xlim(0.0,0.0005)
+                self.ax[0].set_xlim(0.0,0.001)
                 self.ax[0].tick_params(axis='both', which='major', labelsize=15, pad=10)
                 self.ax[0].tick_params(axis='both', which='minor', labelsize=15, pad=10)
                 #plt.xaxis.labelpad = 20
@@ -244,7 +244,7 @@ class plotter():
                 #self.ax[1].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[1].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)
-                self.ax[1].set_xlim(0.0,0.0005)
+                self.ax[1].set_xlim(0.0,0.001)
                 self.ax[1].tick_params(axis='both', which='major', labelsize=15, pad=10)
                 self.ax[1].tick_params(axis='both', which='minor', labelsize=15, pad=10)
 
@@ -260,7 +260,7 @@ class plotter():
                 self.ax[2].set_xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[2].set_ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
                 #self.ax[0].set_ylim(-5,5)
-                self.ax[2].set_xlim(0.0,0.0005)
+                self.ax[2].set_xlim(0.0,0.001)
                 self.ax[2].tick_params(axis='both', which='major', labelsize=15, pad=10)
                 self.ax[2].tick_params(axis='both', which='minor', labelsize=15, pad=10)                
 

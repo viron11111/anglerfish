@@ -65,10 +65,10 @@ class condition():
 
         #rejection statement for samples triggered in middle of transmission (no start point)
         #print earliest_break_num
-        if earliest_break_num > 100:
+        if earliest_break_num > 200:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((10.0/25000.0)*sample_rate)
+            num_samples_save = int((6.0/25000.0)*sample_rate)
             #num_samples_save = int((1.0/25000.0)*sample_rate)
             zeros = [0]*(num_samples_save/4)
 
@@ -149,11 +149,11 @@ class condition():
 
 
             #********* NORMALIZATION for weak signals **********
-            for b in range(channels-1):
-                if amplitude_ratio[b+1] > 5:
-                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*0.25) for x in self.signal[b+1]]
+            '''for b in range(channels-1):
+                if amplitude_ratio[b+1] > 2.0:
+                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*1.0) for x in self.signal[b+1]]
                     phoneno = b+1
-                    rospy.logwarn("SIGNAL DESCREPANCY: weak signal on hydrophone %i. Applying normalization " % phoneno)
+                    print("SIGNAL DESCREPANCY: weak signal on hydrophone %i. Applying normalization " % phoneno)'''
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
@@ -176,6 +176,9 @@ class condition():
             #Allow 50 zeros passed the latest signal, crop all additional zeros following
             for i in range(channels):
                 self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
+
+            #for i in range(4):
+            #    self.signal[i] = self.signal[i][:1750:]    
 
             #combine four signals back into one array
             condition_data = []
@@ -220,7 +223,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.5 #voltage in which threshold is triggered
+        self.break_val = 0.07 #0.15 #voltage in which threshold is triggered
 
         rate = rospy.Rate(1)
 
