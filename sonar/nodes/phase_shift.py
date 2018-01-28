@@ -14,6 +14,8 @@ from advantech_pci1714.msg import *
 from pinger_tracker.msg import Calculated_time_stamps
 import matplotlib.pyplot as plt
 
+from sonar.msg import Sensitivity
+
 #from multilateration import Multilaterator
 #import multilateration as mlat
 #from time_signal_1d import TimeSignal1D
@@ -281,6 +283,7 @@ class phaser():
         
 
         error = 0
+        sense = 0
 
         i = 0
         for i in range(4):
@@ -288,9 +291,25 @@ class phaser():
                 rospy.logerr("Time difference %i not possible.  Time difference %i: %f" % (i, i, calculated[i]))
                 if calculated[i] < - 155:
                     rospy.logwarn("recommend increasing voltage threshold")
+                    sense = 1
                 elif calculated[i] > 155:
                     rospy.logwarn("recommend decreasing voltage threshold")
+                    sense = -1
                 error = 1
+
+        self.counter += 1
+        
+        if self.counter >= 10:
+            sense =-1
+            self.counter = 0
+
+
+        if sense != 0:
+            self.sense_pub.publish(Sensitivity(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='sensitivity'),
+                sensitivity = sense))
+
         #calculated[0] = calculated[0] - calculated[3]
         #calculated[1] = calculated[1] - calculated[3]
         #calculated[2] = calculated[2] - calculated[3]
@@ -326,6 +345,8 @@ class phaser():
         #self.actual_stamps = []
         #self.actual_position = [0,0,0]
 
+        self.counter = 0
+
         self.calc1 = [0,0,0,0]
         self.calc2 = [0,0,0,0]
         self.calc3 = [0,0,0,0]
@@ -343,6 +364,7 @@ class phaser():
         #rospy.Subscriber('/hydrophones/ping', Ping, self.parse_ping)
 
         self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+        self.sense_pub = rospy.Publisher('/hydrophones/sensitivity', Sensitivity, queue_size = 1)
 
         #rospy.Service('/hydrophones/calculated_time_stamps', Calculated_time_stamps_service, self.calculate_time_stamps_phase)
 

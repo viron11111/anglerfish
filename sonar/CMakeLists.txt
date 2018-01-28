@@ -54,6 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    Calculated_time_stamps.msg
    Bearing.msg
+   Sensitivity.msg
  )
 
 ## Generate services in the 'srv' folder

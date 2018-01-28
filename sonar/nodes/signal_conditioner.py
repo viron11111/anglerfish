@@ -17,11 +17,24 @@ import math
 from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
+from sonar.msg import Sensitivity
 
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
 
 class condition():     
+
+    def change_sensitivity(self, data):
+        sens_rate = data.sensitivity
+        if sens_rate == -1:
+            self.break_val -= 0.02
+            if self.break_val < 0.02:
+                self.break_val = 0.02
+        elif sens_rate == 1:
+            self.break_val += 0.02
+            if self.break_val > 0.15:
+                self.break_val = 0.15  
+        print self.break_val          
 
     def condition_data(self, msg):
         channels = msg.channels
@@ -220,6 +233,7 @@ class condition():
 
         #rospy.Subscriber('hydrophones/pingmsg', Pingdata, self.condition_data) # for simulation and bags
         rospy.Subscriber('hydrophones/pingraw', Pingdata, self.condition_data)
+        rospy.Subscriber('hydrophones/sensitivity', Sensitivity, self.change_sensitivity)
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 

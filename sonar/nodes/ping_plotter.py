@@ -17,7 +17,6 @@ from advantech_pci1714.srv import *
 from advantech_pci1714.msg import *
 
 
-
 import time
 import scipy.fftpack
 import operator
