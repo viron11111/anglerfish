@@ -109,47 +109,78 @@ class condition():
             num_samples_save = int((2.0/25000.0)*sample_rate)
 
 
-            min_amp = [0]*channels
-            max_amp = [0]*channels
+            last_intersection = [0]*channels
 
-            #print "length of final_length: %i" % final_length
+            for b in range(channels):
+                for i in range(final_length):
+                    if self.signal[b][i] >= self.break_val:
+                        trigger = i
+                        #print "trigger: %i" % trigger
+                        old1 = self.signal[b][trigger]
+                        break
+                for i in range(final_length-trigger):
+                    first = int(i+trigger)
+                    new1 = self.signal[b][i+trigger]
+                    if old1 > 0 and new1 < 0:
+                        #print "intersection1: %i" % (first)
+                        old0 = first
+                        break
+                    else:
+                        old1 = new1
 
-            print "****"
-            for i in range(final_length):
-                if self.signal[0][i] >= self.break_val:
-                    trigger = i
-                    print "trigger: %i" % trigger
-                    old1 = self.signal[0][trigger]
-                    break
-            for i in range(final_length-trigger):
-                first = int(i+trigger)
-                new1 = self.signal[0][i+trigger]
-                if old1 > 0 and new1 < 0:
-                    print "intersection1: %i" % (first)
-                    old2 = first
-                    break
-                else:
-                    old1 = new1
+                #range(100,-1,-1)                        
+                for i in range(first, -1, -1):
+                    zero = int(i)
+                    new0 = self.signal[b][i+first]
+                    if old0 > 0 and new0 < 0:
+                        print "zero: %i" % zero
+                        print "first: %i" % first
+                        print "tricky difference[%i]: %i" % (b,zero-first)
+                        #old3 = second
+                        break
+                    else:
+                        old0 = new0
+                        
+                for i in range(first, -1, -1):
+                    zero = int(i)
+                    new0 = self.signal[b][i+first]
+                    if old0 > 0 and new0 < 0:
+                        print "zero: %i" % zero
+                        print "first: %i" % first
+                        print "tricky difference[%i]: %i" % (b,zero-first)
+                        #old3 = second
+                        break
+                    else:
+                        old0 = new0                        
 
-            for i in range(final_length-first):
-                second = int(i+first)
-                new2 = self.signal[0][i+first]
-                if old2 < 0 and new2 > 0:
-                    print "intersection2: %i" % (second)
-                    old3 = second
-                    break
-                else:
-                    old2 = new2
 
-            for i in range(final_length-second):
-                third = int(i+second)
-                new3 = self.signal[0][i+second]
-                if old3 > 0 and new3 < 0:
-                    print "intersection3: %i" % (third)
-                    old4 = third
-                    break
-                else:
-                    old3 = new3                   
+                for i in range(final_length-first):
+                    second = int(i+first)
+                    new2 = self.signal[b][i+first]
+                    if old2 < 0 and new2 > 0:
+                        #print "intersection2: %i" % (second)
+                        old3 = second
+                        break
+                    else:
+                        old2 = new2
+
+                for i in range(final_length-second):
+                    third = int(i+second)
+                    new3 = self.signal[b][i+second]
+                    if old3 > 0 and new3 < 0:
+                        #print "intersection3: %i" % (third)
+                        last_intersection[b] = third
+                        break
+                    else:
+                        old3 = new3       
+
+            #print last_intersection        
+            timediffs = [0]*channels
+
+            for b in range(channels):
+                timediffs[b] = (last_intersection[0]-last_intersection[b])*(1.0/2.0)
+
+            print timediffs
 
             #find max value and min value in list for normalization purposes
             #only use 3 periods of 25 kHz length
@@ -169,35 +200,9 @@ class condition():
             for i in range(channels):
                 amplitude_ratio[i] = max_amplitude/amplitude[i]
 
-            #print amplitude_ratio
-
-
-
             ######################
             self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]
-            
-            '''degree = 5
-            window=degree*2-1  
-            weight=np.array([1.0]*window)  
-            weightGauss=[]  
-            for i in range(window):  
-                i=i-degree+1  
-                frac=i/float(window)  
-                gauss=1/(np.exp((4*(frac))**2))  
-                weightGauss.append(gauss) 
-            weight=np.array(weightGauss)*weight  
-            smoothed=[0.0]*(len(self.signal[0])-window)
-            for i in range(len(smoothed)):  
-                smoothed[i]=sum(np.array(self.signal[0][i:i+window])*weight)/sum(weight) 
-            self.signal[0] = smoothed'''
 
-
-            #********* NORMALIZATION for weak signals **********
-            '''for b in range(channels-1):
-                if amplitude_ratio[b+1] > 2.0:
-                    self.signal[b+1] = [x*(amplitude_ratio[b+1]*1.0) for x in self.signal[b+1]]
-                    phoneno = b+1
-                    print("SIGNAL DESCREPANCY: weak signal on hydrophone %i. Applying normalization " % phoneno)'''
 
             #function to allow 3 periods length of signal to continue
             #after 3 periods (at 25 kHz), following values are "zero'd"
@@ -316,7 +321,7 @@ class condition():
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
 
-        self.break_val = 0.07 #0.15 #voltage in which threshold is triggered
+        self.break_val = 0.05 #0.15 #voltage in which threshold is triggered
         self.min_break_val = -self.break_val
 
         self.max_break_val = 0.25

@@ -254,7 +254,7 @@ class phaser():
         microseconds = [1e6,1e6,1e6,1e6]
         calculated = [x * y for x, y in zip(self.timestamps,microseconds)]
 
-        '''print ("before fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+        print ("before fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
         self.calc1[0] = float(self.calc1[1])
         self.calc1[1] = float(self.calc1[2])
@@ -279,7 +279,7 @@ class phaser():
 
         calculated[3] = 0.25*self.calc3[0] + 0.25*self.calc3[1] + 0.25*self.calc3[2] + 0.25*self.calc3[3]
 
-        print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))'''
+        print ("after fir: %0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
         
 
         error = 0
@@ -330,7 +330,7 @@ class phaser():
         #print (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])
 
         if error == 0:
-            print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
+            #print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
             self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
             self.calc_stamps_pub.publish(Calculated_time_stamps(
