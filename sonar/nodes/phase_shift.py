@@ -288,13 +288,16 @@ class phaser():
         i = 0
         for i in range(4):
             if calculated[i] > 155 or calculated[i] < -155:
-                rospy.logerr("Time difference %i not possible.  Time difference %i: %f" % (i, i, calculated[i]))
-                if calculated[i] < - 155:
+                if calculated[i] < -155 and calculated[i] > -230:
+                    rospy.logerr("Time difference %i not possible.  Time difference %i: %f" % (i, i, calculated[i]))
                     rospy.logwarn("recommend increasing voltage threshold")
                     sense = 1
-                elif calculated[i] > 155:
+                elif calculated[i] > 155 and calculated[i] < 230:
+                    rospy.logerr("Time difference %i not possible.  Time difference %i: %f" % (i, i, calculated[i]))
                     rospy.logwarn("recommend decreasing voltage threshold")
                     sense = -1
+                else:
+                    rospy.logerr("Time difference %i bad!  Time difference %i: %f" % (i, i, calculated[i]))
                 error = 1
 
         self.counter += 1

@@ -31,9 +31,9 @@ class condition():
             if self.break_val < 0.02:
                 self.break_val = 0.02
         elif sens_rate == 1:
-            self.break_val += 0.02
-            if self.break_val > 0.15:
-                self.break_val = 0.15  
+            self.break_val += 0.06
+            if self.break_val > 0.25:
+                self.break_val = 0.25  
         print self.break_val          
 
     def condition_data(self, msg):
