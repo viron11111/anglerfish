@@ -108,8 +108,43 @@ class condition():
             #Buffering holder for keeping X periods of actual signal at 25 kHz
             num_samples_save = int((2.0/25000.0)*sample_rate)
 
+            old = self.signal[0][0]
+            sample_list = []
+            
+            #test_var = [[100,50],[101,25]]
+            #print test_var[0][1]
 
-            last_intersection = [0]*channels
+            for i in range(final_length):
+                new = self.signal[0][i]
+                if (old < 0 and new > 0) or (old > 0 and new < 0):
+                    sample_list = np.append(sample_list,i)
+                    #print i
+                old = new
+            print sample_list
+
+            list_dif = [0]*len(sample_list)
+
+            for i in range(len(sample_list)-1):
+                list_dif[i] = sample_list[i] - sample_list[i+1] 
+
+            print list_dif
+
+            for i in range(len(list_dif)):
+                average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
+                if average < -32.0 and average > -35.0:
+                    max_value = max(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
+                    min_value = min(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
+                    print "max: = %f min = %f" % (max_value, min_value)
+                    print "list_dif: %f" % list_dif[i+4]
+                    print "sample_list: %i" % sample_list[i+4]
+                    if max_value > 0.06 or min_value < -0.06:
+                        cut_point = int(sample_list[i+3])
+                        break
+
+            for i in range(channels):
+                self.signal[i] = self.signal[i][:cut_point]
+
+            '''last_intersection = [0]*channels
 
             for b in range(channels):
                 for i in range(final_length):
@@ -180,59 +215,26 @@ class condition():
             for b in range(channels):
                 timediffs[b] = (last_intersection[0]-last_intersection[b])*(1.0/2.0)
 
-            print timediffs
+            print timediffs'''
 
-            #find max value and min value in list for normalization purposes
-            #only use 3 periods of 25 kHz length
-            for b in range(channels):
-                for i in range(final_length):
-                    if self.signal[b][i] >= self.break_val:
-                        min_amp[b] = min(self.signal[b][:i+num_samples_save])
-                        max_amp[b] = max(self.signal[b][:i+num_samples_save])
-                        break        
-            
-            #find greatest amplitude difference
-            amplitude = [x - y for x, y in zip(max_amp, min_amp)]
-            max_amplitude = max(amplitude)
+            condition_data = []
 
-            #determine ratio to normalize signal
-            amplitude_ratio = [0]*channels
-            for i in range(channels):
-                amplitude_ratio[i] = max_amplitude/amplitude[i]
+            for i in range(len(self.signal[0])):
+                condition_data = np.append(condition_data,self.signal[0][i])
+                condition_data = np.append(condition_data,self.signal[1][i])
+                condition_data = np.append(condition_data,self.signal[2][i])
+                condition_data = np.append(condition_data,self.signal[3][i])
 
-            ######################
-            self.signal[0] = [x*(amplitude_ratio[0]*0.5) for x in self.signal[0]]
+            self.simulate_pub.publish(Pingdata(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='signal_conditioner'),
+                channels=channels,
+                samples=len(self.signal[0])*4,
+                data=condition_data,
+                adc_bit = 12,
+                sample_rate=sample_rate))               
 
-
-            #function to allow 3 periods length of signal to continue
-            #after 3 periods (at 25 kHz), following values are "zero'd"
-            max_signal_range = [0]*channels
-            for b in range(channels):
-                #print("start")                
-                zeros = []
-                for i in range(final_length):
-                    if self.signal[b][i] >= self.break_val:
-                        current_signal = i
-                        max_signal_range[b] = current_signal
-                        if current_signal > lastest_signal:
-                            lastest_signal = current_signal
-                        self.signal[b] = self.signal[b][:num_samples_save+i:]
-                        difference = final_length - len(self.signal[b])
-                        zeros = [0]*difference
-                        self.signal[b] = np.append(self.signal[b],zeros)
-                        break
-
-            #Allow 50 zeros passed the latest signal, crop all additional zeros following
-            for i in range(channels):
-                self.signal[i]= self.signal[i][:lastest_signal+num_samples_save+50:]
-
-            #for i in range(4):
-            #    self.signal[i] = self.signal[i][:1750:]    
-
-            #for i in range(channels):
-                #print(max(self.signal[i]))
-            #    print len(self.signal[i])
-            #print"***"        
+ 
 
 
     def condition_data(self, msg):
