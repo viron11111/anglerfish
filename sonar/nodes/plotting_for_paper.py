@@ -102,6 +102,8 @@ class plotter():
         if len(self.t) > n:
             self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off
 
+
+
     def determine_phase(self, ref_sig, a_sig):
         channel_length = len(ref_sig)
 
@@ -137,6 +139,8 @@ class plotter():
         
         phase_holder = max_idx - (len(reference) + 0)
         #print phase_holder
+
+        
         
         return cross_corr 
 
@@ -227,6 +231,8 @@ class plotter():
 
         if len(self.t) > n:
             self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off     
+
+        
 
         #print self.t       
 
@@ -319,6 +325,7 @@ class plotter():
                 self.ax[1].set_ylabel('|Y(freq)|')'''
 
                 plt.pause(0.05)
+                self.plot = 0
 
             rate.sleep()
 
