@@ -17,6 +17,7 @@ from advantech_pci1714.srv import *
 from advantech_pci1714.msg import *
 
 from hydrophones.msg import Ping
+from sonar.msg import Slope, Negative_slope
 
 import time
 import scipy.fftpack
@@ -144,6 +145,29 @@ class plotter():
         
         return cross_corr 
 
+    def max_values(self, data):
+        self.sample_time = [0]*len(data.sample)
+        self.sample_number = data.sample
+        self.slope_ratio = data.ratio
+        self.sample_max_value = data.max_val
+        self.slope = data.slope
+        self.voltage = data.voltage
+
+        for i in range(len(self.sample_number)):
+            self.sample_time[i] = self.sample_number[i]/2000000.0
+        #print "sample_len: %i max_val_len: %i" % (len(self.sample_number), len(self.sample_max_value))
+
+    def min_values(self, data):
+        self.neg_sample_time = [0]*len(data.sample)
+        self.neg_sample_number = data.sample
+        self.neg_slope_ratio = data.ratio
+        self.sample_min_value = data.max_val
+        self.neg_slope = data.slope
+        self.neg_voltage = data.voltage
+
+        for i in range(len(self.sample_number)):
+            self.neg_sample_time[i] = self.neg_sample_number[i]/2000000.0
+        #print "sample_len: %i max_val_len: %i" % (len(self.sample_number), len(self.sample_max_value))        
 
     def plot_ping(self,data):       
 
@@ -230,18 +254,96 @@ class plotter():
         self.t = np.arange(0,n*Ts,Ts)  #resolution of sampling, ie 1 MS/s = 1*10^-6
 
         if len(self.t) > n:
-            self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off     
+            self.t = self.t[:-1]  #make sure len(t) is = to len(n), shave the last number off
 
-        
+        plt.ion()
+        plt.plot()         
+        #fig, self.ax = plt.subplots(1, 1)            
 
-        #print self.t       
+        if len(self.t) == len(self.a):
+            xvalues = []
+            avalues = []
+            bvalues = []
+            cvalues = []
+            dvalues = []
+
+            self.t = self.t
+            xvalues = self.t
+            avalues = self.a
+            bvalues = self.b
+            cvalues = self.c
+            dvalues = self.d
+            Nval = self.N
+            xfval = self.xf
+            yfval = self.yf
+
+            #print len(xvalues)
+            #print len(bvalues)
+
+            plt.cla()
+            #print "%i, %i" % (len(self.t), len(self.a))
+            line_a = plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
+            #line_b = plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
+            #line_c = plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
+            #line_d = plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
+
+            points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
+            points = plt.plot(self.neg_sample_time, self.sample_min_value, marker='o', color='green', markersize=4)
+
+            slope_diff_array = []
+
+            for i in range(len(self.slope_ratio)):
+                slope_diff = self.sample_max_value[i] + abs(self.sample_min_value[i])
+                slope_diff_array = np.append(slope_diff_array,slope_diff)
+
+                if self.slope[i] != 0:
+                    zero_slope_x = -(self.sample_time[i])/-self.slope[i]
+
+                    plt.plot([0.000015, self.sample_time[i]], [0,1], color='red', markersize=10)
+
+                #if self.slope_ratio[i] > 2 and self.voltage[i+1] > 0.15 and self.slope[i] > 0.002:
+                #    plt.plot(self.sample_time[i], self.sample_max_value[i], marker='o', color='yellow', markersize=10)
+                #    plt.text(self.sample_time[i], self.sample_max_value[i]+0.6, '%0.2f' % self.voltage[i], color='red', rotation=45)
+                #    plt.text(self.sample_time[i], self.sample_max_value[i]+0.4, '%0.2f' % self.slope_ratio[i], color='green', rotation=45)
+                #    plt.text(self.sample_time[i], self.sample_max_value[i]+0.2, '%0.2f' % self.slope[i], rotation=45)
+
+            
+
+
+            plt.legend(loc="upper left")#, fontsize=25)
+            plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
+            plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
+            plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
+            #self.ax[0].set_ylim(-5,5)
+            plt.xlim(0,self.x_axis_length)
+            plt.tick_params(axis='both', which='major', labelsize=25, pad=20)
+            plt.tick_params(axis='both', which='minor', labelsize=25, pad=20)
+            #plt.xaxis.labelpad = 20
+            #plt.yaxis.labelpad = 20
+
+            plt.pause(0.05)
+            self.plot = 0     
 
 
     def __init__(self):
         rospy.init_node('ping_plotter')
         #rospy.Subscriber('/hydrophones/ping', Ping, self.signal_plotter)
+        #ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
+        #ping = ping_service()
+
+        rospy.Subscriber('/hydrophones/slope', Slope, self.max_values)
+        rospy.Subscriber('/hydrophones/negative_slope', Negative_slope, self.min_values)
+
+        #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
+        #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
+        rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
+        #rospy.Subscriber('hydrophones/ping', Ping, self.robotx)        
 
         rate = rospy.Rate(10)
+
+        self.sample_number = []
+        self.sample_max_value = []
+
 
         #self.x = []
         self.a = []
@@ -260,20 +362,12 @@ class plotter():
         self.cc  = [0]*2873
         self.dc  = [0]*2873
 
-        plt.ion()
-        plt.plot()         
-        #fig, self.ax = plt.subplots(1, 1)  
+  
 
         while not rospy.is_shutdown():
-            #ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
-            #ping = ping_service()
 
-            #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
-            #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)
-            rospy.Subscriber('/hydrophones/pingconditioned', Pingdata, self.plot_ping)
-            #rospy.Subscriber('hydrophones/ping', Ping, self.robotx)
 
-            if len(self.t) == len(self.a):
+            '''if len(self.t) == len(self.a):
                 xvalues = []
                 avalues = []
                 bvalues = []
@@ -311,8 +405,7 @@ class plotter():
                 #plt.xaxis.labelpad = 20
                 #plt.yaxis.labelpad = 20
 
-
-                '''self.ax[1].cla()
+                self.ax[1].cla()
                 #self.ax[2].set_title("FFT On Channel One")
                 #self.ax[1].plot(frq,abs(Y),'r') # plotting the FFT spectrum
                 if self.yf[0] != 0:
@@ -324,8 +417,8 @@ class plotter():
                 self.ax[1].set_xlabel('Freq (Hz)')
                 self.ax[1].set_ylabel('|Y(freq)|')'''
 
-                plt.pause(0.05)
-                self.plot = 0
+                #plt.pause(0.05)
+                #self.plot = 0
 
             rate.sleep()
 

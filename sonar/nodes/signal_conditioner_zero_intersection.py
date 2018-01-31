@@ -17,7 +17,7 @@ import math
 from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
-from sonar.msg import Sensitivity
+from sonar.msg import Sensitivity, Slope, Negative_slope
 
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
@@ -130,6 +130,111 @@ class condition():
             #*********************************************************************
 
             #*******************************************************
+            #************SLOPE APPROACH*****************************
+            #*******************************************************
+            old = self.signal[0][0]
+            sample_list = []
+            positive_list = []
+            max_value_list = []
+            difference_list = []
+            slope = []
+            slope_ratio = []
+
+            for i in range(final_length):
+                new = self.signal[0][i]
+                if (old < 0 and new > 0) or (old > 0 and new < 0):
+                    sample_list = np.append(sample_list,i)
+                    #print i
+                old = new
+
+            for i in range(len(sample_list)-1):
+                max_unit = max(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
+                if max_unit > 0:
+                    positive_list = np.append(positive_list,sample_list[i])
+                    max_value_list = np.append(max_value_list,max_unit)
+
+            slope_old = 0.1
+
+            for i in range(len(max_value_list)-1):
+                slope = np.append(slope, (max_value_list[i+1] - max_value_list[i])/(sample_list[i+1]-sample_list[i]))
+                slope_new = slope[i]
+                slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                #print "sample: %f max_val: %0.2f slope: %0.4f ratio: %f" % (positive_list[i]/2000000, max_value_list[i], slope[i], slope_ratio[i])
+                slope_old = slope_new
+
+
+            for i in range(len(positive_list)-1):
+                positive_list[i] = (positive_list[i]+sample_list[2*i+1])/2.0
+
+            voltage = [0]*len(positive_list)
+
+            for i in range(len(positive_list)):
+                voltage[i] = self.signal[0][int(positive_list[i])]
+
+            self.slope_pub.publish(Slope(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='slope_values'),
+                sample=positive_list,
+                max_val=max_value_list,
+                ratio=slope_ratio,
+                slope=slope,
+                voltage=voltage))
+
+            old = self.signal[0][0]
+            sample_list = []
+            negative_list = []
+            min_value_list = []
+            difference_list = []
+            slope = []
+            slope_ratio = []
+
+            for i in range(final_length):
+                new = self.signal[0][i]
+                if (old < 0 and new > 0) or (old > 0 and new < 0):
+                    sample_list = np.append(sample_list,i)
+                    #print i
+                old = new
+
+            for i in range(len(sample_list)-1):
+                min_unit = min(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
+                if min_unit < 0:
+                    negative_list = np.append(negative_list,sample_list[i])
+                    min_value_list = np.append(min_value_list,min_unit)
+
+            slope_old = -0.1
+
+            for i in range(len(max_value_list)-1):
+                slope = np.append(slope, (min_value_list[i+1] - min_value_list[i])/(sample_list[i+1]-sample_list[i]))
+                slope_new = slope[i]
+                slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                print "sample: %f min_val: %0.2f slope: %0.4f ratio: %f" % (negative_list[i]/2000000, min_value_list[i], slope[i], slope_ratio[i])
+                slope_old = slope_new
+
+
+            for i in range(len(negative_list)-1):
+                negative_list[i] = (negative_list[i]+sample_list[2*i+1])/2.0
+
+            voltage = [0]*len(negative_list)
+
+            for i in range(len(negative_list)):
+                voltage[i] = self.signal[0][int(negative_list[i])]
+
+            self.neg_slope_pub.publish(Negative_slope(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='negative_slope_values'),
+                sample=negative_list,
+                max_val=min_value_list,
+                ratio=slope_ratio,
+                slope=slope,
+                voltage=voltage))            
+
+
+
+            #*******************************************************
+            #*******************************************************
+            #*******************************************************            
+
+            #*******************************************************
             #************FIND NOISE FLOOR AMPLITUDE*****************
             #*******************************************************
             abs_signal = [[],[],[],[]]
@@ -144,7 +249,7 @@ class condition():
             for i in range(channels):
                 abs_signal[i] = map(abs, self.signal[i][:(self.previous_noise_floor_position[i]-40)])
                 #signal_average[i] = np.mean(abs_signal[i])
-                max_noise[i] = max(abs_signal[i]) + 0.03
+                max_noise[i] = max(abs_signal[i]) + 0.05#0.03
                 if max_noise[i] >= 0.25:
                     max_noise[i] = 0.25
                 elif max_noise[i] <= 0.05:
@@ -194,7 +299,7 @@ class condition():
                             #print "list_dif: %f" % list_dif[i+4]
                             #print "sample_list: %i" % sample_list[i+4]
                             if max_value > max_noise[b]:
-                                cut_point = int(sample_list[i+2])
+                                cut_point = int(sample_list[i+7])
                                 self.previous_noise_floor_position[b]=int(sample_list[i])
                                 if self.previous_noise_floor_position[b] >= max_sample_size:
                                     self.previous_noise_floor_position[b] = max_sample_size
@@ -204,7 +309,7 @@ class condition():
                                 self.signal[b] = self.signal[b][:cut_point]
                                 break
                             elif min_value < -max_noise[b]:
-                                cut_point = int(sample_list[i+1])
+                                cut_point = int(sample_list[i+6])
                                 self.previous_noise_floor_position[b]=int(sample_list[i])
                                 if self.previous_noise_floor_position[b] >= max_sample_size:
                                     self.previous_noise_floor_position[b] = max_sample_size   
@@ -344,6 +449,8 @@ class condition():
         rospy.Subscriber('hydrophones/sensitivity', Sensitivity, self.change_sensitivity)
 
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
+        self.slope_pub = rospy.Publisher('hydrophones/slope', Slope, queue_size = 1)
+        self.neg_slope_pub = rospy.Publisher('hydrophones/negative_slope', Negative_slope, queue_size=1)
 
         self.break_val = 0.05 #0.15 #voltage in which threshold is triggered
         self.min_break_val = -self.break_val
