@@ -165,7 +165,7 @@ class plotter():
         self.neg_slope = data.slope
         self.neg_voltage = data.voltage
 
-        for i in range(len(self.sample_number)):
+        for i in range(len(self.neg_sample_number)):
             self.neg_sample_time[i] = self.neg_sample_number[i]/2000000.0
         #print "sample_len: %i max_val_len: %i" % (len(self.sample_number), len(self.sample_max_value))        
 
@@ -290,16 +290,97 @@ class plotter():
             points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
             points = plt.plot(self.neg_sample_time, self.sample_min_value, marker='o', color='green', markersize=4)
 
-            slope_diff_array = []
+            hold_i  =0
 
+            slope_diff_array = []
+            zero_slope_x_old_max = 0
+            zero_slope_x_old_min = 1
+
+            #for positive slope numbers
             for i in range(len(self.slope_ratio)):
                 slope_diff = self.sample_max_value[i] + abs(self.sample_min_value[i])
                 slope_diff_array = np.append(slope_diff_array,slope_diff)
 
-                if self.slope[i] != 0:
-                    zero_slope_x = -(self.sample_time[i])/-self.slope[i]
+                if self.slope[i] != 0 and (self.sample_time[i+1]-self.sample_time[i]) != 0:
+                    Y = self.sample_max_value[i]
+                    X = self.sample_time[i]
+                    m = (self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
+                    b = Y-m*X
+                    zero_slope_x = b/-m
 
-                    plt.plot([0.000015, self.sample_time[i]], [0,1], color='red', markersize=10)
+                    zero_slope_x_new = zero_slope_x
+
+                    #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
+
+                    rospy.logwarn("Y: %f m: %f zero_slope_x: %f" % (Y, m, zero_slope_x))
+
+                    if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m > 4000 and zero_slope_x_new < zero_slope_x_old_min and self.sample_max_value[i] > 0.05:
+                        hold_i = i
+                        zero_slope_x_old_min = zero_slope_x_new
+                    
+                    if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m > 4000 and zero_slope_x_new > zero_slope_x_old_max and self.sample_max_value[i] > 0.05:
+                        hold_i = i
+                        zero_slope_x_old_max = zero_slope_x_new                        
+
+            if hold_i != 0:
+                #plt.plot([zero_slope_x_old_max, self.sample_time[hold_i]], [0,self.sample_max_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+                plt.plot([zero_slope_x_old_min, self.sample_time[hold_i]], [0,self.sample_max_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+
+                #start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_max))
+                #plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='red', markersize=14)
+                start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_min))
+                plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='yellow', markersize=12)
+
+
+            #*******************************
+            #for negative slope numbers
+            #******************************
+            #self.neg_sample_time = [0]*len(data.sample)
+            #self.neg_sample_number = data.sample
+            #self.neg_slope_ratio = data.ratio
+            #self.sample_min_value = data.max_val
+            #self.neg_slope = data.slope
+            #self.neg_voltage = data.voltage
+
+            #for i in range(len(self.sample_number)):
+            #    self.neg_sample_time[i] = self.neg_sample_number[i]/2000000.0            
+            #print "sample_len: %i max_val_len: %i" % (len(self.sample_number), len(self.sample_max_value)) 
+
+            hold_i = 0
+            zero_slope_x_old_max = 0
+            zero_slope_x_old_min = 1
+
+            for i in range(len(self.neg_slope_ratio)):
+                #slope_diff = self.sample_min_value[i] + abs(self.sample_min_value[i])
+                #slope_diff_array = np.append(slope_diff_array,slope_diff)
+
+                if self.neg_slope[i] != 0 and (self.neg_sample_time[i+1]-self.neg_sample_time[i]) != 0:
+                    Y = self.sample_min_value[i]
+                    X = self.neg_sample_time[i]
+                    m = (self.sample_min_value[i+1]-self.sample_min_value[i])/(self.neg_sample_time[i+1]-self.neg_sample_time[i])
+                    b = Y-m*X
+                    zero_slope_x = b/-m
+
+                    zero_slope_x_new = zero_slope_x
+
+                    #rospy.logwarn("Y: %f X: %f m: %f b: %f zero_slope_x: %f" % (Y, X, m, b, zero_slope_x))
+
+                    if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m < -4000 and zero_slope_x_new > zero_slope_x_old_max and self.sample_min_value[i] < -0.05:
+                        hold_i = i
+                        zero_slope_x_old_max = zero_slope_x_new
+                    if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m < -4000 and zero_slope_x_new < zero_slope_x_old_min and self.sample_min_value[i] < -0.05:
+                        hold_i = i
+                        zero_slope_x_old_min = zero_slope_x_new                        
+
+            if hold_i != 0:
+                #plt.plot([zero_slope_x_old_max, self.neg_sample_time[hold_i]], [0,self.sample_min_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+                #start_of_signal = min(self.neg_sample_time, key=lambda x:abs(x-zero_slope_x_old_max))
+                #plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='cyan', markersize=10)       
+
+                plt.plot([zero_slope_x_old_min, self.neg_sample_time[hold_i]], [0,self.sample_min_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+                start_of_signal = min(self.neg_sample_time, key=lambda x:abs(x-zero_slope_x_old_min))
+                plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='green', markersize=10) 
+            #print m
 
                 #if self.slope_ratio[i] > 2 and self.voltage[i+1] > 0.15 and self.slope[i] > 0.002:
                 #    plt.plot(self.sample_time[i], self.sample_max_value[i], marker='o', color='yellow', markersize=10)
