@@ -296,6 +296,16 @@ class plotter():
             zero_slope_x_old_max = 0
             zero_slope_x_old_min = 1
 
+            average_slope = 0
+
+            if len(self.slope) != 0:
+                for i in range(len(self.slope)-1,len(self.slope)-6,-1):
+                    average_slope = average_slope + (self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
+
+
+                print average_slope/5
+
+
             #for positive slope numbers
             for i in range(len(self.slope_ratio)):
                 slope_diff = self.sample_max_value[i] + abs(self.sample_min_value[i])
@@ -312,7 +322,7 @@ class plotter():
 
                     #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
 
-                    rospy.logwarn("Y: %f m: %f zero_slope_x: %f" % (Y, m, zero_slope_x))
+                    #rospy.logwarn("Y: %f m: %f zero_slope_x: %f" % (Y, m, zero_slope_x))
 
                     if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m > 4000 and zero_slope_x_new < zero_slope_x_old_min and self.sample_max_value[i] > 0.05:
                         hold_i = i
@@ -320,14 +330,22 @@ class plotter():
                     
                     if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m > 4000 and zero_slope_x_new > zero_slope_x_old_max and self.sample_max_value[i] > 0.05:
                         hold_i = i
-                        zero_slope_x_old_max = zero_slope_x_new                        
+                        zero_slope_x_old_max = zero_slope_x_new   
+
+            
+            Y = self.sample_max_value[len(self.sample_time)-1]            
+            X = self.sample_time[len(self.sample_time)-1]
+            m = average_slope#(self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
+            b = Y-m*X
+            zero_slope_x = b/-m                                            
 
             if hold_i != 0:
-                #plt.plot([zero_slope_x_old_max, self.sample_time[hold_i]], [0,self.sample_max_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+                plt.plot([zero_slope_x, self.sample_time[len(self.sample_time)-1]], [0,self.sample_max_value[len(self.sample_time)-1]], color='green', markersize=10, linewidth=3.0)
                 plt.plot([zero_slope_x_old_min, self.sample_time[hold_i]], [0,self.sample_max_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
 
                 #start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_max))
                 #plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='red', markersize=14)
+                
                 start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_min))
                 plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='yellow', markersize=12)
 
