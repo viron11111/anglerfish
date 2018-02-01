@@ -252,20 +252,25 @@ class condition():
             slope = []
             slope_ratio = []
 
+            average_slope = []
+            zero_slope_x_old_max = 0
+            zero_slope_x_old_min = 10000       
+            x_solutions = []     
+
             #Find the zero crossing, either negative or positive
             for i in range(len(self.signal[0])):
                 new = self.signal[0][i]
                 if (old < 0 and new > 0) or (old > 0 and new < 0):
-                    sample_list = np.append(sample_list,i)
+                    sample_list = np.append(sample_list,i) #list of all positive and negative crossings
                     #print i
                 old = new
 
-            #Create a positive list of crossing, starts positive and crosses to negative value
+            #Create a positive list, top half of period or positive arch
             for i in range(len(sample_list)-1):
                 max_unit = max(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
                 if max_unit > 0:
-                    positive_list = np.append(positive_list,sample_list[i])
-                    max_value_list = np.append(max_value_list,max_unit)
+                    positive_list = np.append(positive_list,sample_list[i]) #stores placeholder for start of arch
+                    max_value_list = np.append(max_value_list,max_unit)   #stores the max value (height) for the positive arch
 
             #placeholder for a slope value
             slope_old = 0.1
@@ -278,15 +283,83 @@ class condition():
                 #print "sample: %f max_val: %0.2f slope: %0.4f ratio: %f" % (positive_list[i]/2000000, max_value_list[i], slope[i], slope_ratio[i])
                 slope_old = slope_new
 
+            if len(slope) != 0:
+                for i in range(len(slope)-1,len(slope)-4,-1):
+                    average_slope = np.append(average_slope,slope[i])
+
+                average_slope = np.mean(average_slope)
+
+                Y = max_value_list[len(max_value_list)-1]
+                X = positive_list[len(positive_list)-1]
+                m = average_slope
+                b = Y-m*X
+                zero_slope_x = b/-m                    
+
+                print "average_slope solution: %f" % zero_slope_x
+
+
+            x_solutions = np.append(x_solutions,zero_slope_x)
+
+            #print "avg_slope: %f" % average_slope
+            for i in range(len(slope)):
+                if slope[i] != 0: #and (self.sample_time[i+1]-self.sample_time[i]) != 0:
+                    Y = max_value_list[i]
+                    X = positive_list[i]
+                    m = slope[i]
+                    b = Y-m*X
+                    zero_slope_x = b/-m
+
+
+                    zero_slope_x_new = zero_slope_x
+
+                    #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
+
+                    #rospy.logwarn("Y: %f m: %f zero_slope_x: %f" % (Y, m, zero_slope_x))
+
+                    if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new < zero_slope_x_old_min and max_value_list[i] > 0.05:
+                        hold_i = i
+                        zero_slope_x_old_min = zero_slope_x_new
+                    
+                    if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new > zero_slope_x_old_max and max_value_list[i] > 0.05:
+                        hold_i = i
+                        zero_slope_x_old_max = zero_slope_x_new   
+
+            if zero_slope_x_old_min != 10000 and zero_slope_x_old_max != 0:
+                print "zero_slope_x_old_min: %f zero_slope_x_old_max: %f" % (zero_slope_x_old_min, zero_slope_x_old_max)    
+
+                x_solutions = np.append(x_solutions,zero_slope_x_old_min)
+                x_solutions = np.append(x_solutions,zero_slope_x_old_max)
+
+            average_solutions = np.mean(x_solutions)
+
+            print "average_solution x-axis: %f" % average_solutions
+
+
+            start_of_signal = min(positive_list, key=lambda x:abs(x-average_solutions))
+
+            print "start of signal: %i" % start_of_signal
+
+            start_place_holder = 0
+
+            for i in range(len(sample_list)):
+                if start_of_signal == sample_list[i]:
+                    start_place_holder = i
+
+            print "len: %i place_holder: %i" % (len(sample_list), start_place_holder)
+
+            self.signal[0] = self.signal[0][:sample_list[start_place_holder+3]:]
+
+
+
 
 
             for i in range(len(positive_list)-1):
-                positive_list[i] = (positive_list[i]+sample_list[2*i+2])/2.0
+                positive_list[i] = (positive_list[i]+sample_list[2*i+2])/2.0  #update positive placeholder to point at center between i and i+1
 
             voltage = [0]*len(positive_list)
 
-            for i in range(len(positive_list)):
-                voltage[i] = self.signal[0][int(positive_list[i])]
+            #for i in range(len(positive_list)):
+            #    voltage[i] = self.signal[0][int(positive_list[i])] #store the voltage level of the highest point of the arch
 
             self.slope_pub.publish(Slope(
                 header=Header(stamp=rospy.Time.now(),

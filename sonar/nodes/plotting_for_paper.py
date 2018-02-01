@@ -287,7 +287,7 @@ class plotter():
             #line_c = plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
             #line_d = plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
-            points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
+            '''points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
             points = plt.plot(self.neg_sample_time, self.sample_min_value, marker='o', color='green', markersize=4)
 
             hold_i = 0
@@ -445,7 +445,7 @@ class plotter():
                 #    plt.text(self.sample_time[i], self.sample_max_value[i]+0.4, '%0.2f' % self.slope_ratio[i], color='green', rotation=45)
                 #    plt.text(self.sample_time[i], self.sample_max_value[i]+0.2, '%0.2f' % self.slope[i], rotation=45)
 
-            
+            '''
 
 
             plt.legend(loc="upper left")#, fontsize=25)
