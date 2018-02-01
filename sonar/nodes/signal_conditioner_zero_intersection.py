@@ -328,7 +328,7 @@ class condition():
                 for i in range(len(max_value_list)-1):
                     slope = np.append(slope, (max_value_list[i+1] - max_value_list[i])/(sample_list[i+1]-sample_list[i]))
                     slope_new = slope[i]
-                    slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                    #slope_ratio = np.append(slope_ratio,slope_new/slope_old)
                     #print "sample: %f max_val: %0.2f slope: %0.4f ratio: %f" % (positive_list[i]/2000000, max_value_list[i], slope[i], slope_ratio[i])
                     slope_old = slope_new
 
@@ -390,7 +390,7 @@ class condition():
                 for i in range(len(min_value_list)-1):
                     slope = np.append(slope, (min_value_list[i+1] - min_value_list[i])/(sample_list[i+1]-sample_list[i]))
                     slope_new = slope[i]
-                    slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                    #slope_ratio = np.append(slope_ratio,slope_new/slope_old)
                     #print "sample: %f min_val: %0.2f slope: %0.4f ratio: %f" % (negative_list[i]/2000000, min_value_list[i], slope[i], slope_ratio[i])
                     slope_old = slope_new
 
@@ -473,7 +473,9 @@ class condition():
                 #print type(b)
                 #print type(start_place_holder)
 
-                self.signal[z] = self.signal[z][:sample_list[int(start_place_holder)]:]
+                print sample_list[25]
+
+                self.signal[z] = int(self.signal[z][:25:])#int(start_place_holder)+1]:]  sample_list[25]
 
 
             #print "A: %i B: %i C: %i D: %i" % (len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3]))
