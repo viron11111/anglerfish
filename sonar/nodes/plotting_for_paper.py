@@ -283,9 +283,9 @@ class plotter():
             plt.cla()
             #print "%i, %i" % (len(self.t), len(self.a))
             line_a = plt.plot(xvalues,avalues, linewidth=3.0, label='Hydrophone A')
-            #line_b = plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
-            #line_c = plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
-            #line_d = plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
+            line_b = plt.plot(xvalues,bvalues, linewidth=3.0, label='Hydrophone B')
+            line_c = plt.plot(xvalues,cvalues, linewidth=3.0, label='Hydrophone C')
+            line_d = plt.plot(xvalues,dvalues, linewidth=3.0, label='Hydrophone D')
 
             '''points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
             points = plt.plot(self.neg_sample_time, self.sample_min_value, marker='o', color='green', markersize=4)

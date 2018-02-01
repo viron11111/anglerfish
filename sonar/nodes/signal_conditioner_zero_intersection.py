@@ -231,7 +231,7 @@ class condition():
 
             for i in range(channels):
                 possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
-            print possible_time_stamps
+            #print possible_time_stamps
 
             for i in range(channels):
                 difference = max_samples - lengths[i]
@@ -239,121 +239,268 @@ class condition():
                 self.signal[i] = np.append(self.signal[i], zeros)
 
 
+            
+            #*********************************************************************
+            #****************NORMALIZATION****************************************
+            #*********************************************************************
+            abs_signal = [[],[],[],[]]
+            signal_average = [0]*channels
+  
+            for i in range(channels):
+                abs_signal[i] = map(abs, self.signal[i])
+                signal_average[i] = np.mean(abs_signal[i])
+
+            #print signal_average
+            max_signal_average = max(signal_average)
+
+            for i in range(channels):
+                self.signal[i] = [z * (max_signal_average/signal_average[i]) for z in self.signal[i]]
+
+            #*********************************************************************
+            #*********************************************************************
+            #*********************************************************************                  
+            
+
+            lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
+            #print lengths
+
+            max_samples = max(lengths)
+
+            possible_time_stamps = [0]*channels
+
+            for i in range(channels):
+                possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
+            
+            #print possible_time_stamps
+
+            for i in range(channels):
+                difference = max_samples - lengths[i]
+                zeros = [0]*(difference+50)
+                self.signal[i] = np.append(self.signal[i], zeros) 
+
 
             #*******************************************************
             #************SLOPE APPROACH*****************************
             #*******************************************************
 
-            old = self.signal[0][0]
-            sample_list = []
-            positive_list = []
-            max_value_list = []
-            difference_list = []
-            slope = []
-            slope_ratio = []
+            for z in range(channels):
 
-            average_slope = []
-            zero_slope_x_old_max = 0
-            zero_slope_x_old_min = 10000       
-            x_solutions = []     
+                old = self.signal[z][0]
+                sample_list = []
+                positive_list = []
+                max_value_list = []
+                difference_list = []
+                slope = []
+                slope_ratio = []
 
-            #Find the zero crossing, either negative or positive
-            for i in range(len(self.signal[0])):
-                new = self.signal[0][i]
-                if (old < 0 and new > 0) or (old > 0 and new < 0):
-                    sample_list = np.append(sample_list,i) #list of all positive and negative crossings
-                    #print i
-                old = new
+                average_slope = []
+                zero_slope_x_old_max = 0
+                zero_slope_x_old_min = 10000       
+                x_solutions = []     
+                negative_list = []
+                min_value_list = []
 
-            #Create a positive list, top half of period or positive arch
-            for i in range(len(sample_list)-1):
-                max_unit = max(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
-                if max_unit > 0:
-                    positive_list = np.append(positive_list,sample_list[i]) #stores placeholder for start of arch
-                    max_value_list = np.append(max_value_list,max_unit)   #stores the max value (height) for the positive arch
+                #Find the zero crossing, either negative or positive
+                for i in range(len(self.signal[z])):
+                    new = self.signal[z][i]
+                    if (old < 0 and new > 0) or (old > 0 and new < 0):
+                        sample_list = np.append(sample_list,i) #list of all positive and negative crossings
+                        #print i
+                    old = new
 
-            #placeholder for a slope value
-            slope_old = 0.1
+                #Create a positive list, top half of period or positive arch
+                for i in range(len(sample_list)-1):
+                    max_unit = max(self.signal[z][int(sample_list[i]):int(sample_list[i+1])])
+                    if max_unit > 0:
+                        positive_list = np.append(positive_list,sample_list[i]) #stores placeholder for start of arch
+                        max_value_list = np.append(max_value_list,max_unit)   #stores the max value (height) for the positive arch
 
-            #Store a list of slopes of i and i+1
-            for i in range(len(max_value_list)-1):
-                slope = np.append(slope, (max_value_list[i+1] - max_value_list[i])/(sample_list[i+1]-sample_list[i]))
-                slope_new = slope[i]
-                slope_ratio = np.append(slope_ratio,slope_new/slope_old)
-                #print "sample: %f max_val: %0.2f slope: %0.4f ratio: %f" % (positive_list[i]/2000000, max_value_list[i], slope[i], slope_ratio[i])
-                slope_old = slope_new
+                for i in range(len(sample_list)-1):
+                    min_unit = min(self.signal[z][int(sample_list[i]):int(sample_list[i+1])])
+                    if min_unit < 0:
+                        negative_list = np.append(negative_list,sample_list[i])
+                        min_value_list = np.append(min_value_list,min_unit)                        
 
-            if len(slope) != 0:
-                for i in range(len(slope)-1,len(slope)-4,-1):
-                    average_slope = np.append(average_slope,slope[i])
+                #placeholder for a slope value
+                slope_old = 0.1
 
-                average_slope = np.mean(average_slope)
+                #Store a list of slopes of i and i+1
+                for i in range(len(max_value_list)-1):
+                    slope = np.append(slope, (max_value_list[i+1] - max_value_list[i])/(sample_list[i+1]-sample_list[i]))
+                    slope_new = slope[i]
+                    slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                    #print "sample: %f max_val: %0.2f slope: %0.4f ratio: %f" % (positive_list[i]/2000000, max_value_list[i], slope[i], slope_ratio[i])
+                    slope_old = slope_new
 
-                Y = max_value_list[len(max_value_list)-1]
-                X = positive_list[len(positive_list)-1]
-                m = average_slope
-                b = Y-m*X
-                zero_slope_x = b/-m                    
+                if len(slope) != 0:
+                    for i in range(len(slope)-1,len(slope)-4,-1):
+                        average_slope = np.append(average_slope,slope[i])
 
-                print "average_slope solution: %f" % zero_slope_x
+                    average_slope = np.mean(average_slope)
 
-
-            x_solutions = np.append(x_solutions,zero_slope_x)
-
-            #print "avg_slope: %f" % average_slope
-            for i in range(len(slope)):
-                if slope[i] != 0: #and (self.sample_time[i+1]-self.sample_time[i]) != 0:
-                    Y = max_value_list[i]
-                    X = positive_list[i]
-                    m = slope[i]
+                    Y = max_value_list[len(max_value_list)-1]
+                    X = positive_list[len(positive_list)-1]
+                    m = average_slope
                     b = Y-m*X
-                    zero_slope_x = b/-m
+                    zero_slope_x = b/-m     
+
+                    x_solutions = np.append(x_solutions,zero_slope_x)               
+
+                    #print "average_slope solution: %f" % zero_slope_x      
+
+                #print "avg_slope: %f" % average_slope
+                for i in range(len(slope)):
+                    if slope[i] != 0: #and (self.sample_time[i+1]-self.sample_time[i]) != 0:
+                        Y = max_value_list[i]
+                        X = positive_list[i]
+                        m = slope[i]
+                        b = Y-m*X
+                        zero_slope_x = b/-m
 
 
-                    zero_slope_x_new = zero_slope_x
+                        zero_slope_x_new = zero_slope_x
 
-                    #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
+                        #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
 
-                    #rospy.logwarn("Y: %f m: %f zero_slope_x: %f" % (Y, m, zero_slope_x))
+                        #rospy.logwarn("Y: %f X: %i m: %f zero_slope_x: %f" % (Y, X, m, zero_slope_x))
 
-                    if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new < zero_slope_x_old_min and max_value_list[i] > 0.05:
-                        hold_i = i
-                        zero_slope_x_old_min = zero_slope_x_new
-                    
-                    if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new > zero_slope_x_old_max and max_value_list[i] > 0.05:
-                        hold_i = i
-                        zero_slope_x_old_max = zero_slope_x_new   
+                        if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new < zero_slope_x_old_min and max_value_list[i] > 0.05:
+                            hold_i = i
+                            zero_slope_x_old_min = zero_slope_x_new
+                        
+                        if zero_slope_x > 200 and zero_slope_x < 1000 and m > 0.003 and zero_slope_x_new > zero_slope_x_old_max and max_value_list[i] > 0.05:
+                            hold_i = i
+                            zero_slope_x_old_max = zero_slope_x_new   
 
-            if zero_slope_x_old_min != 10000 and zero_slope_x_old_max != 0:
-                print "zero_slope_x_old_min: %f zero_slope_x_old_max: %f" % (zero_slope_x_old_min, zero_slope_x_old_max)    
+                if zero_slope_x_old_min != 10000 and zero_slope_x_old_max != 0:
+                    #print "zero_slope_x_old_min: %f zero_slope_x_old_max: %f" % (zero_slope_x_old_min, zero_slope_x_old_max)    
 
-                x_solutions = np.append(x_solutions,zero_slope_x_old_min)
-                x_solutions = np.append(x_solutions,zero_slope_x_old_max)
-
-            average_solutions = np.mean(x_solutions)
-
-            print "average_solution x-axis: %f" % average_solutions
+                    x_solutions = np.append(x_solutions,zero_slope_x_old_min)
+                    x_solutions = np.append(x_solutions,zero_slope_x_old_max)
 
 
-            start_of_signal = min(positive_list, key=lambda x:abs(x-average_solutions))
+                #*************************************************************
+                #***********Begin Negative Portion on Slope Approach**********
+                #*************************************************************
+                average_slope = []
+                slope_old = -0.1
+                slope = []
+                slope_ratio = []                
 
-            print "start of signal: %i" % start_of_signal
+                for i in range(len(min_value_list)-1):
+                    slope = np.append(slope, (min_value_list[i+1] - min_value_list[i])/(sample_list[i+1]-sample_list[i]))
+                    slope_new = slope[i]
+                    slope_ratio = np.append(slope_ratio,slope_new/slope_old)
+                    #print "sample: %f min_val: %0.2f slope: %0.4f ratio: %f" % (negative_list[i]/2000000, min_value_list[i], slope[i], slope_ratio[i])
+                    slope_old = slope_new
 
-            start_place_holder = 0
+                #print slope                    
 
-            for i in range(len(sample_list)):
-                if start_of_signal == sample_list[i]:
-                    start_place_holder = i
+                if len(slope) != 0:
+                    for i in range(len(slope)-1,len(slope)-4,-1):
+                        average_slope = np.append(average_slope,slope[i])
 
-            print "len: %i place_holder: %i" % (len(sample_list), start_place_holder)
+                    average_slope = np.mean(average_slope)
 
-            self.signal[0] = self.signal[0][:sample_list[start_place_holder+3]:]
+                    Y = min_value_list[len(min_value_list)-1]
+                    X = negative_list[len(negative_list)-1]
+                    m = average_slope
+                    b = Y-m*X
+                    zero_slope_x = b/-m     
+
+                    x_solutions = np.append(x_solutions,zero_slope_x)               
+
+                    #print "average_slope solution: %f" % zero_slope_x
+
+                zero_slope_x_old_max = 0
+                zero_slope_x_old_min = 10000 
+
+                #print negative_list
+
+                #print "avg_slope: %f" % average_slope
+                for i in range(len(slope)):
+                    if slope[i] != 0: #and (self.sample_time[i+1]-self.sample_time[i]) != 0:
+                        Y = min_value_list[i]
+                        X = negative_list[i]
+                        m = slope[i]
+                        b = Y-m*X
+                        zero_slope_x = b/-m
+
+
+                        zero_slope_x_new = zero_slope_x
+
+                        #plt.plot([zero_slope_x_new, self.sample_time[i]], [0,self.sample_max_value[i]], color='black', markersize=10, linewidth=2.0)
+
+                        #rospy.logwarn("Y: %f X: %f m: %f b: %f zero_slope_x: %f" % (Y, X, m, b, zero_slope_x))
+
+                        if zero_slope_x > 200 and zero_slope_x < 1000 and m < -0.003 and zero_slope_x_new < zero_slope_x_old_min and min_value_list[i] < -0.05:
+                            hold_i = i
+                            zero_slope_x_old_min = zero_slope_x_new
+                            #print "here"
+                        
+                        if zero_slope_x > 200 and zero_slope_x < 1000 and m < -0.003 and zero_slope_x_new > zero_slope_x_old_max and min_value_list[i] < -0.05:
+                            hold_i = i
+                            zero_slope_x_old_max = zero_slope_x_new   
+
+                #print zero_slope_x_old_min
+
+                if zero_slope_x_old_min != 10000 and zero_slope_x_old_max != 0:
+                    #print "zero_slope_x_old_min: %f zero_slope_x_old_max: %f" % (zero_slope_x_old_min, zero_slope_x_old_max)    
+
+                    x_solutions = np.append(x_solutions,zero_slope_x_old_min)
+                    x_solutions = np.append(x_solutions,zero_slope_x_old_max)
+
+                   
 
 
 
 
 
-            for i in range(len(positive_list)-1):
+
+                
+
+                average_solutions = np.mean(x_solutions)
+
+
+                start_of_signal = min(positive_list, key=lambda x:abs(x-average_solutions))
+
+                #print "start of signal: %i" % start_of_signal
+
+                start_place_holder = 0
+
+                for i in range(len(sample_list)):
+                    if start_of_signal == sample_list[i]:
+                        start_place_holder = i
+
+                #print "len: %i place_holder: %i" % (len(sample_list), start_place_holder)
+                #print type(b)
+                #print type(start_place_holder)
+
+                self.signal[z] = self.signal[z][:sample_list[int(start_place_holder+2)]:]
+
+
+            #print "A: %i B: %i C: %i D: %i" % (len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3]))
+
+            lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
+            #print lengths
+
+            max_samples = max(lengths)
+
+            possible_time_stamps = [0]*channels
+
+            for i in range(channels):
+                possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
+            
+            print possible_time_stamps
+
+            for i in range(channels):
+                difference = max_samples - lengths[i]
+                zeros = [0]*(difference+50)
+                self.signal[i] = np.append(self.signal[i], zeros)            
+
+
+
+            '''for i in range(len(positive_list)-1):
                 positive_list[i] = (positive_list[i]+sample_list[2*i+2])/2.0  #update positive placeholder to point at center between i and i+1
 
             voltage = [0]*len(positive_list)
@@ -416,7 +563,7 @@ class condition():
                 max_val=min_value_list,
                 ratio=slope_ratio,
                 slope=slope,
-                voltage=voltage))            
+                voltage=voltage))            '''
 
             #*******************************************************
             #*******************************************************
