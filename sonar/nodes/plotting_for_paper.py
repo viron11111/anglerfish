@@ -290,20 +290,23 @@ class plotter():
             points = plt.plot(self.sample_time, self.sample_max_value, marker='o', color='red', markersize=4)
             points = plt.plot(self.neg_sample_time, self.sample_min_value, marker='o', color='green', markersize=4)
 
-            hold_i  =0
+            hold_i = 0
+
+            x_solutions = []
 
             slope_diff_array = []
             zero_slope_x_old_max = 0
             zero_slope_x_old_min = 1
 
-            average_slope = 0
+            average_slope = []
 
             if len(self.slope) != 0:
-                for i in range(len(self.slope)-1,len(self.slope)-6,-1):
-                    average_slope = average_slope + (self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
+                for i in range(len(self.slope)-1,len(self.slope)-4,-1):
+                    average_slope = np.append(average_slope,(self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i]))
 
 
-                print average_slope/5
+            average_slope = np.mean(average_slope)
+            #print average_slope
 
 
             #for positive slope numbers
@@ -337,10 +340,15 @@ class plotter():
             X = self.sample_time[len(self.sample_time)-1]
             m = average_slope#(self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
             b = Y-m*X
-            zero_slope_x = b/-m                                            
+            zero_slope_x = b/-m      
+
+            x_solutions = np.append(x_solutions,zero_slope_x)
+
+
+
 
             if hold_i != 0:
-                plt.plot([zero_slope_x, self.sample_time[len(self.sample_time)-1]], [0,self.sample_max_value[len(self.sample_time)-1]], color='green', markersize=10, linewidth=3.0)
+                plt.plot([zero_slope_x, self.sample_time[len(self.sample_time)-1]], [0,self.sample_max_value[len(self.sample_time)-1]], color='red', markersize=10, linewidth=4.0)
                 plt.plot([zero_slope_x_old_min, self.sample_time[hold_i]], [0,self.sample_max_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
 
                 #start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_max))
@@ -348,6 +356,8 @@ class plotter():
                 
                 start_of_signal = min(self.sample_time, key=lambda x:abs(x-zero_slope_x_old_min))
                 plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='yellow', markersize=12)
+
+                x_solutions = np.append(x_solutions,start_of_signal)
 
 
             #*******************************
@@ -367,6 +377,18 @@ class plotter():
             hold_i = 0
             zero_slope_x_old_max = 0
             zero_slope_x_old_min = 1
+
+
+            average_slope = []
+
+            if len(self.neg_slope) != 0:
+                for i in range(len(self.neg_slope)-1,len(self.neg_slope)-4,-1):
+                    average_slope = np.append(average_slope,(self.sample_min_value[i+1]-self.sample_min_value[i])/(self.neg_sample_time[i+1]-self.neg_sample_time[i]))
+
+
+            average_slope = np.mean(average_slope)
+            print average_slope
+
 
             for i in range(len(self.neg_slope_ratio)):
                 #slope_diff = self.sample_min_value[i] + abs(self.sample_min_value[i])
@@ -388,16 +410,33 @@ class plotter():
                         zero_slope_x_old_max = zero_slope_x_new
                     if zero_slope_x > 0.0002 and zero_slope_x < 0.0006 and m < -4000 and zero_slope_x_new < zero_slope_x_old_min and self.sample_min_value[i] < -0.05:
                         hold_i = i
-                        zero_slope_x_old_min = zero_slope_x_new                        
+                        zero_slope_x_old_min = zero_slope_x_new     
+
+            Y = self.sample_min_value[len(self.neg_sample_time)-1]            
+            X = self.neg_sample_time[len(self.neg_sample_time)-1]
+            m = average_slope#(self.sample_max_value[i+1]-self.sample_max_value[i])/(self.sample_time[i+1]-self.sample_time[i])
+            b = Y-m*X
+            zero_slope_x = b/-m                                             
+
+            x_solutions = np.append(x_solutions,zero_slope_x)
 
             if hold_i != 0:
-                #plt.plot([zero_slope_x_old_max, self.neg_sample_time[hold_i]], [0,self.sample_min_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
+                plt.plot([zero_slope_x, self.neg_sample_time[hold_i]], [0,self.sample_min_value[hold_i]], color='red', markersize=10, linewidth=4.0)
                 #start_of_signal = min(self.neg_sample_time, key=lambda x:abs(x-zero_slope_x_old_max))
                 #plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='cyan', markersize=10)       
 
                 plt.plot([zero_slope_x_old_min, self.neg_sample_time[hold_i]], [0,self.sample_min_value[hold_i]], color='magenta', markersize=10, linewidth=2.0)
                 start_of_signal = min(self.neg_sample_time, key=lambda x:abs(x-zero_slope_x_old_min))
                 plt.plot(start_of_signal, avalues[int(2000000*start_of_signal)], marker='o', color='green', markersize=10) 
+
+                x_solutions = np.append(x_solutions,start_of_signal)        
+
+
+            average = np.mean(x_solutions)
+            plt.plot(average, 0, marker='o', color='black', markersize=10)
+            start_of_signal = min(self.neg_sample_time, key=lambda x:abs(x-average))
+            plt.plot(start_of_signal, 0, marker='o', color='cyan', markersize=10)
+
             #print m
 
                 #if self.slope_ratio[i] > 2 and self.voltage[i+1] > 0.15 and self.slope[i] > 0.002:

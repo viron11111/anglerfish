@@ -252,6 +252,7 @@ class condition():
             slope = []
             slope_ratio = []
 
+            #Find the zero crossing, either negative or positive
             for i in range(len(self.signal[0])):
                 new = self.signal[0][i]
                 if (old < 0 and new > 0) or (old > 0 and new < 0):
@@ -259,14 +260,17 @@ class condition():
                     #print i
                 old = new
 
+            #Create a positive list of crossing, starts positive and crosses to negative value
             for i in range(len(sample_list)-1):
                 max_unit = max(self.signal[0][int(sample_list[i]):int(sample_list[i+1])])
                 if max_unit > 0:
                     positive_list = np.append(positive_list,sample_list[i])
                     max_value_list = np.append(max_value_list,max_unit)
 
+            #placeholder for a slope value
             slope_old = 0.1
 
+            #Store a list of slopes of i and i+1
             for i in range(len(max_value_list)-1):
                 slope = np.append(slope, (max_value_list[i+1] - max_value_list[i])/(sample_list[i+1]-sample_list[i]))
                 slope_new = slope[i]
