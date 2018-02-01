@@ -17,7 +17,7 @@ from advantech_pci1714.srv import *
 from advantech_pci1714.msg import *
 
 from hydrophones.msg import Ping
-from sonar.msg import Slope, Negative_slope
+from sonar.msg import Slope, Negative_slope, Plot
 
 import time
 import scipy.fftpack
@@ -471,6 +471,7 @@ class plotter():
 
         rospy.Subscriber('/hydrophones/slope', Slope, self.max_values)
         rospy.Subscriber('/hydrophones/negative_slope', Negative_slope, self.min_values)
+        #rospy.Subscriber('/hydrophones/plot', Plot, self.plot_func)
 
         #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation
         #rospy.Subscriber('/hydrophones/pingraw', Pingdata, self.plot_ping)

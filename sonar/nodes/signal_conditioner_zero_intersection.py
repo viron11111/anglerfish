@@ -17,7 +17,7 @@ import math
 from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
-from sonar.msg import Sensitivity, Slope, Negative_slope
+from sonar.msg import Sensitivity, Slope, Negative_slope, Plot
 
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
@@ -450,10 +450,7 @@ class condition():
                     x_solutions = np.append(x_solutions,zero_slope_x_old_min)
                     x_solutions = np.append(x_solutions,zero_slope_x_old_max)
 
-                   
-
-
-
+               
 
 
 
@@ -476,7 +473,7 @@ class condition():
                 #print type(b)
                 #print type(start_place_holder)
 
-                self.signal[z] = self.signal[z][:sample_list[int(start_place_holder+2)]:]
+                self.signal[z] = self.signal[z][:sample_list[int(start_place_holder)]:]
 
 
             #print "A: %i B: %i C: %i D: %i" % (len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3]))
@@ -498,6 +495,11 @@ class condition():
                 zeros = [0]*(difference+50)
                 self.signal[i] = np.append(self.signal[i], zeros)            
 
+
+            '''self.plot_pub.publish(Pingdata(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='plotting'),
+                sample_rate=x_solutions))    '''  
 
 
             '''for i in range(len(positive_list)-1):
@@ -681,6 +683,7 @@ class condition():
         self.simulate_pub = rospy.Publisher('hydrophones/pingconditioned', Pingdata, queue_size = 1)
         self.slope_pub = rospy.Publisher('hydrophones/slope', Slope, queue_size = 1)
         self.neg_slope_pub = rospy.Publisher('hydrophones/negative_slope', Negative_slope, queue_size=1)
+        self.plot_pub = rospy.Publisher('/hydrophones/plot', Plot, queue_size=1)
 
         self.break_val = 0.05 #0.15 #voltage in which threshold is triggered
         self.min_break_val = -self.break_val
