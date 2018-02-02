@@ -1,0 +1,286 @@
+#!/usr/bin/env python
+import rospy
+import rosparam
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import operator
+import os
+
+from std_msgs.msg import Header, Float32
+from pinger_tracker.msg import *
+from sonar.msg import Bearing
+#from multilateration import Multilaterator, ReceiverArraySim, Pulse
+
+import sys
+import math
+
+from dynamic_reconfigure.server import Server
+from pinger_tracker.cfg import SignalConfig
+from pinger_tracker.srv import *
+
+import time
+
+class solver():
+
+    def cardinal(self, data):
+
+        del1 = data.calculated_time_stamps[1]
+        del2 = data.calculated_time_stamps[2]
+        del3 = data.calculated_time_stamps[3]
+
+        del0 = 0.0
+        self.bearing = 0.0
+        tolerance = 20
+        self.psolution = 0
+
+        print "del1-2: %f del1-3: %f del2-3: %f" % (abs(del1-del2), abs(del1-del3), abs(del2-del3))
+
+        dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
+        sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
+        sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
+        self.sorted_dels = sorted_dels   
+        print self.sorted_dels
+        if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            else:
+                self.bearing = 75.0  
+            self.psolution = 1
+        elif sorted_dels == ('del3', 'del2', 'del0', 'del1'): #new
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            else:
+                self.bearing = 75.0  
+            self.psolution = 1            
+        elif sorted_dels == ('del2', 'del3', 'del1', 'del0'): #double checked
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 120
+            else:
+                self.bearing = 105     
+            self.psolution = 1  #changed changed back
+        elif sorted_dels == ('del3', 'del2', 'del1', 'del0'): #new
+            if abs(del1-del2) < tolerance:
+                self.bearing = 150         
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 120
+            else:
+                self.bearing = 135
+            self.psolution = 1
+        elif sorted_dels == ('del2', 'del1', 'del3', 'del0'): #double checked
+            if abs(del1-del2) < tolerance:
+                self.bearing = 150         
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 120
+            else:
+                self.bearing = 135
+            self.psolution = 1
+        elif sorted_dels == ('del1', 'del2', 'del3', 'del0'): #double checked
+            if abs(del3-del2) < tolerance:
+                self.bearing = 180
+            elif abs(del1-del2) < tolerance:
+                self.bearing = 150
+            else:                
+                self.bearing = 165.0
+            self.psolution = 1
+        elif sorted_dels == ('del1', 'del3', 'del2', 'del0'): #switching between 1 and 2
+            if abs(del2-del3) < tolerance:
+                self.bearing = 180
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 210
+            else:                            
+                self.bearing = 195
+            self.psolution = 1
+        elif sorted_dels == ('del3', 'del1', 'del2', 'del0'): #new
+            if abs(del2-del3) < tolerance:
+                self.bearing = 180
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 210
+            else:                            
+                self.bearing = 195
+            self.psolution = 1            
+            #print "here2" 
+        elif sorted_dels == ('del1', 'del3', 'del0', 'del2'): #double checked
+            if abs(del2) < tolerance:
+                self.bearing = 210
+            elif abs(del3-del0)<tolerance:
+                self.bearing = 240
+            else:
+                self.bearing = 225
+            self.psolution = 2
+        elif sorted_dels == ('del3', 'del1', 'del0', 'del2'): #new
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 240.0
+            else:
+                self.bearing = 255.0
+            self.psolution = 1
+        elif sorted_dels == ('del1', 'del0', 'del3', 'del2'): #double checked
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 240.0
+            else:
+                self.bearing = 255.0
+            self.psolution = 1
+        elif sorted_dels == ('del0', 'del1', 'del3', 'del2'):#double checked
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del3-del1) < tolerance:
+                self.bearing = 300.0
+            else:
+                self.bearing = 285.0
+            self.psolution = 2
+            #print "here4" 
+        elif sorted_dels == ('del0', 'del3', 'del1', 'del2'):#double checked
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 300
+            else:                            
+                self.bearing = 315 
+            self.psolution = 1
+        elif sorted_dels == ('del3', 'del0', 'del1', 'del2'):#new
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 300
+            else:                            
+                self.bearing = 315 
+            self.psolution = 1            
+        elif sorted_dels == ('del0', 'del3', 'del2', 'del1'):#double checked 
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330.0
+            elif abs(del2-del3) < tolerance:
+                self.bearing = 0.0
+            else:                            
+                self.bearing = 345.0
+            self.psolution = 2
+        elif sorted_dels == ('del0', 'del2', 'del1', 'del3'):#new bottom
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330.0
+            elif abs(del2-del3) < tolerance:
+                self.bearing = 0.0
+            else:                            
+                self.bearing = 345.0
+            self.psolution = 2            
+        elif sorted_dels == ('del0', 'del1', 'del2', 'del3'):#new bottom
+            if abs(del1-del2) < tolerance:
+                self.bearing = 330
+            elif abs(del1-del3) < tolerance:
+                self.bearing = 300
+            else:                            
+                self.bearing = 315 
+            self.psolution = 1 
+        elif sorted_dels == ('del1', 'del0', 'del2', 'del3'):#new bottom
+            if abs(del1-del0) < tolerance:
+                self.bearing = 270.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 240.0
+            else:
+                self.bearing = 255.0
+            self.psolution = 1
+        elif sorted_dels == ('del1', 'del2', 'del0', 'del3'):#new bottom
+            if abs(del2-del3) < tolerance:
+                self.bearing = 180
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 210
+            else:                            
+                self.bearing = 195
+            self.psolution = 1    
+        elif sorted_dels == ('del2', 'del1', 'del0', 'del3'):#new bottom 
+            if abs(del3-del2) < tolerance:
+                self.bearing = 180
+            elif abs(del1-del2) < tolerance:
+                self.bearing = 150
+            else:                
+                self.bearing = 165.0
+            self.psolution = 1
+        elif sorted_dels == ('del2', 'del0', 'del1', 'del3'):#new bottom             
+            if abs(del1-del0) < tolerance:
+                self.bearing = 90.0
+            elif abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            else:
+                self.bearing = 75.0  
+            self.psolution = 1  
+
+            
+        elif sorted_dels == ('del0', 'del2', 'del3', 'del1'):#double checked             
+            if abs(del2-del3) < tolerance:            
+                self.bearing = 0.0
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 30.0
+            else:
+                self.bearing = 15.0  
+            self.psolution = 2  
+        elif sorted_dels == ('del2', 'del0', 'del3', 'del1'):#double checked 
+            if abs(del0-del3) < tolerance:
+                self.bearing = 60.0
+            if abs(del0-del2) < tolerance:
+                self.bearing = 30.0
+            else:
+                self.bearing = 45.0
+            self.psolution = 2
+            #print "here6" 
+        elif sorted_dels == ('del3', 'del0', 'del2', 'del1'): #new
+            if abs(del2-del3) < tolerance:            
+                self.bearing = 0.0
+            elif abs(del2-del0) < tolerance:
+                self.bearing = 30.0
+            else:
+                self.bearing = 15.0  
+            self.psolution = 2           
+
+        else:
+            rospy.logerr("CARDINAL failed to find solution!")
+            os.system("rosnode kill crane_method_service")
+            self.bearing = -1
+
+        if sorted_dels[3] == 'del0':
+            self.ref_hydro = 0
+        elif sorted_dels[3] == 'del1':
+            self.ref_hydro = 1
+        elif sorted_dels[3] == 'del2':
+            self.ref_hydro = 2
+
+        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+        self.cardinal_pub.publish(Float32(self.bearing))
+
+
+    def __init__(self):
+        rospy.init_node('cardinal')
+        #rospy.Subscriber('/hydrophones/actual_time_stamps', Actual_time_stamps, self.calc_vals) #self.actu_vals)
+        rospy.Subscriber('/hydrophones/calculated_time_stamps', Calculated_time_stamps, self.cardinal)
+        #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
+
+        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+
+
+        rate = rospy.Rate(1)
+
+        while not rospy.is_shutdown():
+
+            rate.sleep()
+
+def main():
+    
+    solver()
+
+    try:
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        print "Shutting down"
+        pass
+    
+
+
+if __name__ == '__main__':
+    main()              

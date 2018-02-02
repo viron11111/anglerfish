@@ -452,7 +452,7 @@ class plotter():
             plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
             plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
             plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
-            #self.ax[0].set_ylim(-5,5)
+            #plt.ylim(-0.1,0.1)
             plt.xlim(0,self.x_axis_length)
             plt.tick_params(axis='both', which='major', labelsize=25, pad=20)
             plt.tick_params(axis='both', which='minor', labelsize=25, pad=20)
@@ -469,8 +469,8 @@ class plotter():
         #ping_service = rospy.ServiceProxy('hydrophones/ping', Ping)
         #ping = ping_service()
 
-        rospy.Subscriber('/hydrophones/slope', Slope, self.max_values)
-        rospy.Subscriber('/hydrophones/negative_slope', Negative_slope, self.min_values)
+        #rospy.Subscriber('/hydrophones/slope', Slope, self.max_values)
+        #rospy.Subscriber('/hydrophones/negative_slope', Negative_slope, self.min_values)
         #rospy.Subscriber('/hydrophones/plot', Plot, self.plot_func)
 
         #rospy.Subscriber('/hydrophones/pingmsg', Pingdata, self.plot_ping) #for simulation

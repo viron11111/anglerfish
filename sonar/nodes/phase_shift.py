@@ -329,6 +329,36 @@ class phaser():
         #sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         #print (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])
 
+        '''d1d2d3 = calculated[1] - (calculated[2] + calculated[3])
+        
+
+        if d1d2d3 > self.time_diff_thresh:
+            print "before c1: %0.1f c2: %0.1f  c3: %0.1f" % (calculated[1], calculated[2], calculated[3])
+            print "discrepency in channel 1 found"
+            ts1 = calculated[1] - 35
+            ts2 = calculated[2] - 35
+            ts3 = calculated[3] - 35
+            d1d2d3 = ts3 - (ts2 + ts3)
+            if d1d2d3 < self.time_diff_thresh:
+                print "subtracting by one period, d1d2d3: %f" % d1d2d3
+                calculated[1] = calculated[1] - 35
+                calculated[2] = calculated[2] - 35
+                calculated[3] = calculated[3] - 35
+
+            ts1 = calculated[1] + 35
+            ts2 = calculated[2] + 35
+            ts3 = calculated[3] + 35
+            d1d2d3 = ts3 - (ts2 + ts3)
+            if d1d2d3 < self.time_diff_thresh:
+                print "adding by one period, d1d2d3: %f" % d1d2d3
+                calculated[1] = calculated[1] + 35
+                calculated[2] = calculated[2] + 35
+                calculated[3] = calculated[3] + 35
+
+            print "after c1: %0.1f c2: %0.1f  c3: %0.1f" % (calculated[1], calculated[2], calculated[3])'''
+
+
+
         if error == 0:
             print ("%0.2f, %0.2f, %0.2f, %0.2f uSec" % (calculated[0], calculated[1], calculated[2], calculated[3]))
 
@@ -347,6 +377,8 @@ class phaser():
         #self.timestamps = []
         #self.actual_stamps = []
         #self.actual_position = [0,0,0]
+
+        self.time_diff_thresh = 5 #uSec
 
         self.counter = 0
 
