@@ -143,7 +143,7 @@ class solver():
 
             P1[0] = P1[1] = P1[2] = 0.0
             P2[0] = P2[1] = P2[2] = 0.0
-            z=0         
+            z=0 #10000  #value to make sure no solution is apparent        
 
         else:
 

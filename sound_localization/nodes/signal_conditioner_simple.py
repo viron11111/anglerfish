@@ -183,11 +183,18 @@ class condition():
                     if i < len(list_dif)-5:
                         average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4])/5
 
-                        pos_peak_val = max(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
-                        neg_peak_val = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
+                        peaks = [0]*5
 
-                        if average < -32.0 and average > -35.0 and (pos_peak_val > 0.2 or neg_peak_val < -0.2):
-                            
+                        for j in range(5):
+                            pos_peak_val = max(self.signal[b][int(sample_list[i+j]):int(sample_list[i+j+1])])
+                            peaks = np.append(peaks, pos_peak_val)
+                            #neg_peak_val = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
+
+                        #print np.average(peaks)
+
+                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.05: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        
+                            print np.average(peaks)    
                             #start_of_signal = i
                             start_position = sample_list[i]
                             nearest_positive_arch = min(positive_list, key=lambda x:abs(x-start_position))

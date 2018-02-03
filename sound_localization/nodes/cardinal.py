@@ -38,13 +38,13 @@ class solver():
         tolerance = 18
         self.psolution = 0
 
-        print "del1-2: %f del1-3: %f del2-3: %f" % (abs(del1-del2), abs(del1-del3), abs(del2-del3))
+        #print "del1-2: %f del1-3: %f del2-3: %f" % (abs(del1-del2), abs(del1-del3), abs(del2-del3))
 
         dels = {"del0": del0, "del1": del1, "del2": del2, "del3": del3}
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
         self.sorted_dels = sorted_dels   
-        print self.sorted_dels
+        #print self.sorted_dels
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
@@ -258,10 +258,32 @@ class solver():
         #self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
         #self.cardinal_pub.publish(Float32(self.bearing))
 
+        if del1 > 115:
+            del1 = del1-33
+            del2 = del2-33
+            del3 = del3-33
+
         localization = rospy.ServiceProxy('/hydrophones/location_query', Localization_query)
         crane_ret = localization(self.bearing, del1, del2, del3)
 
-        print "heading: %f declination: %f" % (crane_ret.heading, crane_ret.declination)
+        print "cardinal: %f heading: %f declination: %f" % (self.bearing, crane_ret.heading, crane_ret.declination)
+
+        if self.bearing < 90 and crane_ret.heading > 270:
+            crane_ret.heading = crane_ret.heading - 360
+        elif self.bearing > 270 and crane_ret.heading < 90:
+            crane_ret.heading = crane_ret.heading + 360
+
+
+
+        #if self.bearing - crane_ret.heading > 15.0:
+            #crane_ret = localization(self.bearing, del1, del2, del3)
+            #print"del1: %f del2: %f del3: %f" % (del1, del2, del3)
+            #print "bearing discrepency: %f" % (self.bearing - crane_ret.heading)
+            #print "cardinal: %f heading: %f declination: %f" % (self.bearing, crane_ret.heading, crane_ret.declination)
+        print "*********************"
+            
+
+
 
 
 
