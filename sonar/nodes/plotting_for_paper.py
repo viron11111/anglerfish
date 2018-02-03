@@ -452,7 +452,7 @@ class plotter():
             plt.title("Conditioned Signals", weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
             plt.xlabel('Time (sec)', size = 25, weight = 'bold', x = 0.5, y = 0)
             plt.ylabel('Amplitude (V)', size = 25, weight = 'bold', x = 0, y = 0.5)
-            #plt.ylim(-0.1,0.1)
+            plt.ylim(-4,4)
             plt.xlim(0,self.x_axis_length)
             plt.tick_params(axis='both', which='major', labelsize=25, pad=20)
             plt.tick_params(axis='both', which='minor', labelsize=25, pad=20)

@@ -19,11 +19,15 @@ from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
 
+from sound_localization.srv import *
+
 import time
 
 class solver():
 
     def cardinal(self, data):
+
+        stamps = [data.calculated_time_stamps[0],data.calculated_time_stamps[1],data.calculated_time_stamps[2],data.calculated_time_stamps[3]]
 
         del1 = data.calculated_time_stamps[1]
         del2 = data.calculated_time_stamps[2]
@@ -31,7 +35,7 @@ class solver():
 
         del0 = 0.0
         self.bearing = 0.0
-        tolerance = 20
+        tolerance = 18
         self.psolution = 0
 
         print "del1-2: %f del1-3: %f del2-3: %f" % (abs(del1-del2), abs(del1-del3), abs(del2-del3))
@@ -251,8 +255,14 @@ class solver():
         elif sorted_dels[3] == 'del2':
             self.ref_hydro = 2
 
-        self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
-        self.cardinal_pub.publish(Float32(self.bearing))
+        #self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+        #self.cardinal_pub.publish(Float32(self.bearing))
+
+        localization = rospy.ServiceProxy('/hydrophones/location_query', Localization_query)
+        crane_ret = localization(self.bearing, del1, del2, del3)
+
+        print "heading: %f declination: %f" % (crane_ret.heading, crane_ret.declination)
+
 
 
     def __init__(self):

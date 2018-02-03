@@ -27,16 +27,30 @@ class solver():
 
     def location_response(self, data):
         self.bearing = data.cardinal_bearing
-        calculated_time_stamps = data.stamps
+        stamp1 = data.stamp1
+        stamp2 = data.stamp2
+        stamp3 = data.stamp3
+
+        (x_pos, y_pos, z_pos) = self.calc_vals(stamp1, stamp2, stamp3)
+
+        crane_heading = np.arctan2(x_pos, y_pos) - np.pi/2       
+
+        crane_horizontal_distance = np.sqrt(x_pos**2 + y_pos**2)
         
+        if crane_horizontal_distance != 0:
+            calculated_declination = np.arctan(z_pos/crane_horizontal_distance)
+        else:
+            calculated_declination = 0.0
 
-        #print cardinal
-        #print stamps
-        x_pos = 1.0
-        y_pos = 2.0
-        z_pos = -1.0
+        heading = math.degrees(crane_heading)
+        declination = math.degrees(calculated_declination)
 
-        return Localization_queryResponse(x_pos, y_pos, z_pos)
+        if heading < 0:
+            heading = heading + 360
+        elif heading > 360:
+            heading = heading - 360
+
+        return Localization_queryResponse(x_pos, y_pos, z_pos, heading, declination)
        
     def pol2cart(self, rho, phi):
         x = rho * np.cos(phi)
@@ -386,7 +400,7 @@ class solver():
 
         return (x,y,z,P1,P2)     
 
-    def calc_vals(self, calculated_time_stamps):
+    def calc_vals(self, stamp1, stamp2, stamp3):
 
         c = 1.484 # speed of sound in 20 C water per uSec
         #c = 0.343 #speed of sound in air 
@@ -396,9 +410,9 @@ class solver():
         P1 = [0,0,0]
         P2 = [0,0,0]
 
-        del1i = (calculated_time_stamps[1])*c #mm/uSec
-        del2i = (calculated_time_stamps[2])*c #mm/uSec
-        del3i = (calculated_time_stamps[3])*c #mm/uSec
+        del1i = stamp1*c #mm/uSec
+        del2i = stamp2*c #mm/uSec
+        del3i = stamp3*c #mm/uSec
 
         print "*******************POSITION 1*******************"
         print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
@@ -411,9 +425,9 @@ class solver():
         #hydro1: [170.75, 0, 0] hydro2: [83.6, 147.65, 0] hydro3: [86.75, 42.4, -87.55] 
 
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [170.75,   0,     0]  #[170.75, 0, 0]
-        hydro2_xyz = [81.6,  147.65,     0]
-        hydro3_xyz = [86.75,  42.4, -87.55]#[86.75, 42.4, -87.55]        
+        hydro1_xyz = [166,   0,     0]  #[170.75, 0, 0]
+        hydro2_xyz = [80.9,  141,     0] #[81.6,  147.65,     0] 
+        hydro3_xyz = [76.4,  42.3, -87.55]#[86.75, 42.4, -87.55]        
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)    
 
@@ -421,30 +435,9 @@ class solver():
         y = y1 #(y1+y2)/2
         z = z1 #(z1+z2)/2       
 
-        if self.bearing != -1:  
-
-            self.bearing_pub = rospy.Publisher('hydrophones/bearing_info', Bearing, queue_size = 1)
-            self.bearing_pub.publish(Bearing(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='bearing_info'),
-                p1 = P11,
-                p2 = P21,
-                cardinal_bearing = self.bearing, 
-                dels = self.sorted_dels,
-                psolution = self.psolution
-                ))
-
-            self.crane_pub = rospy.Publisher('hydrophones/crane_pos', Crane_pos, queue_size = 1)
-            self.crane_pub.publish(Crane_pos(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='Crane_pos_calc'),
-                x_pos=x,
-                y_pos=y,
-                z_pos=z)) 
-
         (x,y,z) = (x1,y1,z1)         
 
-        return Crane_pos_serviceResponse(x, y, z)        
+        return (x, y, z)        
 
     def __init__(self):
         rospy.init_node('locating_service')
