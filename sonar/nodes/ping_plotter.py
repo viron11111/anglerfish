@@ -261,7 +261,7 @@ class plotter():
                 self.ax[0].set_title("Raw Signals")#, weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 #self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[0].set_ylabel('Amplitude')#, size = 25, weight = 'bold', x = 0, y = 0.5)
-                #self.ax[0].set_ylim(-5,5)
+                self.ax[0].set_ylim(-0.2,0.2)
                 self.ax[0].set_xlim(0,self.x_axis_length)
                 #self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
                 #self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
