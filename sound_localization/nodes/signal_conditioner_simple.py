@@ -192,7 +192,7 @@ class condition():
 
                         #print np.average(peaks)
 
-                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.05: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.15: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
                             print np.average(peaks)    
                             #start_of_signal = i

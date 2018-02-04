@@ -44,7 +44,7 @@ class solver():
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
         self.sorted_dels = sorted_dels   
-        #print self.sorted_dels
+        print self.sorted_dels
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
