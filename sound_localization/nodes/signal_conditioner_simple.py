@@ -181,7 +181,8 @@ class condition():
                 for i in range(len(list_dif)):
                     
                     if i < len(list_dif)-7:
-                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
+                        #average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
+                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4])/5
 
                         peaks = [0]*5
 
@@ -192,7 +193,7 @@ class condition():
 
                         #print np.average(peaks)
 
-                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.07: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.75: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
                             print np.average(peaks)    
                             #start_of_signal = i
