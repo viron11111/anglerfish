@@ -180,8 +180,8 @@ class condition():
 
                 for i in range(len(list_dif)):
                     
-                    if i < len(list_dif)-5:
-                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4])/5
+                    if i < len(list_dif)-7:
+                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
 
                         peaks = [0]*5
 
@@ -192,7 +192,7 @@ class condition():
 
                         #print np.average(peaks)
 
-                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.15: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.07: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
                             print np.average(peaks)    
                             #start_of_signal = i
@@ -235,7 +235,7 @@ class condition():
 
             for i in range(channels):
                 difference = max_samples - lengths[i]
-                zeros = [0]*(difference+50)
+                zeros = [0]*(difference)#+50)
                 self.signal[i] = np.append(self.signal[i], zeros)
 
 
@@ -268,20 +268,20 @@ class condition():
 
             possible_time_stamps = [0]*channels
 
-            for i in range(channels):
-                possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
+            #for i in range(channels):
+            #    possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
             
             #print possible_time_stamps
 
-            for i in range(channels):
-                difference = max_samples - lengths[i]
-                zeros = [0]*(difference+50)
-                self.signal[i] = np.append(self.signal[i], zeros) 
+            #for i in range(channels):
+            #    difference = max_samples - lengths[i]
+            #    zeros = [0]*(difference)#)
+            #    self.signal[i] = np.append(self.signal[i], zeros) 
 
 
             #print "A: %i B: %i C: %i D: %i" % (len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3]))
 
-            lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
+            '''lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
             #print lengths
 
             max_samples = max(lengths)
@@ -296,7 +296,7 @@ class condition():
             for i in range(channels):
                 difference = max_samples - lengths[i]
                 zeros = [0]*(difference+50)
-                self.signal[i] = np.append(self.signal[i], zeros)            
+                self.signal[i] = np.append(self.signal[i], zeros)'''            
 
 
             condition_data = []
