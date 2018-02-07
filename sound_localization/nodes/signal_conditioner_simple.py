@@ -18,6 +18,7 @@ from dynamic_reconfigure.server import Server
 from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
 from sonar.msg import Sensitivity, Slope, Negative_slope, Plot
+from pinger_tracker.msg import Calculated_time_stamps
 
 #1600, -1600, -2000 (mm)
 #0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
@@ -151,6 +152,8 @@ class condition():
             #print test_var[0][1]
             print "***************************** "
 
+            time_cut_positions = [0]*channels
+
             for b in range(channels):
                 sample_list = []
                 list_dif = []
@@ -181,22 +184,27 @@ class condition():
                 for i in range(len(list_dif)):
                     
                     if i < len(list_dif)-7:
-                        #average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
-                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4])/5
+                        average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
+                        #average = (list_dif[i]+list_dif[i+1]+list_dif[i+2])/3
 
-                        peaks = [0]*3
+                        peaks = [0]*2
+                        g = 0
 
-                        for j in range(3):
-                            pos_peak_val = max(self.signal[b][int(sample_list[i+j]):int(sample_list[i+j+1])])
-                            peaks = np.append(peaks, pos_peak_val)
+                        for j in range(0,4,2):
+                            ###print j                            
+                            pos_peak_val = max(self.signal[b][int(sample_list[(i)+j]):int(sample_list[(i)+j+1])])
+                            peaks[g] = pos_peak_val
                             #neg_peak_val = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
+                            g += 1
 
-                        #print np.average(peaks)
-                        trigger_val = 0.1
+                        #if b == 3:
+                            #print peaks
+                            #print np.average(peaks)
+                        trigger_val = 1
 
-                        if average < -32.0 and average > -35.0 and np.average(peaks) > trigger_val:#*((max_signal_average/signal_average[b])):#*2): #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average < -31.0 and average > -36.0: #and np.average(peaks) > trigger_val*((max_signal_average/(signal_average[b]*2))):#*2): #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
-                            print np.average(peaks)    
+                            #print np.average(peaks)    
                             #start_of_signal = i
                             start_position = sample_list[i]
                             nearest_positive_arch = min(positive_list, key=lambda x:abs(x-start_position))
@@ -204,7 +212,7 @@ class condition():
                             for i in range(len(positive_list)):
                                 if nearest_positive_arch == positive_list[i]:
                                     cut_point = positive_list[i+2]
-
+                                    time_cut_positions[b] = positive_list[i]
 
                             #print "start_position: %i nearest_positive_arch: %i" % (start_position, nearest_positive_arch)
                             #print "nearest_positive_arch: %i cut_point: %i " % (nearest_positive_arch, cut_point)
@@ -217,6 +225,21 @@ class condition():
 
                     else:
                         rospy.logerr("Bad signal on channel %i" % b)
+
+            #print time_cut_positions
+            time_cut_diffs = [0]*4
+            for i in range(len(time_cut_positions)):
+                #print "time1: %f time2: %f" % (time_cut_positions[i], time_cut_positions[i+1])
+                time_cut_diffs[i] = time_cut_positions[0] - time_cut_positions[i]
+                time_cut_diffs[i] = time_cut_diffs[i]/2.0
+
+            #print "time_cut_diffs: %s" % time_cut_diffs
+
+            self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+            self.calc_stamps_pub.publish(Calculated_time_stamps(
+                header=Header(stamp=rospy.Time.now(),
+                              frame_id='phase_shift'),
+                calculated_time_stamps=time_cut_diffs))          
 
             lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
             #print lengths
@@ -237,7 +260,7 @@ class condition():
 
             for i in range(channels):
                 difference = max_samples - lengths[i]
-                zeros = [0]*(difference)#+50)
+                zeros = [0]*(difference+50)
                 self.signal[i] = np.append(self.signal[i], zeros)
 
 
@@ -268,38 +291,7 @@ class condition():
 
             max_samples = max(lengths)
 
-            possible_time_stamps = [0]*channels
-
-            #for i in range(channels):
-            #    possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
-            
-            #print possible_time_stamps
-
-            #for i in range(channels):
-            #    difference = max_samples - lengths[i]
-            #    zeros = [0]*(difference)#)
-            #    self.signal[i] = np.append(self.signal[i], zeros) 
-
-
-            #print "A: %i B: %i C: %i D: %i" % (len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3]))
-
-            '''lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
-            #print lengths
-
-            max_samples = max(lengths)
-
-            possible_time_stamps = [0]*channels
-
-            for i in range(channels):
-                possible_time_stamps[i] = (lengths[0] - lengths[i])/2.0
-            
-            #print possible_time_stamps
-
-            for i in range(channels):
-                difference = max_samples - lengths[i]
-                zeros = [0]*(difference+50)
-                self.signal[i] = np.append(self.signal[i], zeros)'''            
-
+            possible_time_stamps = [0]*channels     
 
             condition_data = []
 

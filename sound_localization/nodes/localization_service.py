@@ -410,12 +410,14 @@ class solver():
         P1 = [0,0,0]
         P2 = [0,0,0]
 
+        #print "stamp1: %f stamp2: %f stamp3: %f" % (stamp1, stamp2, stamp3)
+
         del1i = stamp1*c #mm/uSec
         del2i = stamp2*c #mm/uSec
         del3i = stamp3*c #mm/uSec
 
-        print "*******************POSITION 1*******************"
-        print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
+        #print "*******************POSITION 1*******************"
+        #print "del1: %0.10f del2: %0.10f del3: %0.10f" % (del1i, del2i, del3i)         
 
         #hydro0_xyz = [0,      0,     0]
         #hydro1_xyz = [173.2,   0,     0]
@@ -424,10 +426,15 @@ class solver():
 
         #hydro1: [170.75, 0, 0] hydro2: [83.6, 147.65, 0] hydro3: [86.75, 42.4, -87.55] 
 
+        #hydro0_xyz = [0,      0,     0]
+        #hydro1_xyz = [166.2,   0,     0]        #[170.75, 0, 0]        [166,   0,     0] 
+        #hydro2_xyz = [80.9,  141.7,     0]      #[81.6, 147.65,0]      [80.9,  141,     0] 
+        #hydro3_xyz = [76.4,  42.3, -87.55]   #[86.75, 42.4, -87.55] [76.4,  42.3, -87.55]       
+
         hydro0_xyz = [0,      0,     0]
-        hydro1_xyz = [166,   0,     0]      #[170.75, 0, 0]
-        hydro2_xyz = [80.9,  141,     0]    #[81.6,  147.65,     0] 
-        hydro3_xyz = [76.4,  42.3, -87.55]  #[86.75, 42.4, -87.55]        
+        hydro1_xyz = [170.75, 0, 0]        #[166,   0,     0] 
+        hydro2_xyz = [81.6, 147.65,0]      #[80.9,  141,     0] 
+        hydro3_xyz = [86.75, 42.4, -87.55] #[76.4,  42.3, -87.55]            
 
         (x1,y1,z1,P11,P21) = self.crane_calc(del1i,del2i,del3i,hydro1_xyz,hydro2_xyz,hydro3_xyz)    
 

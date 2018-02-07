@@ -44,7 +44,7 @@ class solver():
         sorted_dels = sorted(dels.items(), key=operator.itemgetter(1))
         sorted_dels = (sorted_dels[0][0],sorted_dels[1][0],sorted_dels[2][0],sorted_dels[3][0])  
         self.sorted_dels = sorted_dels   
-        print self.sorted_dels
+        #print self.sorted_dels
         if sorted_dels == ('del2', 'del3', 'del0', 'del1'): #double checked
             if abs(del1-del0) < tolerance:
                 self.bearing = 90.0
@@ -259,12 +259,20 @@ class solver():
         #self.cardinal_pub.publish(Float32(self.bearing))
 
         if del1 > 115:
-            del1 = del1-33
-            #del2 = del2-33
-            #del3 = del3-33
+            del1 = del1 - 33
+        elif del1 < -115:
+            del1 = del1 + 33
+
         if del2 > 115:
             del2 = del2 - 33
+        elif del2 < -115:
+            del2 = del2 + 33
 
+        if del3 > 86:
+            del3 = del3 - 33
+
+
+        print "del1: %f del2: %f del3: %f" % (del1, del2, del3)
 
         localization = rospy.ServiceProxy('/hydrophones/location_query', Localization_query)
         crane_ret = localization(self.bearing, del1, del2, del3)
