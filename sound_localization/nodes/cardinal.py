@@ -260,8 +260,11 @@ class solver():
 
         if del1 > 115:
             del1 = del1-33
-            del2 = del2-33
-            del3 = del3-33
+            #del2 = del2-33
+            #del3 = del3-33
+        if del2 > 115:
+            del2 = del2 - 33
+
 
         localization = rospy.ServiceProxy('/hydrophones/location_query', Localization_query)
         crane_ret = localization(self.bearing, del1, del2, del3)

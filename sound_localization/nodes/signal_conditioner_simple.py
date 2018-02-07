@@ -117,7 +117,7 @@ class condition():
             abs_signal = [[],[],[],[]]
             signal_average = [0]*channels
 
-            estimated_signal_start = 300 
+            estimated_signal_start = 0 #300 
 
             #signal_holder
   
@@ -130,7 +130,7 @@ class condition():
                 error = 1
 
             total_average = np.average(signal_average)
-
+            
             #print signal_average
 
             max_signal_average = max(signal_average)
@@ -184,16 +184,17 @@ class condition():
                         #average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
                         average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4])/5
 
-                        peaks = [0]*5
+                        peaks = [0]*3
 
-                        for j in range(5):
+                        for j in range(3):
                             pos_peak_val = max(self.signal[b][int(sample_list[i+j]):int(sample_list[i+j+1])])
                             peaks = np.append(peaks, pos_peak_val)
                             #neg_peak_val = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
 
                         #print np.average(peaks)
+                        trigger_val = 0.1
 
-                        if average < -32.0 and average > -35.0 and np.average(peaks) > 0.75: #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average < -32.0 and average > -35.0 and np.average(peaks) > trigger_val:#*((max_signal_average/signal_average[b])):#*2): #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
                             print np.average(peaks)    
                             #start_of_signal = i
