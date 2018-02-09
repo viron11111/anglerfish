@@ -160,6 +160,8 @@ class condition():
                 positive_list = []
                 negative_list = []
 
+                #print "----channel %i-------" % b
+
                 #find zero crossings and save them into sample list
                 for i in range(final_length):
                     new = self.signal[b][i]
@@ -174,16 +176,68 @@ class condition():
                 list_dif = [0]*len(sample_list)
 
                 for i in range(len(sample_list)-1):
-                    list_dif[i] = sample_list[i] - sample_list[i+1] 
+                    list_dif[i] = sample_list[i+1] - sample_list[i] 
 
                 #if b == 0:
                 #    print list_dif
 
                               
 
+                number_of_crossings = 4
+
+                space_counter = 0
+                space_holder = 0
+                positive_voltage_thresh = 0.08
+
+                sign = 0
+
+                #if b == 2:
+                #    print list_dif
+
                 for i in range(len(list_dif)):
-                    
-                    if i < len(list_dif)-7:
+
+
+                    if list_dif[i] >= 26 and list_dif[i] <= 43:
+                        max_value = max(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
+                        min_value = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
+
+                        #print "max_value: %f" % (max_value)
+                        if max_value > positive_voltage_thresh or min_value < -positive_voltage_thresh:
+                            if space_counter == 0:
+                                if min_value < -positive_voltage_thresh:
+                                    sign = 1
+                                space_holder = i
+                            space_counter += 1
+                            #print "space_holder: %i" % (space_holder)
+                            #print "sample_list: %i" % sample_list[space_holder]
+                            #print space_counter
+                        elif max_value >= 0 or min_value <= 0:
+
+                            #print "counter zeroed due to max_value"
+                            space_counter = 0
+                    else:
+                        #print "counter zeroed due to list_dif"
+                        space_counter = 0
+
+                    if space_counter >= 6:
+                        if sign == 1:
+                            number_of_crossings += 1
+                        #print "space_counter max reached. "
+                        self.signal[b] = self.signal[b][:int(sample_list[space_holder+number_of_crossings])]
+                        space_counter = 0
+                        break
+
+                        #print "max: %f min: %f" % (max_value, min_value)
+
+
+
+                    '''if i < len(list_dif)-5:
+                        
+
+
+
+
+
                         average = (list_dif[i]+list_dif[i+1]+list_dif[i+2]+list_dif[i+3]+list_dif[i+4]+list_dif[i+5]+list_dif[i+6]+list_dif[i+7]+list_dif[i+8]+list_dif[i+9])/10
                         #average = (list_dif[i]+list_dif[i+1]+list_dif[i+2])/3
 
@@ -202,7 +256,7 @@ class condition():
                             #print np.average(peaks)
                         trigger_val = 1
 
-                        if average < -31.0 and average > -36.0: #and np.average(peaks) > trigger_val*((max_signal_average/(signal_average[b]*2))):#*2): #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
+                        if average > 31.0 and average < 36.0: #and np.average(peaks) > trigger_val*((max_signal_average/(signal_average[b]*2))):#*2): #(pos_peak_val > 0.07 or neg_peak_val < -0.07):
                         
                             #print np.average(peaks)    
                             #start_of_signal = i
@@ -224,7 +278,7 @@ class condition():
                             break
 
                     else:
-                        rospy.logerr("Bad signal on channel %i" % b)
+                        rospy.logerr("Bad signal on channel %i" % b)'''
 
             #print time_cut_positions
             time_cut_diffs = [0]*4
@@ -235,11 +289,11 @@ class condition():
 
             #print "time_cut_diffs: %s" % time_cut_diffs
 
-            self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+            '''self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
             self.calc_stamps_pub.publish(Calculated_time_stamps(
                 header=Header(stamp=rospy.Time.now(),
                               frame_id='phase_shift'),
-                calculated_time_stamps=time_cut_diffs))          
+                calculated_time_stamps=time_cut_diffs))    '''      
 
             lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
             #print lengths

@@ -207,7 +207,7 @@ class plotter():
         heartbeat = 0
 
         plt.ion()
-        fig, self.ax = plt.subplots(3, 1)         
+        fig, self.ax = plt.subplots(2, 1)         
         #fig, self.ax = plt.subplots(1, 1)  
 
         while not rospy.is_shutdown():
@@ -261,14 +261,14 @@ class plotter():
                 self.ax[0].set_title("Raw Signals")#, weight = 'bold', size = 37, x = 0.5, y = 1.02, horizontalalignment='center')
                 #self.ax[0].set_xlabel('Time (seconds)', size = 25, weight = 'bold', x = 0.5, y = 0)
                 self.ax[0].set_ylabel('Amplitude')#, size = 25, weight = 'bold', x = 0, y = 0.5)
-                #self.ax[0].set_ylim(-5, 5)
+                self.ax[0].set_ylim(-5, 5)
                 self.ax[0].set_xlim(0,self.x_axis_length)
                 #self.ax[0].tick_params(axis='both', which='major', labelsize=25, pad=20)
                 #self.ax[0].tick_params(axis='both', which='minor', labelsize=25, pad=20)
                 self.ax[0].xaxis.labelpad = 20
                 self.ax[0].yaxis.labelpad = 20
 
-                self.ax[1].cla()
+                '''self.ax[1].cla()
                 #print "%i, %i" % (len(self.t), len(self.a))
                 self.ax[1].plot(xvalues2,avalues2, linewidth=2.0, label='Hydrophone A')
                 self.ax[1].plot(xvalues2,bvalues2, linewidth=2.0, label='Hydrophone B')
@@ -284,20 +284,20 @@ class plotter():
                 #self.ax[1].tick_params(axis='both', which='major', labelsize=25, pad=20)
                 #self.ax[1].tick_params(axis='both', which='minor', labelsize=25, pad=20)
                 self.ax[1].xaxis.labelpad = 20
-                self.ax[1].yaxis.labelpad = 20            
+                self.ax[1].yaxis.labelpad = 20 '''           
 
 
-                self.ax[2].cla()
-                self.ax[2].set_title("FFT On Channel One")
+                self.ax[1].cla()
+                self.ax[1].set_title("FFT On Channel One")
                 #self.ax[1].plot(frq,abs(Y),'r') # plotting the FFT spectrum
                 if self.yf[0] != 0:
-                    self.ax[2].plot(xfval,2.0/Nval * np.abs(yfval[:Nval//2]),'r') # plotting the FFT spectrum
+                    self.ax[1].plot(xfval,2.0/Nval * np.abs(yfval[:Nval//2]),'r') # plotting the FFT spectrum
                 #print abs(Y)
-                self.ax[2].set_xlim(5000,50000)
+                self.ax[1].set_xlim(5000,50000)
                 #plt.xticks(np.arange(5000, 50000+1, 500.0))
                 #self.ax[1].set_ylim(0,n/10)
-                self.ax[2].set_xlabel('Freq (Hz)')
-                self.ax[2].set_ylabel('|Y(freq)|')
+                self.ax[1].set_xlabel('Freq (Hz)')
+                self.ax[1].set_ylabel('|Y(freq)|')
 
                 heartbeat += 1
                 plt.pause(0.05)
