@@ -84,14 +84,14 @@ class condition():
                 self.signal[b] = self.signal[b][self.earliest_break_num-num_samples_save::]#::]
                 #self.signal[b] = np.append(zeros,self.signal[b])
                 
-            for b in range(channels):
+            '''for b in range(channels):
                 #print "break_num: ",break_num[b]
                 #print "earliest_break_num ", earliest_break_num
                 for i in range(len(self.signal[b])):
                     if i < self.break_num[b]-self.earliest_break_num: 
                         self.signal[b][i] = 0
                     else: 
-                        break                
+                        break     '''           
                     
 
             '''for b in range(channels):
@@ -187,17 +187,20 @@ class condition():
 
                 space_counter = 0
                 space_holder = 0
-                positive_voltage_thresh = 0.08
+                positive_voltage_thresh = 0.1
 
                 sign = 0
 
-                #if b == 2:
+                if b == 3:
+                    positive_voltage_thresh -= 0.03
+
+                #if b == 0:
                 #    print list_dif
 
                 for i in range(len(list_dif)):
 
 
-                    if list_dif[i] >= 26 and list_dif[i] <= 43:
+                    if list_dif[i] >= 26 and list_dif[i] <= 71:
                         max_value = max(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
                         min_value = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
 
@@ -212,11 +215,20 @@ class condition():
                             #print "sample_list: %i" % sample_list[space_holder]
                             #print space_counter
                         elif max_value >= 0 or min_value <= 0:
-
-                            #print "counter zeroed due to max_value"
+                            '''if b == 0:
+                                lister = [0]*4
+                                for y in range(4):
+                                    lister[y] = self.signal[b][int(sample_list[i+y-4])]
+                                print "lister: %s" % lister
+                                print "counter zeroed due to max_value"'''
                             space_counter = 0
                     else:
-                        #print "counter zeroed due to list_dif"
+                        '''if b == 0:
+                            lister = [0]*4
+                            for y in range(4):
+                                lister[y] = list_dif[i+y-4]
+                            print "lister: %s" % lister
+                            print "counter zeroed due to list_dif"'''
                         space_counter = 0
 
                     if space_counter >= 6:
