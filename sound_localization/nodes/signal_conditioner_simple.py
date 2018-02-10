@@ -187,12 +187,23 @@ class condition():
 
                 space_counter = 0
                 space_holder = 0
-                positive_voltage_thresh = 0.1
+                positive_voltage_thresh = 0.2
 
                 sign = 0
 
-                if b == 3:
-                    positive_voltage_thresh -= 0.03
+                if b == 0:
+                    positive_voltage_thresh -= 0.05
+
+                #if b == 1:
+                #    positive_voltage_thresh += 0.05
+
+                if b == 2:
+                    positive_voltage_thresh -= 0.05                
+
+                #if b == 3:
+                #    positive_voltage_thresh -= 0.03
+
+                negative_voltage_thresh = -positive_voltage_thresh
 
                 #if b == 0:
                 #    print list_dif
@@ -205,7 +216,8 @@ class condition():
                         min_value = min(self.signal[b][int(sample_list[i]):int(sample_list[i+1])])
 
                         #print "max_value: %f" % (max_value)
-                        if max_value > positive_voltage_thresh or min_value < -positive_voltage_thresh:
+                        #print negative_voltage_thresh
+                        if max_value > positive_voltage_thresh or min_value < negative_voltage_thresh:
                             if space_counter == 0:
                                 if min_value < -positive_voltage_thresh:
                                     sign = 1
