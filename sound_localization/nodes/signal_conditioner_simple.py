@@ -191,14 +191,14 @@ class condition():
 
                 sign = 0
 
-                if b == 0:
-                    positive_voltage_thresh += 0.05
+                #if b == 0:
+                #    positive_voltage_thresh -= 0.05
 
                 #if b == 1:
-                #    positive_voltage_thresh += 0.15
+                #    positive_voltage_thresh -= 0.05
 
-                #if b == 2:
-                #    positive_voltage_thresh -= 0.05                
+                if b == 2:
+                    positive_voltage_thresh += 0.15                
 
                 #if b == 3:
                 #    positive_voltage_thresh -= 0.03
@@ -248,6 +248,7 @@ class condition():
                             number_of_crossings += 1
                         #print "space_counter max reached. "
                         self.signal[b] = self.signal[b][:int(sample_list[space_holder+number_of_crossings])]
+                        time_cut_positions[b] = int(sample_list[space_holder+number_of_crossings])
                         space_counter = 0
                         break
 
@@ -311,13 +312,13 @@ class condition():
                 time_cut_diffs[i] = time_cut_positions[0] - time_cut_positions[i]
                 time_cut_diffs[i] = time_cut_diffs[i]/2.0
 
-            #print "time_cut_diffs: %s" % time_cut_diffs
+            print "time_cut_diffs: %s" % time_cut_diffs
 
-            '''self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
-            self.calc_stamps_pub.publish(Calculated_time_stamps(
-                header=Header(stamp=rospy.Time.now(),
-                              frame_id='phase_shift'),
-                calculated_time_stamps=time_cut_diffs))    '''      
+            #self.calc_stamps_pub = rospy.Publisher('/hydrophones/calculated_time_stamps', Calculated_time_stamps, queue_size = 1)
+            #self.calc_stamps_pub.publish(Calculated_time_stamps(
+            #    header=Header(stamp=rospy.Time.now(),
+            #                  frame_id='phase_shift'),
+            #    calculated_time_stamps=time_cut_diffs))
 
             lengths = [len(self.signal[0]),len(self.signal[1]),len(self.signal[2]),len(self.signal[3])]
             #print lengths
