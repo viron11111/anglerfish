@@ -192,13 +192,13 @@ class condition():
                 sign = 0
 
                 #if b == 0:
-                #    positive_voltage_thresh += 0.15
+                #    positive_voltage_thresh += 0.1
 
                 #if b == 1:
-                #    positive_voltage_thresh += 0.15
+                #    positive_voltage_thresh += 0.05
 
                 #if b == 2:
-                #    positive_voltage_thresh -= 0.05                
+                #    positive_voltage_thresh += 0.1                
 
                 #if b == 3:
                 #    positive_voltage_thresh += 0.15

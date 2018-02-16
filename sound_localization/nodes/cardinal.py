@@ -8,6 +8,7 @@ import operator
 import os
 
 from std_msgs.msg import Header, Float32
+from geometry_msgs.msg import Vector3Stamped, Vector3
 from pinger_tracker.msg import *
 from sonar.msg import Bearing
 #from multilateration import Multilaterator, ReceiverArraySim, Pulse
@@ -284,7 +285,18 @@ class solver():
         elif self.bearing > 270 and crane_ret.heading < 90:
             crane_ret.heading = crane_ret.heading + 360
 
+        x = float(crane_ret.x_pos)
+        y = float(crane_ret.y_pos)
+        z = float(crane_ret.z_pos)
 
+        holder = [x,y,z]
+
+        print "x: %f y: %f z: %f" % (x, y, z)
+
+        self.ping_direction_pub.publish(Vector3Stamped(
+            header=Header(stamp=rospy.Time.now(),
+                          frame_id='pinger_direction'),
+            vector=Vector3(x,y,z)))
 
         #if self.bearing - crane_ret.heading > 15.0:
             #crane_ret = localization(self.bearing, del1, del2, del3)
@@ -305,6 +317,7 @@ class solver():
         #rospy.Subscriber('hydrophones/hydrophone_locations', Hydrophone_locations, self.hydrophone_locations)
 
         self.cardinal_pub = rospy.Publisher('hydrophones/cardinal', Float32, queue_size = 1)
+        self.ping_direction_pub = rospy.Publisher('hydrophones/ping_direction', Vector3Stamped, queue_size = 1)
 
 
         rate = rospy.Rate(1)
