@@ -71,7 +71,11 @@ class condition():
 
         #rejection statement for samples triggered in middle of transmission (no start point)
         #print earliest_break_num
-        if self.earliest_break_num > 200:
+
+        overall_max_value = max(data)
+        print overall_max_value
+
+        if self.earliest_break_num > 50 and overall_max_value >= 0.25:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
             num_samples_save = int((6.0/25000.0)*sample_rate)
@@ -482,7 +486,7 @@ class condition():
         self.neg_slope_pub = rospy.Publisher('hydrophones/negative_slope', Negative_slope, queue_size=1)
         self.plot_pub = rospy.Publisher('/hydrophones/plot', Plot, queue_size=1)
 
-        self.break_val = 0.05 #0.15 #voltage in which threshold is triggered
+        self.break_val = 0.15 #0.15 #voltage in which threshold is triggered
         self.min_break_val = -self.break_val
 
         self.max_break_val = 0.25
