@@ -273,7 +273,7 @@ class solver():
             del3 = del3 - 33
 
 
-        print "del1: %f del2: %f del3: %f" % (del1, del2, del3)
+        #print "del1: %f del2: %f del3: %f" % (del1, del2, del3)
 
         localization = rospy.ServiceProxy('/hydrophones/location_query', Localization_query)
         crane_ret = localization(self.bearing, del1, del2, del3)
@@ -291,7 +291,7 @@ class solver():
 
         holder = [x,y,z]
 
-        print "x: %f y: %f z: %f" % (x, y, z)
+        #print "x: %f y: %f z: %f" % (x, y, z)
 
         self.ping_direction_pub.publish(Vector3Stamped(
             header=Header(stamp=rospy.Time.now(),

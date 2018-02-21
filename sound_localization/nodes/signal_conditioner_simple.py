@@ -78,8 +78,8 @@ class condition():
         if self.earliest_break_num > 50 and overall_max_value >= 0.25:
 
             #Buffering holder (zeros) based on the time of 1 period at 25 kHz
-            num_samples_save = int((6.0/25000.0)*sample_rate)
-            #num_samples_save = int((1.0/25000.0)*sample_rate)
+            #num_samples_save = int((6.0/25000.0)*sample_rate)
+            num_samples_save = int((2.0/25000.0)*sample_rate)
             zeros = [0]*(num_samples_save/4)
 
             #eliminate all information before first signal by adding zeros in front of signal
@@ -187,7 +187,7 @@ class condition():
 
                               
 
-                number_of_crossings = 4
+                number_of_crossings = 2#4
 
                 space_counter = 0
                 space_holder = 0
@@ -195,17 +195,17 @@ class condition():
 
                 sign = 0
 
-                #if b == 0:
-                #    positive_voltage_thresh += 0.1
+                if b == 0:
+                    positive_voltage_thresh += 0.1
 
-                #if b == 1:
-                #    positive_voltage_thresh += 0.05
+                if b == 1:
+                    positive_voltage_thresh += 0.1
 
-                #if b == 2:
-                #    positive_voltage_thresh += 0.1                
+                if b == 2:
+                    positive_voltage_thresh += 0.1
 
-                #if b == 3:
-                #    positive_voltage_thresh += 0.15
+                if b == 3:
+                    positive_voltage_thresh -= 0.05
 
                 negative_voltage_thresh = -positive_voltage_thresh
 
