@@ -187,25 +187,25 @@ class condition():
 
                               
 
-                number_of_crossings = 2#4
+                number_of_crossings = 4#4
 
                 space_counter = 0
                 space_holder = 0
-                positive_voltage_thresh = 0.2
+                positive_voltage_thresh = 0.15 #0.2
 
                 sign = 0
 
                 if b == 0:
-                    positive_voltage_thresh += 0.1
+                    positive_voltage_thresh -= 0.05
 
                 if b == 1:
-                    positive_voltage_thresh += 0.1
+                    positive_voltage_thresh -= 0.05
 
                 if b == 2:
-                    positive_voltage_thresh += 0.1
+                    positive_voltage_thresh -= 0.05
 
                 if b == 3:
-                    positive_voltage_thresh -= 0.05
+                    positive_voltage_thresh -= 0.1
 
                 negative_voltage_thresh = -positive_voltage_thresh
 
