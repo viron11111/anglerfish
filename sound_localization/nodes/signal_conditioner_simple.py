@@ -9,7 +9,6 @@ from std_msgs.msg import Header
 from pinger_tracker.msg import *
 
 from advantech_pci1714.msg import *
-#from multilateration import Multilaterator, ReceiverArraySim, Pulse
 
 import sys
 import math
@@ -19,9 +18,6 @@ from pinger_tracker.cfg import SignalConfig
 from pinger_tracker.srv import *
 from sonar.msg import Sensitivity, Slope, Negative_slope, Plot
 from pinger_tracker.msg import Calculated_time_stamps
-
-#1600, -1600, -2000 (mm)
-#0.0, 9.119770766119473, -9.016221156343818, -9.016221156343818
 
 class condition():     
 
@@ -57,23 +53,27 @@ class condition():
 
         #find the first signal
         #looks for first signal to go above self.break_val value
+
+        #print self.break_val
+
         self.break_num = [0]*channels
         #print self.break_val
-        for b in range(channels):
+        for b in range(0,4):
             for i in range(samples/4):
                 if self.signal[b][i] >= self.break_val:
-                    #print self.signal[b][i]
+                    print self.signal[b][i]
                     self.break_num[b] = i
-                    #print break_num[b]
-                    break        
-        
+                    break
+
+        print self.break_num
         self.earliest_break_num = min(self.break_num)
 
         #rejection statement for samples triggered in middle of transmission (no start point)
         #print earliest_break_num
 
         overall_max_value = max(data)
-        print overall_max_value
+        print "max val: %f" % overall_max_value
+        print "earliest_break_num: %i" % self.earliest_break_num
 
         if self.earliest_break_num > 50 and overall_max_value >= 0.25:
 
@@ -433,7 +433,7 @@ class condition():
 
         if self.counter >= 9:
             #rospy.logerr("counter filled")
-            self.break_val = 0.07
+            self.break_val = 0.1
             error = 1
             self.counter = 0            
 
@@ -486,7 +486,7 @@ class condition():
         self.neg_slope_pub = rospy.Publisher('hydrophones/negative_slope', Negative_slope, queue_size=1)
         self.plot_pub = rospy.Publisher('/hydrophones/plot', Plot, queue_size=1)
 
-        self.break_val = 0.15 #0.15 #voltage in which threshold is triggered
+        self.break_val = 0.01 #0.15 #voltage in which threshold is triggered
         self.min_break_val = -self.break_val
 
         self.max_break_val = 0.25
