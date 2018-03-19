@@ -9,6 +9,9 @@
   <node pkg="sound_localization" type="cardinal.py" name="cardinal" respawn="true">
   </node>  
 
+ <node pkg="sonar" type="phase_shift.py" name="phase_shift" respawn="true">
+  </node> 
+
   <node pkg="sound_localization" type="localization_service.py" name="localization_service" respawn="true">
   </node>  
 
